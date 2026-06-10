@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/db/database.dart';
+import 'core/design/design.dart';
+import 'core/router/app_router.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,17 +16,17 @@ Future<void> main() async {
   );
 }
 
-class PersonalPlannerApp extends ConsumerWidget {
+class PersonalPlannerApp extends StatelessWidget {
   const PersonalPlannerApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return MaterialApp(
+  Widget build(BuildContext context) {
+    return MaterialApp.router(
       title: 'Personal Planner',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-      ),
-      home: const Scaffold(body: Center(child: Text('Personal Planner'))),
+      theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
+      themeMode: ThemeMode.system,
+      routerConfig: appRouter,
     );
   }
 }
