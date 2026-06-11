@@ -90,7 +90,7 @@ class BackupService {
     // DB file
     final dbPath = await _dbFilePath();
     if (await File(dbPath).exists()) {
-      encoder.addFile(File(dbPath), 'planner.db');
+      encoder.addFile(File(dbPath), 'app.db');
     }
 
     // Images directory
@@ -107,7 +107,7 @@ class BackupService {
     final manifest = jsonEncode({
       'version': 1,
       'exported_at': DateTime.now().toIso8601String(),
-      'db': 'planner.db',
+      'db': 'app.db',
     });
     final manifestBytes = utf8.encode(manifest);
     encoder.addArchiveFile(
@@ -130,7 +130,7 @@ class BackupService {
       for (final file in archive) {
         if (!file.isFile) continue;
         final data = file.content as List<int>;
-        if (file.name == 'planner.db') {
+        if (file.name == 'app.db') {
           await File(dbPath).writeAsBytes(data);
         } else if (file.name.startsWith('images/')) {
           final imgName = p.basename(file.name);
@@ -145,7 +145,7 @@ class BackupService {
 
   Future<String> _dbFilePath() async {
     final dir = await getApplicationDocumentsDirectory();
-    return p.join(dir.path, 'planner.db');
+    return p.join(dir.path, 'app.db');
   }
 
   Future<Directory> _imagesDir() async {

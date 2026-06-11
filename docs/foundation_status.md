@@ -70,18 +70,10 @@ Database class: `lib/core/db/database.dart` with `appDatabaseProvider`.
 - `lib/core/services/image_service.dart` — `pick()` (gallery/camera), compress+save via `flutter_image_compress`, `delete()`, `listAll()`, `saveBytes()` for restore
 - `lib/core/services/backup_service.dart` — `exportAndShare()` / `exportToFile()` (zip: planner.db + images/ + manifest.json), `importFromPicker()` / `restoreFromPath()`, `shouldNudge()` (30-day reminder), `lastBackupTime()`
 
----
+### Step 11 — Contracts doc
+- `docs/contracts.md` covering: directory ownership rules, DB access pattern, design system, navigation/routes, `CalendarAggregator` integration contract, `DayRepository` API, `NotificationService` / `ImageService` / `BackupService` APIs, `ConflictFeed` interface, per-agent notification ID namespaces, and the feature checklist for agents 2–5.
 
-## Pending — Step 11
-
-**Step 11 — `docs/contracts.md`** for agents 2–5:
-- DB access pattern (drift repositories, provider wiring)
-- Design system usage guide
-- `CalendarAggregator` module integration contract
-- Day-tag repository API
-- Notification / image / backup service APIs
-- Route names and `agentRoutes` extension point
-- Per-feature directory rules
+Also fixed: `BackupService` was referencing `planner.db` but the Drift database file is `app.db` — corrected in all four places in `backup_service.dart`.
 
 ---
 
