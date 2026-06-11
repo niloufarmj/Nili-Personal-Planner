@@ -15,7 +15,9 @@ import 'shell_scaffold.dart';
 /// Keep the list sorted by feature area.
 final List<RouteBase> agentRoutes = [];
 
-final GoRouter appRouter = GoRouter(
+/// Creates a fresh [GoRouter]. Use this in tests so each test gets isolated
+/// navigation state; [appRouter] is the singleton used by the running app.
+GoRouter buildAppRouter() => GoRouter(
   initialLocation: Routes.today,
   routes: [
     StatefulShellRoute.indexedStack(
@@ -82,6 +84,8 @@ final GoRouter appRouter = GoRouter(
     ...agentRoutes,
   ],
 );
+
+final GoRouter appRouter = buildAppRouter();
 
 Widget _stubScreen(BuildContext context, String title) => Scaffold(
   appBar: AppBar(title: Text(title)),
