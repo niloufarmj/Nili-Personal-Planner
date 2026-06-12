@@ -1,5 +1,6 @@
 export 'app_colors.dart';
 export 'app_theme.dart';
+export 'currency_formatter.dart';
 export 'widgets/app_card.dart';
 export 'widgets/confirm_dialog.dart';
 export 'widgets/empty_state.dart';

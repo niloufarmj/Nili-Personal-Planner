@@ -385,6 +385,69 @@ overriding `conflictFeedProvider` in your feature bootstrap.
 
 ---
 
+## 12. CurrencyFormatter
+
+Single shared money formatter — all monetary display must go through this class.
+Located at `lib/core/design/currency_formatter.dart`; re-exported via `design.dart`.
+
+```dart
+import 'package:personal_planner/core/design/design.dart';
+
+// Display: int cents → formatted string (€1,950.00)
+CurrencyFormatter.format(195000);          // '€1,950.00'
+CurrencyFormatter.formatAmount(195000);    // '1950.00'  (no symbol)
+
+// Parse: user input string → int cents (null if invalid / negative)
+CurrencyFormatter.parseToCents('12.50');   // 1250
+CurrencyFormatter.parseToCents('1,250');   // 125000  (comma treated as decimal)
+CurrencyFormatter.parseToCents('abc');     // null
+```
+
+**Rules:**
+- All money amounts are stored as `int` cents in the database — never `double`.
+- All user-facing money strings come from `CurrencyFormatter.format`.
+- Never call `NumberFormat` or `toStringAsFixed` directly in a widget.
+
+---
+
+## 13. ExpenseLinkService
+
+The bridge between the Shopping List and Finance features.
+Located at `lib/core/services/expense_link_service.dart`.
+
+Provider: `expenseLinkServiceProvider`
+
+```dart
+// Called when a shopping item is added with an estimated cost.
+// Idempotent — safe to call multiple times for the same item; returns
+// existing transaction id if the link already exists.
+Future<int> createFromItem({
+  required int itemId,
+  required String title,
+  required int plannedCostCents,
+});
+
+// Called when the user marks a shopping item as bought.
+// If a planned transaction already exists for this item (via createFromItem),
+// it is converted to status='actual' with the actual cost.
+// If no prior transaction exists, a new actual transaction is created directly.
+// Idempotent — calling twice with the same itemId is safe.
+Future<void> markBought({
+  required int itemId,
+  required String title,
+  required int actualCostCents,
+});
+```
+
+**How it works internally:**
+- Transactions are linked to shopping items via the `note` column, encoded as
+  `'item:$itemId'` (e.g. `'item:42'`).
+- Category is always `'shopping'`, direction is `'out'`.
+- Agent 2 (Lists) is the caller; this service lives in `lib/core/` to avoid a
+  circular dependency between `lib/features/lists/` and `lib/features/finance/`.
+
+---
+
 ## 11. Checklist for Adding a Feature
 
 1. All Dart files in `lib/features/<your-feature>/`.

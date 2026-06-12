@@ -5,6 +5,7 @@ import 'package:personal_planner/core/db/database.dart';
 import 'package:personal_planner/core/design/design.dart';
 import 'package:personal_planner/core/router/app_router.dart';
 import 'package:drift/native.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 Widget _app() => ProviderScope(
   overrides: [
@@ -18,6 +19,11 @@ Widget _app() => ProviderScope(
 );
 
 void main() {
+  setUp(() {
+    // ConflictEngine calls SharedPreferences.getInstance() on every evaluation.
+    SharedPreferences.setMockInitialValues({});
+  });
+
   testWidgets('Today tab renders on launch', (tester) async {
     await tester.pumpWidget(_app());
     await tester.pumpAndSettle();
@@ -56,7 +62,10 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byIcon(Icons.bar_chart_outlined));
     await tester.pumpAndSettle();
-    expect(find.text('Track what matters'), findsOneWidget);
+    // TrackScreen's AppBar title; also BottomNavBar label — use findsWidgets
+    expect(find.text('Track'), findsWidgets);
+    // At least one Track-tab entry is in the tree
+    expect(find.text('Finance'), findsOneWidget);
   });
 
   testWidgets('Tap More tab navigates to MoreScreen', (tester) async {
@@ -64,7 +73,8 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byIcon(Icons.more_horiz));
     await tester.pumpAndSettle();
-    expect(find.text('Everything else'), findsOneWidget);
+    // MoreScreen now shows Travel Planner, Reminders, Partner Schedule.
+    expect(find.text('Travel Planner'), findsOneWidget);
   });
 
   testWidgets('No exceptions across all 5 tabs', (tester) async {

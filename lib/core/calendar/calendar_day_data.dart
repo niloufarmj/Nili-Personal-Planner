@@ -14,6 +14,7 @@ class CalendarDayData {
     this.mealDots = 0,
     this.gymSession,
     this.dueDots = 0,
+    this.financeDots = 0,
     this.activeReminders = const [],
     this.partnerTags = const [],
     this.partnerEvents = const [],
@@ -42,6 +43,9 @@ class CalendarDayData {
   /// Count of items with due_date == this date.
   final int dueDots;
 
+  /// Count of planned finance transactions on this date (future-dated).
+  final int financeDots;
+
   /// Active reminders whose window includes this date.
   final List<Reminder> activeReminders;
 
@@ -59,6 +63,7 @@ class CalendarDayData {
       mealDots == 0 &&
       gymSession == null &&
       dueDots == 0 &&
+      financeDots == 0 &&
       activeReminders.isEmpty &&
       partnerTags.isEmpty &&
       partnerEvents.isEmpty;
@@ -77,6 +82,7 @@ class CalendarFilter {
     this.showTasks = true,
     this.showPartner = true,
     this.showReminders = true,
+    this.showFinance = true,
   });
 
   final bool showLocation;
@@ -89,6 +95,7 @@ class CalendarFilter {
   final bool showTasks;
   final bool showPartner;
   final bool showReminders;
+  final bool showFinance;
 
   static const all = CalendarFilter();
 
@@ -103,17 +110,18 @@ class CalendarFilter {
     bool? showTasks,
     bool? showPartner,
     bool? showReminders,
-  }) =>
-      CalendarFilter(
-        showLocation: showLocation ?? this.showLocation,
-        showGym: showGym ?? this.showGym,
-        showMeals: showMeals ?? this.showMeals,
-        showWork: showWork ?? this.showWork,
-        showUni: showUni ?? this.showUni,
-        showTravel: showTravel ?? this.showTravel,
-        showSocial: showSocial ?? this.showSocial,
-        showTasks: showTasks ?? this.showTasks,
-        showPartner: showPartner ?? this.showPartner,
-        showReminders: showReminders ?? this.showReminders,
-      );
+    bool? showFinance,
+  }) => CalendarFilter(
+    showLocation: showLocation ?? this.showLocation,
+    showGym: showGym ?? this.showGym,
+    showMeals: showMeals ?? this.showMeals,
+    showWork: showWork ?? this.showWork,
+    showUni: showUni ?? this.showUni,
+    showTravel: showTravel ?? this.showTravel,
+    showSocial: showSocial ?? this.showSocial,
+    showTasks: showTasks ?? this.showTasks,
+    showPartner: showPartner ?? this.showPartner,
+    showReminders: showReminders ?? this.showReminders,
+    showFinance: showFinance ?? this.showFinance,
+  );
 }
