@@ -214,7 +214,9 @@ final List<RouteBase> agentRoutes = [
     pageBuilder: (context, state) => _fadeThroughPage(
       context: context,
       state: state,
-      child: RecipeEditScreen(existingId: int.parse(state.pathParameters['id']!)),
+      child: RecipeEditScreen(
+        existingId: int.parse(state.pathParameters['id']!),
+      ),
     ),
   ),
   // Debug

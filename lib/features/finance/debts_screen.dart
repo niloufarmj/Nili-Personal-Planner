@@ -43,11 +43,12 @@ class DebtsScreen extends ConsumerWidget {
       );
 }
 
-final _debtsStreamProvider = StreamProvider.autoDispose.family<List<Debt>, bool>(
-  (ref, settled) => settled
-      ? ref.watch(debtRepositoryProvider).watchSettled()
-      : ref.watch(debtRepositoryProvider).watchAll(),
-);
+final _debtsStreamProvider = StreamProvider.autoDispose
+    .family<List<Debt>, bool>(
+      (ref, settled) => settled
+          ? ref.watch(debtRepositoryProvider).watchSettled()
+          : ref.watch(debtRepositoryProvider).watchAll(),
+    );
 
 // ── Debt list ─────────────────────────────────────────────────────────────────
 

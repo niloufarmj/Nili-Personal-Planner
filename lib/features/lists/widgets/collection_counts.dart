@@ -46,14 +46,18 @@ class CollectionProgressBar extends ConsumerWidget {
                 Text(
                   '$done/$total completed',
                   style: theme.textTheme.labelSmall?.copyWith(
-                    color: isDark ? DesignTokens.inkSoftDark : DesignTokens.inkSoftLight,
+                    color: isDark
+                        ? DesignTokens.inkSoftDark
+                        : DesignTokens.inkSoftLight,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 Text(
                   '${(progress * 100).toInt()}%',
                   style: theme.textTheme.labelSmall?.copyWith(
-                    color: isDark ? DesignTokens.inkSoftDark : DesignTokens.inkSoftLight,
+                    color: isDark
+                        ? DesignTokens.inkSoftDark
+                        : DesignTokens.inkSoftLight,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -64,11 +68,11 @@ class CollectionProgressBar extends ConsumerWidget {
               borderRadius: BorderRadius.circular(4),
               child: LinearProgressIndicator(
                 value: progress,
-                backgroundColor: isDark ? DesignTokens.lineDark : DesignTokens.lineLight,
+                backgroundColor: isDark
+                    ? DesignTokens.lineDark
+                    : DesignTokens.lineLight,
                 valueColor: AlwaysStoppedAnimation<Color>(
-                  progress == 1.0 
-                      ? DesignTokens.success 
-                      : mainColor,
+                  progress == 1.0 ? DesignTokens.success : mainColor,
                 ),
                 minHeight: 4,
               ),

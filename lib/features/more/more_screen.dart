@@ -8,6 +8,7 @@ import '../../core/design/design.dart';
 import '../../core/router/routes.dart';
 import '../../core/services/backup_service.dart';
 import '../lists/repositories/collection_repository.dart';
+import '../settings/seed/services/seeder_service.dart';
 
 class MoreScreen extends ConsumerWidget {
   const MoreScreen({super.key});
@@ -96,7 +97,9 @@ class MoreScreen extends ConsumerWidget {
                       ),
                       child: Icon(
                         Icons.backup_outlined,
-                        color: isDark ? DesignTokens.inkDark : DesignTokens.inkLight,
+                        color: isDark
+                            ? DesignTokens.inkDark
+                            : DesignTokens.inkLight,
                         size: 20,
                       ),
                     ),
@@ -111,11 +114,15 @@ class MoreScreen extends ConsumerWidget {
                                 'Backup & Restore',
                                 style: theme.textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.w600,
-                                  color: isDark ? DesignTokens.inkDark : DesignTokens.inkLight,
+                                  color: isDark
+                                      ? DesignTokens.inkDark
+                                      : DesignTokens.inkLight,
                                 ),
                               ),
                               const SizedBox(width: 8),
-                              ref.watch(shouldNudgeProvider).maybeWhen(
+                              ref
+                                  .watch(shouldNudgeProvider)
+                                  .maybeWhen(
                                     data: (nudge) => nudge
                                         ? const _BackupPillWarning()
                                         : const SizedBox.shrink(),
@@ -123,12 +130,16 @@ class MoreScreen extends ConsumerWidget {
                                   ),
                             ],
                           ),
-                          ref.watch(lastBackupTimeProvider).when(
+                          ref
+                              .watch(lastBackupTimeProvider)
+                              .when(
                                 loading: () => Text(
                                   'Loading...',
                                   style: theme.textTheme.bodyMedium?.copyWith(
                                     fontSize: DesignTokens.fontCaption,
-                                    color: isDark ? DesignTokens.inkSoftDark : DesignTokens.inkSoftLight,
+                                    color: isDark
+                                        ? DesignTokens.inkSoftDark
+                                        : DesignTokens.inkSoftLight,
                                   ),
                                 ),
                                 error: (err, stack) => Text(
@@ -146,7 +157,9 @@ class MoreScreen extends ConsumerWidget {
                                     text,
                                     style: theme.textTheme.bodyMedium?.copyWith(
                                       fontSize: DesignTokens.fontCaption,
-                                      color: isDark ? DesignTokens.inkSoftDark : DesignTokens.inkSoftLight,
+                                      color: isDark
+                                          ? DesignTokens.inkSoftDark
+                                          : DesignTokens.inkSoftLight,
                                     ),
                                   );
                                 },
@@ -164,12 +177,20 @@ class MoreScreen extends ConsumerWidget {
                         icon: const Icon(Icons.share, size: 18),
                         label: const Text('Export Zip'),
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: isDark ? DesignTokens.accentDark : DesignTokens.accentLight,
+                          foregroundColor: isDark
+                              ? DesignTokens.accentDark
+                              : DesignTokens.accentLight,
                           side: BorderSide(
-                            color: isDark ? DesignTokens.accentDark.withValues(alpha: 0.5) : DesignTokens.accentLight.withValues(alpha: 0.5),
+                            color: isDark
+                                ? DesignTokens.accentDark.withValues(alpha: 0.5)
+                                : DesignTokens.accentLight.withValues(
+                                    alpha: 0.5,
+                                  ),
                           ),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(DesignTokens.radiusInput),
+                            borderRadius: BorderRadius.circular(
+                              DesignTokens.radiusInput,
+                            ),
                           ),
                           padding: const EdgeInsets.symmetric(vertical: 12),
                         ),
@@ -203,12 +224,20 @@ class MoreScreen extends ConsumerWidget {
                         icon: const Icon(Icons.download, size: 18),
                         label: const Text('Restore Zip'),
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: isDark ? DesignTokens.accentDark : DesignTokens.accentLight,
+                          foregroundColor: isDark
+                              ? DesignTokens.accentDark
+                              : DesignTokens.accentLight,
                           side: BorderSide(
-                            color: isDark ? DesignTokens.accentDark.withValues(alpha: 0.5) : DesignTokens.accentLight.withValues(alpha: 0.5),
+                            color: isDark
+                                ? DesignTokens.accentDark.withValues(alpha: 0.5)
+                                : DesignTokens.accentLight.withValues(
+                                    alpha: 0.5,
+                                  ),
                           ),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(DesignTokens.radiusInput),
+                            borderRadius: BorderRadius.circular(
+                              DesignTokens.radiusInput,
+                            ),
                           ),
                           padding: const EdgeInsets.symmetric(vertical: 12),
                         ),
@@ -238,7 +267,9 @@ class MoreScreen extends ConsumerWidget {
                               } else if (context.mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
-                                    content: Text('Restore cancelled or failed.'),
+                                    content: Text(
+                                      'Restore cancelled or failed.',
+                                    ),
                                   ),
                                 );
                               }
@@ -272,19 +303,25 @@ class MoreScreen extends ConsumerWidget {
                 decoration: InputDecoration(
                   labelText: 'Theme Mode',
                   labelStyle: TextStyle(
-                    color: isDark ? DesignTokens.inkSoftDark : DesignTokens.inkSoftLight,
+                    color: isDark
+                        ? DesignTokens.inkSoftDark
+                        : DesignTokens.inkSoftLight,
                     fontSize: DesignTokens.fontCaption,
                   ),
                   border: InputBorder.none,
                 ),
-                dropdownColor: isDark ? DesignTokens.surfaceDark : DesignTokens.surfaceLight,
+                dropdownColor: isDark
+                    ? DesignTokens.surfaceDark
+                    : DesignTokens.surfaceLight,
                 items: [
                   DropdownMenuItem(
                     value: ThemeMode.system,
                     child: Text(
                       'System Default',
                       style: TextStyle(
-                        color: isDark ? DesignTokens.inkDark : DesignTokens.inkLight,
+                        color: isDark
+                            ? DesignTokens.inkDark
+                            : DesignTokens.inkLight,
                       ),
                     ),
                   ),
@@ -293,7 +330,9 @@ class MoreScreen extends ConsumerWidget {
                     child: Text(
                       'Light Mode',
                       style: TextStyle(
-                        color: isDark ? DesignTokens.inkDark : DesignTokens.inkLight,
+                        color: isDark
+                            ? DesignTokens.inkDark
+                            : DesignTokens.inkLight,
                       ),
                     ),
                   ),
@@ -302,7 +341,9 @@ class MoreScreen extends ConsumerWidget {
                     child: Text(
                       'Dark Mode',
                       style: TextStyle(
-                        color: isDark ? DesignTokens.inkDark : DesignTokens.inkLight,
+                        color: isDark
+                            ? DesignTokens.inkDark
+                            : DesignTokens.inkLight,
                       ),
                     ),
                   ),
@@ -315,12 +356,76 @@ class MoreScreen extends ConsumerWidget {
               ),
             ),
           ),
+          if (ref.watch(debugSeedingEnabledProvider)) ...[
+            const SizedBox(height: 28),
+            const SectionHeader(title: 'Debug Tools'),
+            const SizedBox(height: 12),
+            _MoreEntry(
+              icon: Icons.data_usage_rounded,
+              title: 'Load seed data',
+              subtitle: 'Populate app with initial seed data',
+              color: DesignTokens.butter,
+              onTap: () => _handleLoadSeed(context, ref),
+            ),
+          ],
           const SizedBox(height: 40),
           const _MoreFooter(),
           const SizedBox(height: 40),
         ],
       ),
     );
+  }
+
+  Future<void> _handleLoadSeed(BuildContext context, WidgetRef ref) async {
+    final confirmed = await ConfirmDialog.show(
+      context,
+      title: 'Load Seed Data?',
+      message:
+          'This will load Persian workout programs, movies, shopping lists, and habits. Pre-existing user data will not be modified. Proceed?',
+      confirmLabel: 'Load',
+    );
+    if (confirmed != true) return;
+
+    if (!context.mounted) return;
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(child: CircularProgressIndicator()),
+    );
+
+    try {
+      final jsonStr = await DefaultAssetBundle.of(
+        context,
+      ).loadString('assets/seeds/seed.json');
+      final summary = await ref.read(seederServiceProvider).run(jsonStr);
+
+      if (context.mounted) {
+        Navigator.of(context).pop(); // dismiss loading dialog
+      }
+
+      if (summary.alreadySeeded) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('Already seeded (v1)')));
+        }
+      } else {
+        if (context.mounted) {
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            builder: (context) => _SeedSummarySheet(summary: summary),
+          );
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        Navigator.of(context).pop(); // dismiss loading
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error loading seed data: $e')));
+      }
+    }
   }
 }
 
@@ -343,7 +448,10 @@ class _MoreEntry extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final badgeBg = DesignTokens.resolvePastelFill(color: color, isDark: isDark);
+    final badgeBg = DesignTokens.resolvePastelFill(
+      color: color,
+      isDark: isDark,
+    );
     final iconColor = isDark ? DesignTokens.inkDark : DesignTokens.inkLight;
 
     return AppCard(
@@ -352,15 +460,8 @@ class _MoreEntry extends StatelessWidget {
         leading: Container(
           width: 40,
           height: 40,
-          decoration: BoxDecoration(
-            color: badgeBg,
-            shape: BoxShape.circle,
-          ),
-          child: Icon(
-            icon,
-            color: iconColor,
-            size: 20,
-          ),
+          decoration: BoxDecoration(color: badgeBg, shape: BoxShape.circle),
+          child: Icon(icon, color: iconColor, size: 20),
         ),
         title: Text(
           title,
@@ -374,7 +475,9 @@ class _MoreEntry extends StatelessWidget {
           subtitle,
           style: theme.textTheme.bodyMedium?.copyWith(
             fontSize: DesignTokens.fontCaption,
-            color: isDark ? DesignTokens.inkSoftDark : DesignTokens.inkSoftLight,
+            color: isDark
+                ? DesignTokens.inkSoftDark
+                : DesignTokens.inkSoftLight,
           ),
         ),
         trailing: Icon(
@@ -426,7 +529,7 @@ class _MoreFooter extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
+
     final lastBackupTime = ref.watch(lastBackupTimeProvider).value;
     final needsBackup = ref.watch(shouldNudgeProvider).value ?? false;
 
@@ -441,7 +544,9 @@ class _MoreFooter extends ConsumerWidget {
           Text(
             versionStr,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: isDark ? DesignTokens.inkSoftDark : DesignTokens.inkSoftLight,
+              color: isDark
+                  ? DesignTokens.inkSoftDark
+                  : DesignTokens.inkSoftLight,
               fontSize: DesignTokens.fontCaption,
             ),
           ),
@@ -449,7 +554,9 @@ class _MoreFooter extends ConsumerWidget {
           Text(
             backupStatusStr,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: isDark ? DesignTokens.inkSoftDark : DesignTokens.inkSoftLight,
+              color: isDark
+                  ? DesignTokens.inkSoftDark
+                  : DesignTokens.inkSoftLight,
               fontSize: DesignTokens.fontCaption,
             ),
           ),
@@ -487,6 +594,198 @@ class _MoreFooter extends ConsumerWidget {
               ),
             ),
           ],
+        ],
+      ),
+    );
+  }
+}
+
+class _SeedSummarySheet extends StatelessWidget {
+  final SeedSummary summary;
+
+  const _SeedSummarySheet({required this.summary});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return DraggableScrollableSheet(
+      initialChildSize: 0.6,
+      minChildSize: 0.4,
+      maxChildSize: 0.9,
+      expand: false,
+      builder: (context, scrollController) {
+        return Container(
+          decoration: BoxDecoration(
+            color: isDark
+                ? DesignTokens.surfaceDark
+                : DesignTokens.surfaceLight,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+          ),
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'Seed Data Summary',
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? DesignTokens.inkDark : DesignTokens.inkLight,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Expanded(
+                child: ListView(
+                  controller: scrollController,
+                  children: [
+                    _buildSummaryRow(
+                      context,
+                      'Tags',
+                      summary.tagsInserted,
+                      summary.tagsUpdated,
+                      summary.tagsSkipped,
+                    ),
+                    _buildSummaryRow(
+                      context,
+                      'Collections',
+                      summary.collectionsInserted,
+                      summary.collectionsUpdated,
+                      summary.collectionsSkipped,
+                    ),
+                    _buildSummaryRow(
+                      context,
+                      'Items',
+                      summary.itemsInserted,
+                      summary.itemsUpdated,
+                      summary.itemsSkipped,
+                    ),
+                    _buildSummaryRow(
+                      context,
+                      'Ingredients',
+                      summary.ingredientsInserted,
+                      summary.ingredientsUpdated,
+                      summary.ingredientsSkipped,
+                    ),
+                    _buildSummaryRow(
+                      context,
+                      'Workout Plans',
+                      summary.plansInserted,
+                      summary.plansUpdated,
+                      summary.plansSkipped,
+                    ),
+                    _buildSummaryRow(
+                      context,
+                      'Measurements',
+                      summary.measurementsInserted,
+                      summary.measurementsUpdated,
+                      summary.measurementsSkipped,
+                    ),
+                    _buildSummaryRow(
+                      context,
+                      'Fitness Goals',
+                      summary.goalsInserted,
+                      summary.goalsUpdated,
+                      summary.goalsSkipped,
+                    ),
+                    _buildSummaryRow(
+                      context,
+                      'Habits',
+                      summary.habitsInserted,
+                      summary.habitsUpdated,
+                      summary.habitsSkipped,
+                    ),
+                    _buildSummaryRow(
+                      context,
+                      'Debts',
+                      summary.debtsInserted,
+                      summary.debtsUpdated,
+                      summary.debtsSkipped,
+                    ),
+                    if (summary.warnings.isNotEmpty) ...[
+                      const SizedBox(height: 24),
+                      Text(
+                        'Warnings & Skipped Items',
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: DesignTokens.danger,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      ...summary.warnings.map(
+                        (w) => Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          child: Text(
+                            '• $w',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: isDark
+                                  ? DesignTokens.inkSoftDark
+                                  : DesignTokens.inkSoftLight,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: isDark
+                      ? DesignTokens.accentDark
+                      : DesignTokens.accentLight,
+                  foregroundColor: isDark
+                      ? DesignTokens.surfaceDark
+                      : DesignTokens.surfaceLight,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(
+                      DesignTokens.radiusInput,
+                    ),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Close'),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildSummaryRow(
+    BuildContext context,
+    String title,
+    int inserted,
+    int updated, [
+    int skipped = 0,
+  ]) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final textStyle = theme.textTheme.bodyMedium?.copyWith(
+      color: isDark ? DesignTokens.inkSoftDark : DesignTokens.inkSoftLight,
+    );
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            title,
+            style: theme.textTheme.bodyLarge?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: isDark ? DesignTokens.inkDark : DesignTokens.inkLight,
+            ),
+          ),
+          Text(
+            skipped > 0
+                ? '+$inserted ins, $updated upd, $skipped skip'
+                : '+$inserted ins, $updated upd',
+            style: textStyle,
+          ),
         ],
       ),
     );

@@ -40,9 +40,11 @@ class ConflictEngine implements ConflictFeed {
       _db.select(_db.gymSessions).watch(),
       _db.select(_db.mealSlots).watch(),
     ]) {
-      subs.add(stream.listen((_) {
-        if (!controller.isClosed) controller.add(null);
-      }));
+      subs.add(
+        stream.listen((_) {
+          if (!controller.isClosed) controller.add(null);
+        }),
+      );
     }
 
     try {

@@ -79,16 +79,18 @@ class _HabitTile extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 4),
-            Text('Target: ${habit.targetPerDay} per day', style: Theme.of(context).textTheme.bodySmall),
-            if (habit.reminderTimes != null && habit.reminderTimes!.isNotEmpty) ...[
+            Text(
+              'Target: ${habit.targetPerDay} per day',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            if (habit.reminderTimes != null &&
+                habit.reminderTimes!.isNotEmpty) ...[
               const SizedBox(height: 6),
               Wrap(
                 spacing: 4,
                 runSpacing: 2,
                 children: habit.reminderTimes!.map<Widget>((time) {
-                  return StatusChip(
-                    status: time,
-                  );
+                  return StatusChip(status: time);
                 }).toList(),
               ),
             ],
@@ -169,7 +171,8 @@ class _HabitAddSheetState extends ConsumerState<_HabitAddSheet> {
                 labelText: 'Habit Name',
                 border: OutlineInputBorder(),
               ),
-              validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
+              validator: (v) =>
+                  v == null || v.trim().isEmpty ? 'Required' : null,
             ),
             const SizedBox(height: 12),
             TextFormField(
@@ -186,7 +189,10 @@ class _HabitAddSheetState extends ConsumerState<_HabitAddSheet> {
               },
             ),
             const SizedBox(height: 16),
-            Text('Reminders (Select times)', style: Theme.of(context).textTheme.bodyMedium),
+            Text(
+              'Reminders (Select times)',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
@@ -222,13 +228,15 @@ class _HabitAddSheetState extends ConsumerState<_HabitAddSheet> {
     final target = int.parse(_targetCtrl.text);
     final timesList = _times.toList()..sort();
 
-    await ref.read(habitRepositoryProvider).createHabit(
-      HabitsCompanion.insert(
-        name: _nameCtrl.text.trim(),
-        targetPerDay: Value(target),
-        reminderTimes: Value(timesList.isEmpty ? null : timesList),
-      ),
-    );
+    await ref
+        .read(habitRepositoryProvider)
+        .createHabit(
+          HabitsCompanion.insert(
+            name: _nameCtrl.text.trim(),
+            targetPerDay: Value(target),
+            reminderTimes: Value(timesList.isEmpty ? null : timesList),
+          ),
+        );
 
     if (mounted) Navigator.of(context).pop();
   }

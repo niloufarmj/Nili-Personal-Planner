@@ -17,10 +17,12 @@ class ShimmerSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     // Warm, desaturated tones matching the planner's light/dark colors
     final base = isDark ? const Color(0xFF423B49) : const Color(0xFFEBE3E0);
-    final highlight = isDark ? const Color(0xFF554D5D) : const Color(0xFFF7F2F0);
+    final highlight = isDark
+        ? const Color(0xFF554D5D)
+        : const Color(0xFFF7F2F0);
 
     final disableAnimations = MediaQuery.of(context).disableAnimations;
     if (disableAnimations) {

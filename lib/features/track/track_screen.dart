@@ -17,16 +17,16 @@ final _financeStatsProvider = StreamProvider.autoDispose<int>((ref) {
       .watch(transactionRepositoryProvider)
       .watchByMonth(now.year, now.month)
       .map((txs) {
-    int net = 0;
-    for (final tx in txs) {
-      if (tx.direction == 'in') {
-        net += tx.amountCents;
-      } else {
-        net -= tx.amountCents;
-      }
-    }
-    return net;
-  });
+        int net = 0;
+        for (final tx in txs) {
+          if (tx.direction == 'in') {
+            net += tx.amountCents;
+          } else {
+            net -= tx.amountCents;
+          }
+        }
+        return net;
+      });
 });
 
 final _activeHabitsProvider = StreamProvider.autoDispose<List<Habit>>((ref) {
@@ -68,20 +68,26 @@ final _gymStatsProvider = StreamProvider.autoDispose<int>((ref) {
   final db = ref.watch(appDatabaseProvider);
   final now = DateTime.now();
   final daysFromMonday = (now.weekday - 1) % 7;
-  final monday = DateTime(now.year, now.month, now.day).subtract(Duration(days: daysFromMonday));
+  final monday = DateTime(
+    now.year,
+    now.month,
+    now.day,
+  ).subtract(Duration(days: daysFromMonday));
   final sunday = monday.add(const Duration(days: 6));
 
-  final startStr = '${monday.year.toString().padLeft(4, '0')}-'
+  final startStr =
+      '${monday.year.toString().padLeft(4, '0')}-'
       '${monday.month.toString().padLeft(2, '0')}-'
       '${monday.day.toString().padLeft(2, '0')}';
-  final endStr = '${sunday.year.toString().padLeft(4, '0')}-'
+  final endStr =
+      '${sunday.year.toString().padLeft(4, '0')}-'
       '${sunday.month.toString().padLeft(2, '0')}-'
       '${sunday.day.toString().padLeft(2, '0')}';
 
-  return (db.select(db.gymSessions)
-        ..where((s) =>
-            s.status.equals('done') &
-            s.date.isBetweenValues(startStr, endStr)))
+  return (db.select(db.gymSessions)..where(
+        (s) =>
+            s.status.equals('done') & s.date.isBetweenValues(startStr, endStr),
+      ))
       .watch()
       .map((rows) => rows.length);
 });
@@ -125,7 +131,9 @@ class TrackScreen extends ConsumerWidget {
               data: (net) {
                 final formatted = CurrencyFormatter.format(net.abs());
                 final sign = net >= 0 ? '+' : '–';
-                final color = net >= 0 ? DesignTokens.success : DesignTokens.danger;
+                final color = net >= 0
+                    ? DesignTokens.success
+                    : DesignTokens.danger;
                 return Text(
                   '$sign$formatted',
                   style: theme.textTheme.bodyMedium?.copyWith(
@@ -165,7 +173,9 @@ class TrackScreen extends ConsumerWidget {
                 return Text(
                   '$count ${count == 1 ? 'workout' : 'workouts'}',
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    color: isDark ? DesignTokens.inkDark : DesignTokens.inkLight,
+                    color: isDark
+                        ? DesignTokens.inkDark
+                        : DesignTokens.inkLight,
                     fontWeight: FontWeight.bold,
                   ),
                 );
@@ -253,10 +263,7 @@ class _TrackEntry extends StatelessWidget {
           Container(
             width: 44,
             height: 44,
-            decoration: BoxDecoration(
-              color: bg,
-              shape: BoxShape.circle,
-            ),
+            decoration: BoxDecoration(color: bg, shape: BoxShape.circle),
             child: Icon(icon, color: fg, size: 20),
           ),
           const SizedBox(width: 16),
@@ -277,7 +284,9 @@ class _TrackEntry extends StatelessWidget {
                 Text(
                   subtitle,
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    color: isDark ? DesignTokens.inkSoftDark : DesignTokens.inkSoftLight,
+                    color: isDark
+                        ? DesignTokens.inkSoftDark
+                        : DesignTokens.inkSoftLight,
                     fontSize: 13,
                   ),
                 ),
@@ -285,10 +294,7 @@ class _TrackEntry extends StatelessWidget {
             ),
           ),
           // Trailing Stat
-          if (trailing != null) ...[
-            const SizedBox(width: 8),
-            trailing!,
-          ],
+          if (trailing != null) ...[const SizedBox(width: 8), trailing!],
           const SizedBox(width: 4),
           Icon(
             Icons.chevron_right,

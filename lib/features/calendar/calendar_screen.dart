@@ -122,9 +122,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     final dataAsync = ref.watch(_calendarDataProvider(key));
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Calendar'),
-      ),
+      appBar: AppBar(title: const Text('Calendar')),
       body: Column(
         children: [
           dataAsync.when(
@@ -288,16 +286,76 @@ class _HorizontalFilterBar extends ConsumerWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final items = [
-      (label: 'Location', active: filter.showLocation, key: 'location', color: DesignTokens.butter, icon: Icons.map_outlined),
-      (label: 'Gym', active: filter.showGym, key: 'gym', color: DesignTokens.dustyBlue, icon: Icons.fitness_center),
-      (label: 'Meals', active: filter.showMeals, key: 'meals', color: DesignTokens.peach, icon: Icons.restaurant),
-      (label: 'Work', active: filter.showWork, key: 'work', color: DesignTokens.lavender, icon: Icons.work_outline),
-      (label: 'Uni', active: filter.showUni, key: 'uni', color: DesignTokens.sage, icon: Icons.school_outlined),
-      (label: 'Travel', active: filter.showTravel, key: 'travel', color: DesignTokens.sage, icon: Icons.flight),
-      (label: 'Social', active: filter.showSocial, key: 'social', color: DesignTokens.rose, icon: Icons.event),
-      (label: 'Tasks', active: filter.showTasks, key: 'tasks', color: DesignTokens.lavender, icon: Icons.task_alt),
-      (label: 'Partner', active: filter.showPartner, key: 'partner', color: DesignTokens.dustyBlueSoft, icon: Icons.favorite_border),
-      (label: 'Reminders', active: filter.showReminders, key: 'reminders', color: DesignTokens.roseSoft, icon: Icons.notifications_none),
+      (
+        label: 'Location',
+        active: filter.showLocation,
+        key: 'location',
+        color: DesignTokens.butter,
+        icon: Icons.map_outlined,
+      ),
+      (
+        label: 'Gym',
+        active: filter.showGym,
+        key: 'gym',
+        color: DesignTokens.dustyBlue,
+        icon: Icons.fitness_center,
+      ),
+      (
+        label: 'Meals',
+        active: filter.showMeals,
+        key: 'meals',
+        color: DesignTokens.peach,
+        icon: Icons.restaurant,
+      ),
+      (
+        label: 'Work',
+        active: filter.showWork,
+        key: 'work',
+        color: DesignTokens.lavender,
+        icon: Icons.work_outline,
+      ),
+      (
+        label: 'Uni',
+        active: filter.showUni,
+        key: 'uni',
+        color: DesignTokens.sage,
+        icon: Icons.school_outlined,
+      ),
+      (
+        label: 'Travel',
+        active: filter.showTravel,
+        key: 'travel',
+        color: DesignTokens.sage,
+        icon: Icons.flight,
+      ),
+      (
+        label: 'Social',
+        active: filter.showSocial,
+        key: 'social',
+        color: DesignTokens.rose,
+        icon: Icons.event,
+      ),
+      (
+        label: 'Tasks',
+        active: filter.showTasks,
+        key: 'tasks',
+        color: DesignTokens.lavender,
+        icon: Icons.task_alt,
+      ),
+      (
+        label: 'Partner',
+        active: filter.showPartner,
+        key: 'partner',
+        color: DesignTokens.dustyBlueSoft,
+        icon: Icons.favorite_border,
+      ),
+      (
+        label: 'Reminders',
+        active: filter.showReminders,
+        key: 'reminders',
+        color: DesignTokens.roseSoft,
+        icon: Icons.notifications_none,
+      ),
     ];
 
     return SizedBox(
@@ -313,18 +371,26 @@ class _HorizontalFilterBar extends ConsumerWidget {
           return Padding(
             padding: const EdgeInsets.only(right: 8),
             child: FilterChip(
-              avatar: Icon(item.icon, size: 14, color: item.active ? (isDark ? DesignTokens.paperDark : Colors.white) : fg),
+              avatar: Icon(
+                item.icon,
+                size: 14,
+                color: item.active
+                    ? (isDark ? DesignTokens.paperDark : Colors.white)
+                    : fg,
+              ),
               label: Text(item.label),
               selected: item.active,
               selectedColor: isDark ? DesignTokens.accentDark : item.color,
               checkmarkColor: isDark ? DesignTokens.paperDark : Colors.white,
               backgroundColor: Colors.transparent,
               side: BorderSide(
-                color: item.active ? Colors.transparent : (isDark ? DesignTokens.lineDark : DesignTokens.lineLight),
+                color: item.active
+                    ? Colors.transparent
+                    : (isDark ? DesignTokens.lineDark : DesignTokens.lineLight),
                 width: 1,
               ),
               labelStyle: TextStyle(
-                color: item.active 
+                color: item.active
                     ? (isDark ? DesignTokens.paperDark : Colors.white)
                     : (isDark ? DesignTokens.inkDark : DesignTokens.inkLight),
                 fontWeight: FontWeight.bold,
@@ -359,7 +425,9 @@ class _DayCell extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    final accentColor = isDark ? DesignTokens.accentDark : DesignTokens.accentLight;
+    final accentColor = isDark
+        ? DesignTokens.accentDark
+        : DesignTokens.accentLight;
     final lineColor = isDark ? DesignTokens.lineDark : DesignTokens.lineLight;
     final inkColor = isDark ? DesignTokens.inkDark : DesignTokens.inkLight;
 
@@ -393,17 +461,24 @@ class _DayCell extends StatelessWidget {
     if (trip != null) {
       final tripStart = _parseDate(trip.startDate!);
       final tripEnd = _parseDate(trip.endDate!);
-      
-      final isStart = isSameDay(day, tripStart) || day.weekday == DateTime.monday;
+
+      final isStart =
+          isSameDay(day, tripStart) || day.weekday == DateTime.monday;
       final isEnd = isSameDay(day, tripEnd) || day.weekday == DateTime.sunday;
 
       final BorderRadius radius;
       if (isStart && isEnd) {
         radius = BorderRadius.circular(8);
       } else if (isStart) {
-        radius = const BorderRadius.only(topLeft: Radius.circular(8), bottomLeft: Radius.circular(8));
+        radius = const BorderRadius.only(
+          topLeft: Radius.circular(8),
+          bottomLeft: Radius.circular(8),
+        );
       } else if (isEnd) {
-        radius = const BorderRadius.only(topRight: Radius.circular(8), bottomRight: Radius.circular(8));
+        radius = const BorderRadius.only(
+          topRight: Radius.circular(8),
+          bottomRight: Radius.circular(8),
+        );
       } else {
         radius = BorderRadius.zero;
       }
@@ -415,7 +490,11 @@ class _DayCell extends StatelessWidget {
         height: 6,
         child: Container(
           decoration: BoxDecoration(
-            color: (isDark ? DesignTokens.adjustColorForDark(DesignTokens.sage) : DesignTokens.sage).withValues(alpha: 0.40),
+            color:
+                (isDark
+                        ? DesignTokens.adjustColorForDark(DesignTokens.sage)
+                        : DesignTokens.sage)
+                    .withValues(alpha: 0.40),
             borderRadius: radius,
           ),
         ),
@@ -439,7 +518,9 @@ class _DayCell extends StatelessWidget {
               if (tripBarWidget != null) tripBarWidget,
 
               // Partner Strip Dotted line at top
-              if (dayData != null && (dayData!.partnerTags.isNotEmpty || dayData!.partnerEvents.isNotEmpty))
+              if (dayData != null &&
+                  (dayData!.partnerTags.isNotEmpty ||
+                      dayData!.partnerEvents.isNotEmpty))
                 Positioned(
                   top: 3,
                   left: 4,
@@ -447,7 +528,11 @@ class _DayCell extends StatelessWidget {
                   height: 3,
                   child: CustomPaint(
                     painter: DottedLinePainter(
-                      color: isDark ? DesignTokens.adjustColorForDark(DesignTokens.dustyBlueSoft) : DesignTokens.dustyBlue,
+                      color: isDark
+                          ? DesignTokens.adjustColorForDark(
+                              DesignTokens.dustyBlueSoft,
+                            )
+                          : DesignTokens.dustyBlue,
                     ),
                   ),
                 ),
@@ -460,11 +545,14 @@ class _DayCell extends StatelessWidget {
                       '${day.day}',
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: inkColor,
-                        fontWeight: isToday || isSelected ? FontWeight.bold : null,
+                        fontWeight: isToday || isSelected
+                            ? FontWeight.bold
+                            : null,
                       ),
                     ),
                     const SizedBox(height: 2),
-                    if (dayData != null && !dayData!.isEmpty) _DotRow(dayData: dayData!),
+                    if (dayData != null && !dayData!.isEmpty)
+                      _DotRow(dayData: dayData!),
                   ],
                 ),
               ),
@@ -539,18 +627,23 @@ class _DotRow extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        ...visibleDots.map((c) => Container(
-          width: 4,
-          height: 4,
-          margin: const EdgeInsets.symmetric(horizontal: 1),
-          decoration: BoxDecoration(color: c, shape: BoxShape.circle),
-        )),
+        ...visibleDots.map(
+          (c) => Container(
+            width: 4,
+            height: 4,
+            margin: const EdgeInsets.symmetric(horizontal: 1),
+            decoration: BoxDecoration(color: c, shape: BoxShape.circle),
+          ),
+        ),
         if (showOverflow)
           Container(
             width: 3,
             height: 3,
             margin: const EdgeInsets.symmetric(horizontal: 1),
-            decoration: const BoxDecoration(color: Colors.grey, shape: BoxShape.circle),
+            decoration: const BoxDecoration(
+              color: Colors.grey,
+              shape: BoxShape.circle,
+            ),
           ),
       ],
     );

@@ -59,4 +59,3 @@ abstract final class AppColors {
     _ => priorityNormal,
   };
 }
-

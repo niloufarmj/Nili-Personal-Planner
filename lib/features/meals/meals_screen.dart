@@ -134,15 +134,21 @@ class _WeekGrid extends ConsumerWidget {
                   // Header row
                   TableRow(
                     decoration: BoxDecoration(
-                      color: isDark ? DesignTokens.lineDark : DesignTokens.lineLight,
-                      borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                      color: isDark
+                          ? DesignTokens.lineDark
+                          : DesignTokens.lineLight,
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(12),
+                      ),
                     ),
                     children: [
                       const _Cell(child: SizedBox(width: 80)),
                       ...days.map((d) {
                         final dateStr = _dateStr(d);
                         final tags = tagsByDate[dateStr] ?? [];
-                        final tagColors = tags.map((t) => AppColors.forTagName(t.name)).toList();
+                        final tagColors = tags
+                            .map((t) => AppColors.forTagName(t.name))
+                            .toList();
 
                         return Container(
                           decoration: DayWashDecoration(
@@ -155,10 +161,13 @@ class _WeekGrid extends ConsumerWidget {
                                 Text(
                                   dayFmt.format(d),
                                   textAlign: TextAlign.center,
-                                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                    color: isDark ? DesignTokens.inkDark : DesignTokens.inkLight,
-                                  ),
+                                  style: Theme.of(context).textTheme.labelSmall
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.w600,
+                                        color: isDark
+                                            ? DesignTokens.inkDark
+                                            : DesignTokens.inkLight,
+                                      ),
                                 ),
                                 if (tags.isNotEmpty)
                                   Padding(
@@ -194,10 +203,13 @@ class _WeekGrid extends ConsumerWidget {
                         _Cell(
                           child: Text(
                             _slotLabel(slot),
-                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: isDark ? DesignTokens.inkSoftDark : DesignTokens.inkSoftLight,
-                            ),
+                            style: Theme.of(context).textTheme.labelSmall
+                                ?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: isDark
+                                      ? DesignTokens.inkSoftDark
+                                      : DesignTokens.inkSoftLight,
+                                ),
                           ),
                         ),
                         ...days.map((d) {
@@ -205,7 +217,9 @@ class _WeekGrid extends ConsumerWidget {
                           final key = '$dateStr:$slot';
                           final mealSlot = slotMap[key];
                           final tags = tagsByDate[dateStr] ?? [];
-                          final tagColors = tags.map((t) => AppColors.forTagName(t.name)).toList();
+                          final tagColors = tags
+                              .map((t) => AppColors.forTagName(t.name))
+                              .toList();
 
                           return Container(
                             decoration: DayWashDecoration(

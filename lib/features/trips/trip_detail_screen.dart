@@ -122,9 +122,7 @@ class _TripDetailView extends ConsumerWidget {
                     contentPadding: EdgeInsets.zero,
                     leading: const Icon(Icons.euro_outlined),
                     title: const Text('Budget'),
-                    subtitle: Text(
-                      CurrencyFormatter.format(trip.budgetCents!),
-                    ),
+                    subtitle: Text(CurrencyFormatter.format(trip.budgetCents!)),
                   ),
               ],
             ),
@@ -141,14 +139,18 @@ class _TripDetailView extends ConsumerWidget {
                     'Description',
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w600,
-                      color: isDark ? DesignTokens.inkDark : DesignTokens.inkLight,
+                      color: isDark
+                          ? DesignTokens.inkDark
+                          : DesignTokens.inkLight,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     trip.description!,
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color: isDark ? DesignTokens.inkSoftDark : DesignTokens.inkSoftLight,
+                      color: isDark
+                          ? DesignTokens.inkSoftDark
+                          : DesignTokens.inkSoftLight,
                     ),
                   ),
                 ],
@@ -182,7 +184,10 @@ class _TripDetailView extends ConsumerWidget {
               (link) => Padding(
                 padding: const EdgeInsets.only(bottom: 12),
                 child: AppCard(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   child: ListTile(
                     contentPadding: EdgeInsets.zero,
                     leading: const Icon(Icons.link),

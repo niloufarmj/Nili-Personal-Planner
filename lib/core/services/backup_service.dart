@@ -31,10 +31,7 @@ class BackupService {
   /// Returns the path of the created zip.
   Future<String> exportAndShare() async {
     final zipPath = await _buildZip();
-    await Share.shareXFiles(
-      [XFile(zipPath)],
-      text: 'Personal Planner backup',
-    );
+    await Share.shareXFiles([XFile(zipPath)], text: 'Personal Planner backup');
     await _recordBackupTime();
     return zipPath;
   }
@@ -159,10 +156,7 @@ class BackupService {
 
   Future<void> _recordBackupTime() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt(
-      _lastBackupKey,
-      DateTime.now().millisecondsSinceEpoch,
-    );
+    await prefs.setInt(_lastBackupKey, DateTime.now().millisecondsSinceEpoch);
   }
 }
 

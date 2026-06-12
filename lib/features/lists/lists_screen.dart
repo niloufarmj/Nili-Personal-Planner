@@ -101,7 +101,9 @@ class ListsScreen extends ConsumerWidget {
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showNewListFlow(context, ref),
         tooltip: 'New list',
-        backgroundColor: isDark ? DesignTokens.accentDark : DesignTokens.accentLight,
+        backgroundColor: isDark
+            ? DesignTokens.accentDark
+            : DesignTokens.accentLight,
         foregroundColor: Colors.white,
         child: const Icon(Icons.add),
       ),
@@ -132,9 +134,13 @@ class ListsScreen extends ConsumerWidget {
     final result = await showModalBottomSheet<_NewListResult>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: isDark ? DesignTokens.paperDark : DesignTokens.paperLight,
+      backgroundColor: isDark
+          ? DesignTokens.paperDark
+          : DesignTokens.paperLight,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(DesignTokens.radiusSheet)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(DesignTokens.radiusSheet),
+        ),
       ),
       builder: (_) => const _NewListSheet(),
     );
@@ -333,9 +339,9 @@ class _CollectionContextSheet extends StatelessWidget {
           ListTile(
             title: Text(
               withCountryFlag(name),
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
           ),
           const Divider(height: 1),
@@ -481,51 +487,60 @@ class _NewListSheetState extends State<_NewListSheet> {
         Wrap(
           spacing: 10,
           runSpacing: 10,
-          children: TemplateRegistry.all.map(
-            (t) {
-              final isSelected = _selectedTemplate == t.id;
-              final mainColor = getTemplateMainColor(t.id, isDark);
-              final softColor = getTemplateSoftColor(t.id, isDark);
-              final inkColor = isDark ? DesignTokens.inkDark : DesignTokens.inkLight;
+          children: TemplateRegistry.all.map((t) {
+            final isSelected = _selectedTemplate == t.id;
+            final mainColor = getTemplateMainColor(t.id, isDark);
+            final softColor = getTemplateSoftColor(t.id, isDark);
+            final inkColor = isDark
+                ? DesignTokens.inkDark
+                : DesignTokens.inkLight;
 
-              return GestureDetector(
-                onTap: () => _pickTemplate(t.id),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                  decoration: BoxDecoration(
-                    color: softColor,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: isSelected ? mainColor : (isDark ? DesignTokens.lineDark : DesignTokens.lineLight),
-                      width: isSelected ? 2 : 1,
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(t.icon, size: 16, color: mainColor),
-                      const SizedBox(width: 8),
-                      Text(
-                        t.label,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: inkColor,
-                        ),
-                      ),
-                      if (isSelected) ...[
-                        const SizedBox(width: 6),
-                        Icon(Icons.check_circle, size: 16, color: DesignTokens.success),
-                      ],
-                    ],
+            return GestureDetector(
+              onTap: () => _pickTemplate(t.id),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 10,
+                ),
+                decoration: BoxDecoration(
+                  color: softColor,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: isSelected
+                        ? mainColor
+                        : (isDark
+                              ? DesignTokens.lineDark
+                              : DesignTokens.lineLight),
+                    width: isSelected ? 2 : 1,
                   ),
                 ),
-              );
-            },
-          ).toList(),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(t.icon, size: 16, color: mainColor),
+                    const SizedBox(width: 8),
+                    Text(
+                      t.label,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: inkColor,
+                      ),
+                    ),
+                    if (isSelected) ...[
+                      const SizedBox(width: 6),
+                      Icon(
+                        Icons.check_circle,
+                        size: 16,
+                        color: DesignTokens.success,
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            );
+          }).toList(),
         ),
       ],
     );
   }
 }
-
-

@@ -14,9 +14,10 @@ import 'fitness_repository.dart';
 
 // ── State for custom field definitions ────────────────────────────────────────
 
-final _customFieldsProvider = StateNotifierProvider<CustomFieldsNotifier, List<String>>((ref) {
-  return CustomFieldsNotifier();
-});
+final _customFieldsProvider =
+    StateNotifierProvider<CustomFieldsNotifier, List<String>>((ref) {
+      return CustomFieldsNotifier();
+    });
 
 class CustomFieldsNotifier extends StateNotifier<List<String>> {
   CustomFieldsNotifier() : super([]) {
@@ -25,7 +26,9 @@ class CustomFieldsNotifier extends StateNotifier<List<String>> {
 
   Future<void> _load() async {
     final prefs = await SharedPreferences.getInstance();
-    state = prefs.getStringList('fitness_custom_fields') ?? ['waist_cm', 'body_fat_pct'];
+    state =
+        prefs.getStringList('fitness_custom_fields') ??
+        ['waist_cm', 'body_fat_pct'];
   }
 
   Future<void> addField(String name) async {
@@ -73,11 +76,7 @@ class FitnessScreen extends ConsumerWidget {
           ),
         ),
         body: const TabBarView(
-          children: [
-            _MeasurementsTab(),
-            _PhotosTab(),
-            _GoalsTab(),
-          ],
+          children: [_MeasurementsTab(), _PhotosTab(), _GoalsTab()],
         ),
       ),
     );
@@ -98,10 +97,12 @@ class _CustomFieldsSettingsSheet extends ConsumerStatefulWidget {
   const _CustomFieldsSettingsSheet();
 
   @override
-  ConsumerState<_CustomFieldsSettingsSheet> createState() => _CustomFieldsSettingsSheetState();
+  ConsumerState<_CustomFieldsSettingsSheet> createState() =>
+      _CustomFieldsSettingsSheetState();
 }
 
-class _CustomFieldsSettingsSheetState extends ConsumerState<_CustomFieldsSettingsSheet> {
+class _CustomFieldsSettingsSheetState
+    extends ConsumerState<_CustomFieldsSettingsSheet> {
   final _ctrl = TextEditingController();
 
   @override
@@ -121,7 +122,10 @@ class _CustomFieldsSettingsSheetState extends ConsumerState<_CustomFieldsSetting
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text('Custom Measurement Fields', style: Theme.of(context).textTheme.titleMedium),
+          Text(
+            'Custom Measurement Fields',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
           const SizedBox(height: 8),
           Text(
             'Create fields like "chest_cm", "thigh_cm", or "body_fat_pct" to log them along with your weight.',
@@ -131,7 +135,11 @@ class _CustomFieldsSettingsSheetState extends ConsumerState<_CustomFieldsSetting
           if (fields.isEmpty)
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 16),
-              child: Text('No custom fields defined yet.', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey)),
+              child: Text(
+                'No custom fields defined yet.',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.grey),
+              ),
             )
           else
             Wrap(
@@ -140,7 +148,8 @@ class _CustomFieldsSettingsSheetState extends ConsumerState<_CustomFieldsSetting
               children: fields.map((f) {
                 return Chip(
                   label: Text(f),
-                  onDeleted: () => ref.read(_customFieldsProvider.notifier).removeField(f),
+                  onDeleted: () =>
+                      ref.read(_customFieldsProvider.notifier).removeField(f),
                 );
               }).toList(),
             ),
@@ -263,8 +272,10 @@ class _WeightChart extends StatelessWidget {
       return FlSpot(i.toDouble(), m.weightKg!);
     }).toList();
 
-    final minW = points.map((m) => m.weightKg!).reduce((a, b) => a < b ? a : b) - 2;
-    final maxW = points.map((m) => m.weightKg!).reduce((a, b) => a > b ? a : b) + 2;
+    final minW =
+        points.map((m) => m.weightKg!).reduce((a, b) => a < b ? a : b) - 2;
+    final maxW =
+        points.map((m) => m.weightKg!).reduce((a, b) => a > b ? a : b) + 2;
 
     return AppCard(
       child: Padding(
@@ -272,7 +283,10 @@ class _WeightChart extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Weight Trend (kg)', style: Theme.of(context).textTheme.titleSmall),
+            Text(
+              'Weight Trend (kg)',
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
             const SizedBox(height: 16),
             SizedBox(
               height: 180,
@@ -289,7 +303,9 @@ class _WeightChart extends StatelessWidget {
                       dotData: const FlDotData(show: true),
                       belowBarData: BarAreaData(
                         show: true,
-                        color: Theme.of(context).colorScheme.primary.withAlpha(20),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.primary.withAlpha(20),
                       ),
                     ),
                   ],
@@ -314,7 +330,10 @@ class _WeightChart extends StatelessWidget {
                       ),
                     ),
                     leftTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: true, reservedSize: 32),
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        reservedSize: 32,
+                      ),
                     ),
                     rightTitles: const AxisTitles(
                       sideTitles: SideTitles(showTitles: false),
@@ -361,14 +380,22 @@ class _MeasurementCard extends ConsumerWidget {
               if (measurement.weightKg != null)
                 _MeasurementChip(
                   label: '${measurement.weightKg} kg',
-                  backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-                  foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
+                  backgroundColor: Theme.of(
+                    context,
+                  ).colorScheme.primaryContainer,
+                  foregroundColor: Theme.of(
+                    context,
+                  ).colorScheme.onPrimaryContainer,
                 ),
               ...fields.entries.map((e) {
                 return _MeasurementChip(
                   label: '${e.key}: ${e.value}',
-                  backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
-                  foregroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
+                  backgroundColor: Theme.of(
+                    context,
+                  ).colorScheme.secondaryContainer,
+                  foregroundColor: Theme.of(
+                    context,
+                  ).colorScheme.onSecondaryContainer,
                 );
               }),
               if (measurement.photos != null && measurement.photos!.isNotEmpty)
@@ -395,7 +422,9 @@ class _MeasurementCard extends ConsumerWidget {
       message: 'Remove measurement log on ${measurement.date}?',
     );
     if (confirmed == true) {
-      await ref.read(fitnessRepositoryProvider).deleteMeasurement(measurement.id);
+      await ref
+          .read(fitnessRepositoryProvider)
+          .deleteMeasurement(measurement.id);
     }
   }
 }
@@ -406,7 +435,8 @@ class _MeasurementAddSheet extends ConsumerStatefulWidget {
   const _MeasurementAddSheet();
 
   @override
-  ConsumerState<_MeasurementAddSheet> createState() => _MeasurementAddSheetState();
+  ConsumerState<_MeasurementAddSheet> createState() =>
+      _MeasurementAddSheetState();
 }
 
 class _MeasurementAddSheetState extends ConsumerState<_MeasurementAddSheet> {
@@ -441,7 +471,10 @@ class _MeasurementAddSheetState extends ConsumerState<_MeasurementAddSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text('Log Measurements', style: Theme.of(context).textTheme.titleMedium),
+            Text(
+              'Log Measurements',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
             const SizedBox(height: 12),
             ListTile(
               contentPadding: EdgeInsets.zero,
@@ -455,7 +488,9 @@ class _MeasurementAddSheetState extends ConsumerState<_MeasurementAddSheet> {
             const SizedBox(height: 8),
             TextFormField(
               controller: _weightCtrl,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               decoration: const InputDecoration(
                 labelText: 'Weight (kg)',
                 border: OutlineInputBorder(),
@@ -473,13 +508,17 @@ class _MeasurementAddSheetState extends ConsumerState<_MeasurementAddSheet> {
                 padding: const EdgeInsets.only(bottom: 12),
                 child: TextFormField(
                   controller: _customCtrls[field],
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
                   decoration: InputDecoration(
                     labelText: field.replaceAll('_', ' '),
                     border: const OutlineInputBorder(),
                   ),
                   validator: (v) {
-                    if (v != null && v.isNotEmpty && double.tryParse(v) == null) {
+                    if (v != null &&
+                        v.isNotEmpty &&
+                        double.tryParse(v) == null) {
                       return 'Invalid number';
                     }
                     return null;
@@ -521,13 +560,15 @@ class _MeasurementAddSheetState extends ConsumerState<_MeasurementAddSheet> {
 
     final dateStr = DateFormat('yyyy-MM-dd').format(_date);
 
-    await ref.read(fitnessRepositoryProvider).createMeasurement(
-      MeasurementsCompanion.insert(
-        date: dateStr,
-        weightKg: Value(weight),
-        fields: Value(fields.isEmpty ? null : fields),
-      ),
-    );
+    await ref
+        .read(fitnessRepositoryProvider)
+        .createMeasurement(
+          MeasurementsCompanion.insert(
+            date: dateStr,
+            weightKg: Value(weight),
+            fields: Value(fields.isEmpty ? null : fields),
+          ),
+        );
 
     if (mounted) Navigator.of(context).pop();
   }
@@ -556,7 +597,9 @@ class _PhotosTab extends ConsumerWidget {
           for (final m in measurements) {
             if (m.photos != null) {
               for (final path in m.photos!) {
-                photoList.add(_PhotoItem(date: m.date, path: path, measurement: m));
+                photoList.add(
+                  _PhotoItem(date: m.date, path: path, measurement: m),
+                );
               }
             }
           }
@@ -583,10 +626,7 @@ class _PhotosTab extends ConsumerWidget {
                 onTap: () => _viewPhoto(context, photo),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(8),
-                  child: Image.file(
-                    File(photo.path),
-                    fit: BoxFit.cover,
-                  ),
+                  child: Image.file(File(photo.path), fit: BoxFit.cover),
                 ),
               );
             },
@@ -660,23 +700,22 @@ class _PhotosTab extends ConsumerWidget {
     if (match != null) {
       final currentPhotos = match.photos ?? [];
       await repo.updateMeasurement(
-        match.copyWith(
-          photos: Value([...currentPhotos, imagePath]),
-        ),
+        match.copyWith(photos: Value([...currentPhotos, imagePath])),
       );
     } else {
       await repo.createMeasurement(
-        MeasurementsCompanion.insert(
-          date: dateStr,
-          photos: Value([imagePath]),
-        ),
+        MeasurementsCompanion.insert(date: dateStr, photos: Value([imagePath])),
       );
     }
   }
 }
 
 class _PhotoItem {
-  const _PhotoItem({required this.date, required this.path, required this.measurement});
+  const _PhotoItem({
+    required this.date,
+    required this.path,
+    required this.measurement,
+  });
   final String date;
   final String path;
   final Measurement measurement;
@@ -714,7 +753,9 @@ class _GoalsTab extends ConsumerWidget {
           }
 
           final openGoals = goals.where((g) => g.achievedDate == null).toList();
-          final achievedGoals = goals.where((g) => g.achievedDate != null).toList();
+          final achievedGoals = goals
+              .where((g) => g.achievedDate != null)
+              .toList();
 
           return ListView(
             padding: const EdgeInsets.all(16),
@@ -761,7 +802,9 @@ class _GoalCard extends ConsumerWidget {
     return AppCard(
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: (isAchieved ? Colors.green : Colors.blue).withAlpha(30),
+          backgroundColor: (isAchieved ? Colors.green : Colors.blue).withAlpha(
+            30,
+          ),
           child: Icon(
             isAchieved ? Icons.emoji_events : Icons.flag,
             color: isAchieved ? Colors.green[700] : Colors.blue[700],
@@ -777,18 +820,24 @@ class _GoalCard extends ConsumerWidget {
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Direction: ${goal.direction == 'down' ? 'Lose/Decrease' : 'Gain/Increase'}'),
+            Text(
+              'Direction: ${goal.direction == 'down' ? 'Lose/Decrease' : 'Gain/Increase'}',
+            ),
             if (goal.deadline != null) Text('Deadline: ${goal.deadline}'),
             if (isAchieved)
               Text(
                 'Achieved on ${goal.achievedDate} 🏆',
-                style: TextStyle(color: Colors.green[700], fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  color: Colors.green[700],
+                  fontWeight: FontWeight.bold,
+                ),
               ),
           ],
         ),
         trailing: IconButton(
           icon: const Icon(Icons.delete_outline),
-          onPressed: () => ref.read(fitnessRepositoryProvider).deleteGoal(goal.id),
+          onPressed: () =>
+              ref.read(fitnessRepositoryProvider).deleteGoal(goal.id),
         ),
       ),
     );
@@ -832,12 +881,18 @@ class _GoalAddSheetState extends ConsumerState<_GoalAddSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text('Set Fitness Goal', style: Theme.of(context).textTheme.titleMedium),
+            Text(
+              'Set Fitness Goal',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
               value: _metric,
               items: metrics.map((m) {
-                return DropdownMenuItem(value: m, child: Text(m.replaceAll('_', ' ')));
+                return DropdownMenuItem(
+                  value: m,
+                  child: Text(m.replaceAll('_', ' ')),
+                );
               }).toList(),
               onChanged: (v) {
                 if (v != null) setState(() => _metric = v);
@@ -859,7 +914,9 @@ class _GoalAddSheetState extends ConsumerState<_GoalAddSheet> {
             const SizedBox(height: 12),
             TextFormField(
               controller: _targetCtrl,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               decoration: const InputDecoration(
                 labelText: 'Target Value',
                 border: OutlineInputBorder(),
@@ -874,7 +931,11 @@ class _GoalAddSheetState extends ConsumerState<_GoalAddSheet> {
             ListTile(
               contentPadding: EdgeInsets.zero,
               leading: const Icon(Icons.calendar_today),
-              title: Text(_deadline == null ? 'No deadline' : 'Deadline: ${DateFormat('yyyy-MM-dd').format(_deadline!)}'),
+              title: Text(
+                _deadline == null
+                    ? 'No deadline'
+                    : 'Deadline: ${DateFormat('yyyy-MM-dd').format(_deadline!)}',
+              ),
               trailing: TextButton(
                 onPressed: _selectDeadline,
                 child: const Text('Change'),
@@ -904,16 +965,20 @@ class _GoalAddSheetState extends ConsumerState<_GoalAddSheet> {
     if (!_formKey.currentState!.validate()) return;
 
     final target = double.parse(_targetCtrl.text);
-    final deadlineStr = _deadline != null ? DateFormat('yyyy-MM-dd').format(_deadline!) : null;
+    final deadlineStr = _deadline != null
+        ? DateFormat('yyyy-MM-dd').format(_deadline!)
+        : null;
 
-    await ref.read(fitnessRepositoryProvider).createGoal(
-      FitnessGoalsCompanion.insert(
-        metric: _metric,
-        target: target,
-        direction: Value(_direction),
-        deadline: Value(deadlineStr),
-      ),
-    );
+    await ref
+        .read(fitnessRepositoryProvider)
+        .createGoal(
+          FitnessGoalsCompanion.insert(
+            metric: _metric,
+            target: target,
+            direction: Value(_direction),
+            deadline: Value(deadlineStr),
+          ),
+        );
 
     if (mounted) Navigator.of(context).pop();
   }

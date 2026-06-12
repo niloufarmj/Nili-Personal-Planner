@@ -41,7 +41,9 @@ class EmptyState extends StatelessWidget {
                 Icon(
                   icon,
                   size: 56,
-                  color: isDark ? DesignTokens.accentDark : DesignTokens.accentLight,
+                  color: isDark
+                      ? DesignTokens.accentDark
+                      : DesignTokens.accentLight,
                 ),
               ],
             ),
@@ -60,7 +62,9 @@ class EmptyState extends StatelessWidget {
               Text(
                 hint!,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: isDark ? DesignTokens.inkSoftDark : DesignTokens.inkSoftLight,
+                  color: isDark
+                      ? DesignTokens.inkSoftDark
+                      : DesignTokens.inkSoftLight,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -71,7 +75,9 @@ class EmptyState extends StatelessWidget {
                 onPressed: action,
                 style: FilledButton.styleFrom(
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(DesignTokens.radiusInput),
+                    borderRadius: BorderRadius.circular(
+                      DesignTokens.radiusInput,
+                    ),
                   ),
                 ),
                 child: Text(actionLabel!),
@@ -122,4 +128,3 @@ class BlobPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
-

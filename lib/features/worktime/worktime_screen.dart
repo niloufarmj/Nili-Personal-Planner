@@ -17,9 +17,10 @@ final _workContextsProvider = StreamProvider.autoDispose((ref) {
   return ref.watch(worktimeRepositoryProvider).watchContexts();
 });
 
-final _workEntriesForDateProvider = StreamProvider.autoDispose.family<List<TimeEntry>, String>((ref, dateStr) {
-  return ref.watch(worktimeRepositoryProvider).watchEntriesForDate(dateStr);
-});
+final _workEntriesForDateProvider = StreamProvider.autoDispose
+    .family<List<TimeEntry>, String>((ref, dateStr) {
+      return ref.watch(worktimeRepositoryProvider).watchEntriesForDate(dateStr);
+    });
 
 // ── Timer state (persisted via SharedPreferences) ────────────────────────────
 
@@ -102,7 +103,9 @@ class _WorktimeScreenState extends ConsumerState<WorktimeScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         heroTag: 'worktime_fab',
-        backgroundColor: isDark ? DesignTokens.accentDark : DesignTokens.accentLight,
+        backgroundColor: isDark
+            ? DesignTokens.accentDark
+            : DesignTokens.accentLight,
         foregroundColor: Colors.white,
         child: const Icon(Icons.add),
         onPressed: () => _showQuickAdd(context),
@@ -135,9 +138,13 @@ class _WorktimeScreenState extends ConsumerState<WorktimeScreen> {
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: isDark ? DesignTokens.paperDark : DesignTokens.paperLight,
+      backgroundColor: isDark
+          ? DesignTokens.paperDark
+          : DesignTokens.paperLight,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(DesignTokens.radiusSheet)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(DesignTokens.radiusSheet),
+        ),
       ),
       builder: (_) => const _QuickAddSheet(),
     );
@@ -244,9 +251,13 @@ class _TimerCardState extends ConsumerState<_TimerCard> {
             children: [
               Icon(
                 Icons.timer_outlined,
-                color: isRunning 
-                    ? (isDark ? DesignTokens.accentDark : DesignTokens.accentLight) 
-                    : (isDark ? DesignTokens.inkSoftDark : DesignTokens.inkSoftLight),
+                color: isRunning
+                    ? (isDark
+                          ? DesignTokens.accentDark
+                          : DesignTokens.accentLight)
+                    : (isDark
+                          ? DesignTokens.inkSoftDark
+                          : DesignTokens.inkSoftLight),
               ),
               const SizedBox(width: 8),
               Text(
@@ -261,7 +272,9 @@ class _TimerCardState extends ConsumerState<_TimerCard> {
                 Text(
                   'since ${DateFormat('HH:mm').format(widget.timerStartedAt!)}',
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: isDark ? DesignTokens.inkSoftDark : DesignTokens.inkSoftLight,
+                    color: isDark
+                        ? DesignTokens.inkSoftDark
+                        : DesignTokens.inkSoftLight,
                   ),
                 ),
               ],
@@ -289,11 +302,15 @@ class _TimerCardState extends ConsumerState<_TimerCard> {
                     icon: const Icon(Icons.stop),
                     label: const Text('Stop Timer'),
                     style: FilledButton.styleFrom(
-                      backgroundColor: isDark ? DesignTokens.danger.withValues(alpha: 0.9) : DesignTokens.danger,
+                      backgroundColor: isDark
+                          ? DesignTokens.danger.withValues(alpha: 0.9)
+                          : DesignTokens.danger,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(DesignTokens.radiusInput),
+                        borderRadius: BorderRadius.circular(
+                          DesignTokens.radiusInput,
+                        ),
                       ),
                     ),
                     onPressed: widget.onStop,
@@ -315,7 +332,7 @@ class _TimerCardState extends ConsumerState<_TimerCard> {
                     child: Text('No contexts yet. Create one via + FAB.'),
                   );
                 }
-                
+
                 _selectedContextId ??= contexts.first.id;
 
                 return Column(
@@ -323,16 +340,26 @@ class _TimerCardState extends ConsumerState<_TimerCard> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       decoration: BoxDecoration(
-                        border: Border.all(color: isDark ? DesignTokens.lineDark : DesignTokens.lineLight),
-                        borderRadius: BorderRadius.circular(DesignTokens.radiusInput),
+                        border: Border.all(
+                          color: isDark
+                              ? DesignTokens.lineDark
+                              : DesignTokens.lineLight,
+                        ),
+                        borderRadius: BorderRadius.circular(
+                          DesignTokens.radiusInput,
+                        ),
                         color: isDark ? DesignTokens.surfaceDark : Colors.white,
                       ),
                       child: DropdownButtonHideUnderline(
                         child: DropdownButton<int>(
                           value: _selectedContextId,
                           isExpanded: true,
-                          dropdownColor: isDark ? DesignTokens.surfaceDark : Colors.white,
-                          style: theme.textTheme.bodyMedium?.copyWith(color: inkColor),
+                          dropdownColor: isDark
+                              ? DesignTokens.surfaceDark
+                              : Colors.white,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: inkColor,
+                          ),
                           items: contexts.map((c) {
                             return DropdownMenuItem(
                               value: c.id,
@@ -354,11 +381,15 @@ class _TimerCardState extends ConsumerState<_TimerCard> {
                         icon: const Icon(Icons.play_arrow),
                         label: const Text('Start Timer'),
                         style: FilledButton.styleFrom(
-                          backgroundColor: isDark ? DesignTokens.accentDark : DesignTokens.accentLight,
+                          backgroundColor: isDark
+                              ? DesignTokens.accentDark
+                              : DesignTokens.accentLight,
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(DesignTokens.radiusInput),
+                            borderRadius: BorderRadius.circular(
+                              DesignTokens.radiusInput,
+                            ),
                           ),
                         ),
                         onPressed: () => widget.onStart(_selectedContextId!),
@@ -374,12 +405,13 @@ class _TimerCardState extends ConsumerState<_TimerCard> {
 
     // Apply sweep shimmer border animation if running
     if (isRunning) {
-      cardContent = cardContent.animate(
-        onPlay: (controller) => controller.repeat(),
-      ).shimmer(
-        duration: 2.seconds,
-        color: (isDark ? DesignTokens.accentDark : DesignTokens.accentLight).withValues(alpha: 0.15),
-      );
+      cardContent = cardContent
+          .animate(onPlay: (controller) => controller.repeat())
+          .shimmer(
+            duration: 2.seconds,
+            color: (isDark ? DesignTokens.accentDark : DesignTokens.accentLight)
+                .withValues(alpha: 0.15),
+          );
     }
 
     return AppCard(child: cardContent);
@@ -396,7 +428,7 @@ class _RollupCard extends ConsumerWidget {
     final repo = ref.watch(worktimeRepositoryProvider);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
+
     final now = DateTime.now();
     final todayStr = _fmt(now);
     final weekStart = now.subtract(Duration(days: now.weekday - 1));
@@ -416,7 +448,7 @@ class _RollupCard extends ConsumerWidget {
             ),
           );
         }
-        
+
         final r = snap.data!;
         final savedColor = r.savedDays >= 0
             ? DesignTokens.success
@@ -461,7 +493,9 @@ class _RollupCard extends ConsumerWidget {
                         Text(
                           r.savedDays >= 0 ? 'Saved days' : 'Deficit days',
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: isDark ? DesignTokens.inkSoftDark : DesignTokens.inkSoftLight,
+                            color: isDark
+                                ? DesignTokens.inkSoftDark
+                                : DesignTokens.inkSoftLight,
                           ),
                         ),
                       ],
@@ -528,7 +562,9 @@ class _StatRow extends StatelessWidget {
           Text(
             label,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: isDark ? DesignTokens.inkSoftDark : DesignTokens.inkSoftLight,
+              color: isDark
+                  ? DesignTokens.inkSoftDark
+                  : DesignTokens.inkSoftLight,
             ),
           ),
           Text(
@@ -578,19 +614,29 @@ class _TodayLog extends ConsumerWidget {
           children: entries
               .map(
                 (e) => AppCard(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   child: ListTile(
                     contentPadding: EdgeInsets.zero,
                     leading: Container(
                       width: 36,
                       height: 36,
                       decoration: BoxDecoration(
-                        color: isDark ? DesignTokens.surfaceDark : DesignTokens.resolvePastelFill(color: DesignTokens.lavender, isDark: false),
+                        color: isDark
+                            ? DesignTokens.surfaceDark
+                            : DesignTokens.resolvePastelFill(
+                                color: DesignTokens.lavender,
+                                isDark: false,
+                              ),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
                         Icons.access_time,
-                        color: isDark ? DesignTokens.inkDark : DesignTokens.lavender,
+                        color: isDark
+                            ? DesignTokens.inkDark
+                            : DesignTokens.lavender,
                         size: 18,
                       ),
                     ),
@@ -604,7 +650,9 @@ class _TodayLog extends ConsumerWidget {
                     subtitle: Text(
                       'Session #${e.id}',
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: isDark ? DesignTokens.inkSoftDark : DesignTokens.inkSoftLight,
+                        color: isDark
+                            ? DesignTokens.inkSoftDark
+                            : DesignTokens.inkSoftLight,
                       ),
                     ),
                     trailing: Text(
@@ -727,7 +775,9 @@ class _QuickAddSheetState extends ConsumerState<_QuickAddSheet> {
             const SizedBox(height: 20),
             FilledButton(
               style: FilledButton.styleFrom(
-                backgroundColor: isDark ? DesignTokens.accentDark : DesignTokens.accentLight,
+                backgroundColor: isDark
+                    ? DesignTokens.accentDark
+                    : DesignTokens.accentLight,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(

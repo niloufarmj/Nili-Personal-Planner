@@ -22,7 +22,9 @@ class AppCard extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    final resolvedColor = color ?? (isDark ? DesignTokens.surfaceDark : DesignTokens.surfaceLight);
+    final resolvedColor =
+        color ??
+        (isDark ? DesignTokens.surfaceDark : DesignTokens.surfaceLight);
     final lineColor = isDark ? DesignTokens.lineDark : DesignTokens.lineLight;
     final inkColor = isDark ? DesignTokens.inkDark : DesignTokens.inkLight;
 
@@ -60,4 +62,3 @@ class AppCard extends StatelessWidget {
     );
   }
 }
-

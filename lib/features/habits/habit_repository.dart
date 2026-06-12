@@ -12,7 +12,9 @@ class HabitRepository {
   // ── Habit CRUD ─────────────────────────────────────────────────────────────
 
   Stream<List<Habit>> watchActiveHabits() {
-    return (_db.select(_db.habits)..where((h) => h.active.equals(true))).watch();
+    return (_db.select(
+      _db.habits,
+    )..where((h) => h.active.equals(true))).watch();
   }
 
   Stream<List<Habit>> watchAllHabits() {
@@ -35,7 +37,9 @@ class HabitRepository {
   }
 
   Future<int> deleteHabit(int id) async {
-    final deleted = await (_db.delete(_db.habits)..where((h) => h.id.equals(id))).go();
+    final deleted = await (_db.delete(
+      _db.habits,
+    )..where((h) => h.id.equals(id))).go();
     await scheduleHabitReminders();
     return deleted;
   }
@@ -43,7 +47,9 @@ class HabitRepository {
   // ── Logging count ──────────────────────────────────────────────────────────
 
   Stream<List<HabitLog>> watchLogsForDate(String dateIso) {
-    return (_db.select(_db.habitLogs)..where((l) => l.date.equals(dateIso))).watch();
+    return (_db.select(
+      _db.habitLogs,
+    )..where((l) => l.date.equals(dateIso))).watch();
   }
 
   Future<HabitLog?> getLog(int habitId, String dateIso) {
@@ -59,7 +65,9 @@ class HabitRepository {
             ..where((l) => l.habitId.equals(habitId) & l.date.equals(dateIso)))
           .write(HabitLogsCompanion(count: Value(log.count + 1)));
     } else {
-      await _db.into(_db.habitLogs).insert(
+      await _db
+          .into(_db.habitLogs)
+          .insert(
             HabitLogsCompanion.insert(
               habitId: habitId,
               date: dateIso,
@@ -81,10 +89,11 @@ class HabitRepository {
   // ── Streaks Calculation ────────────────────────────────────────────────────
 
   Future<int> computeStreak(Habit habit) async {
-    final logs = await (_db.select(_db.habitLogs)
-          ..where((l) => l.habitId.equals(habit.id))
-          ..orderBy([(l) => OrderingTerm.desc(l.date)]))
-        .get();
+    final logs =
+        await (_db.select(_db.habitLogs)
+              ..where((l) => l.habitId.equals(habit.id))
+              ..orderBy([(l) => OrderingTerm.desc(l.date)]))
+            .get();
 
     if (logs.isEmpty) return 0;
 
@@ -107,7 +116,8 @@ class HabitRepository {
       checkDate = checkDate.subtract(const Duration(days: 1));
       final yesterdayStr = _fmt(checkDate);
       final yesterdayLog = logByDate[yesterdayStr];
-      final yesterdayMet = yesterdayLog != null && yesterdayLog.count >= habit.targetPerDay;
+      final yesterdayMet =
+          yesterdayLog != null && yesterdayLog.count >= habit.targetPerDay;
       if (!yesterdayMet) return 0;
     }
 

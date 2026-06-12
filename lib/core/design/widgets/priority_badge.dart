@@ -15,7 +15,10 @@ class PriorityBadge extends StatelessWidget {
     final color = switch (priority) {
       1 => isDark ? DesignTokens.accentDark : DesignTokens.accentLight,
       3 => isDark ? DesignTokens.inkSoftDark : DesignTokens.inkSoftLight,
-      _ => isDark ? DesignTokens.adjustColorForDark(DesignTokens.dustyBlue) : DesignTokens.dustyBlue,
+      _ =>
+        isDark
+            ? DesignTokens.adjustColorForDark(DesignTokens.dustyBlue)
+            : DesignTokens.dustyBlue,
     };
 
     final label = switch (priority) {
@@ -30,10 +33,7 @@ class PriorityBadge extends StatelessWidget {
         Container(
           width: 8,
           height: 8,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-          ),
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
         const SizedBox(width: 6),
         Text(
@@ -48,4 +48,3 @@ class PriorityBadge extends StatelessWidget {
     );
   }
 }
-

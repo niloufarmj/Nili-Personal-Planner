@@ -18,9 +18,9 @@ void main() {
     // this stub ensures the plugin itself doesn't throw if ever reached).
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
-      const MethodChannel('dexterous.com/flutter/local_notifications'),
-      (_) async => null,
-    );
+          const MethodChannel('dexterous.com/flutter/local_notifications'),
+          (_) async => null,
+        );
   });
 
   setUp(() async {

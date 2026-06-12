@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:collection/collection.dart';
 import 'package:drift/drift.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/db/database.dart';
@@ -693,3 +694,5 @@ final seederServiceProvider = Provider<SeederService>((ref) {
     debtRepo: ref.watch(debtRepositoryProvider),
   );
 });
+
+final debugSeedingEnabledProvider = Provider<bool>((ref) => kDebugMode);

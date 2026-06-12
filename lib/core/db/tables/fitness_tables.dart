@@ -39,7 +39,8 @@ class FitnessGoals extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get metric => text()();
   RealColumn get target => real()();
-  TextColumn get direction => text().withDefault(const Constant('up'))(); // 'up'|'down'
+  TextColumn get direction =>
+      text().withDefault(const Constant('up'))(); // 'up'|'down'
   TextColumn get deadline => text().nullable()();
   TextColumn get achievedDate => text().nullable()();
 }

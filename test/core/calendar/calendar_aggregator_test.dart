@@ -40,18 +40,20 @@ void main() {
 
     // ── Empty DB ─────────────────────────────────────────────────────────────
 
-    test('empty DB returns clean CalendarDayData for every day in range',
-        () async {
-      final data = await _aggregate(
-        db,
-        start: DateTime(2025, 1, 1),
-        end: DateTime(2025, 1, 3),
-      );
-      expect(data.length, 3);
-      for (final d in data.values) {
-        expect(d.isEmpty, isTrue);
-      }
-    });
+    test(
+      'empty DB returns clean CalendarDayData for every day in range',
+      () async {
+        final data = await _aggregate(
+          db,
+          start: DateTime(2025, 1, 1),
+          end: DateTime(2025, 1, 3),
+        );
+        expect(data.length, 3);
+        for (final d in data.values) {
+          expect(d.isEmpty, isTrue);
+        }
+      },
+    );
 
     // ── Location overlay precedence ───────────────────────────────────────────
 
@@ -59,9 +61,9 @@ void main() {
       final dayRepo = DayRepository(db);
       // Tag Jan 5 with both linz and travel
       // Find linz and travel tag ids
-      final allTags =
-          await (db.select(db.tags)..where((t) => t.kind.equals('location')))
-              .get();
+      final allTags = await (db.select(
+        db.tags,
+      )..where((t) => t.kind.equals('location'))).get();
       final linzTag = allTags.firstWhere((t) => t.name == 'linz');
       final travelTag = allTags.firstWhere((t) => t.name == 'travel');
 
@@ -80,8 +82,9 @@ void main() {
 
     test('linz overlay set when only linz tag present', () async {
       final dayRepo = DayRepository(db);
-      final allTags =
-          await (db.select(db.tags)..where((t) => t.name.equals('linz'))).get();
+      final allTags = await (db.select(
+        db.tags,
+      )..where((t) => t.name.equals('linz'))).get();
       await dayRepo.setTag('2025-01-10', allTags.first.id);
 
       final data = await _aggregate(
@@ -96,9 +99,9 @@ void main() {
 
     test('activity tags produce icons', () async {
       final dayRepo = DayRepository(db);
-      final gymTag = await (db.select(db.tags)
-            ..where((t) => t.name.equals('gym')))
-          .getSingle();
+      final gymTag = await (db.select(
+        db.tags,
+      )..where((t) => t.name.equals('gym'))).getSingle();
       await dayRepo.setTag('2025-01-15', gymTag.id);
 
       final data = await _aggregate(
@@ -106,20 +109,17 @@ void main() {
         start: DateTime(2025, 1, 15),
         end: DateTime(2025, 1, 15),
       );
-      expect(
-        data['2025-01-15']!.activityIcons,
-        contains(Icons.fitness_center),
-      );
+      expect(data['2025-01-15']!.activityIcons, contains(Icons.fitness_center));
     });
 
     test('multi-tag day has both overlay and activity icons', () async {
       final dayRepo = DayRepository(db);
-      final linzTag = await (db.select(db.tags)
-            ..where((t) => t.name.equals('linz')))
-          .getSingle();
-      final gymTag = await (db.select(db.tags)
-            ..where((t) => t.name.equals('gym')))
-          .getSingle();
+      final linzTag = await (db.select(
+        db.tags,
+      )..where((t) => t.name.equals('linz'))).getSingle();
+      final gymTag = await (db.select(
+        db.tags,
+      )..where((t) => t.name.equals('gym'))).getSingle();
       await dayRepo.setTag('2025-01-20', linzTag.id);
       await dayRepo.setTag('2025-01-20', gymTag.id);
 
@@ -137,9 +137,9 @@ void main() {
 
     test('showLocation=false hides location overlay', () async {
       final dayRepo = DayRepository(db);
-      final linzTag = await (db.select(db.tags)
-            ..where((t) => t.name.equals('linz')))
-          .getSingle();
+      final linzTag = await (db.select(
+        db.tags,
+      )..where((t) => t.name.equals('linz'))).getSingle();
       await dayRepo.setTag('2025-01-05', linzTag.id);
 
       final data = await _aggregate(
@@ -153,9 +153,9 @@ void main() {
 
     test('showGym=false hides gym activity icon', () async {
       final dayRepo = DayRepository(db);
-      final gymTag = await (db.select(db.tags)
-            ..where((t) => t.name.equals('gym')))
-          .getSingle();
+      final gymTag = await (db.select(
+        db.tags,
+      )..where((t) => t.name.equals('gym'))).getSingle();
       await dayRepo.setTag('2025-01-15', gymTag.id);
 
       final data = await _aggregate(
@@ -212,14 +212,16 @@ void main() {
     // ── Trip bars ─────────────────────────────────────────────────────────────
 
     test('final trip spans all days in its range', () async {
-      await db.into(db.trips).insert(
-        const TripsCompanion(
-          title: Value('Vienna trip'),
-          status: Value('final'),
-          startDate: Value('2025-01-08'),
-          endDate: Value('2025-01-10'),
-        ),
-      );
+      await db
+          .into(db.trips)
+          .insert(
+            const TripsCompanion(
+              title: Value('Vienna trip'),
+              status: Value('final'),
+              startDate: Value('2025-01-08'),
+              endDate: Value('2025-01-10'),
+            ),
+          );
 
       final data = await _aggregate(
         db,
@@ -234,14 +236,16 @@ void main() {
     });
 
     test('probable trip is not shown as bar', () async {
-      await db.into(db.trips).insert(
-        const TripsCompanion(
-          title: Value('Maybe trip'),
-          status: Value('probable'),
-          startDate: Value('2025-01-08'),
-          endDate: Value('2025-01-10'),
-        ),
-      );
+      await db
+          .into(db.trips)
+          .insert(
+            const TripsCompanion(
+              title: Value('Maybe trip'),
+              status: Value('probable'),
+              startDate: Value('2025-01-08'),
+              endDate: Value('2025-01-10'),
+            ),
+          );
 
       final data = await _aggregate(
         db,
@@ -254,14 +258,16 @@ void main() {
     // ── Reminders ─────────────────────────────────────────────────────────────
 
     test('active reminder appears in window days', () async {
-      await db.into(db.reminders).insert(
-        const RemindersCompanion(
-          title: Value('Call dentist'),
-          windowStart: Value('2025-01-14'),
-          windowEnd: Value('2025-01-16'),
-          status: Value('open'),
-        ),
-      );
+      await db
+          .into(db.reminders)
+          .insert(
+            const RemindersCompanion(
+              title: Value('Call dentist'),
+              windowStart: Value('2025-01-14'),
+              windowEnd: Value('2025-01-16'),
+              status: Value('open'),
+            ),
+          );
 
       final data = await _aggregate(
         db,
@@ -276,14 +282,16 @@ void main() {
     });
 
     test('dismissed reminder is not shown', () async {
-      await db.into(db.reminders).insert(
-        const RemindersCompanion(
-          title: Value('Old reminder'),
-          windowStart: Value('2025-01-14'),
-          windowEnd: Value('2025-01-16'),
-          status: Value('dismissed'),
-        ),
-      );
+      await db
+          .into(db.reminders)
+          .insert(
+            const RemindersCompanion(
+              title: Value('Old reminder'),
+              windowStart: Value('2025-01-14'),
+              windowEnd: Value('2025-01-16'),
+              status: Value('dismissed'),
+            ),
+          );
 
       final data = await _aggregate(
         db,
