@@ -4,22 +4,30 @@ import 'package:intl/intl.dart';
 
 import '../../core/calendar/calendar_aggregator.dart';
 import '../../core/calendar/calendar_day_data.dart';
+import '../../core/conflicts/conflict_engine.dart';
+import '../../core/conflicts/conflict_item.dart';
 import '../../core/db/repositories/event_repository.dart';
 import '../../core/design/design.dart';
 import '../calendar/day_tag_picker.dart';
 import '../calendar/event_edit_sheet.dart';
+import '../../core/db/database.dart';
+import '../meals/meal_slot_repository.dart';
+import '../meals/recipe_repository.dart';
 
 // ── Provider: today's aggregated data ─────────────────────────────────────────
 
-final _todayDataProvider = FutureProvider.autoDispose<CalendarDayData>((ref) async {
+final _todayDataProvider = FutureProvider.autoDispose<CalendarDayData>((
+  ref,
+) async {
   final today = _todayDate();
   final agg = ref.watch(calendarAggregatorProvider);
   final map = await agg.getDataForRange(today, today);
   return map[_fmtDate(today)] ?? CalendarDayData(date: today);
 });
 
-final _todayEventsProvider =
-    FutureProvider.autoDispose<List<EventOccurrence>>((ref) {
+final _todayEventsProvider = FutureProvider.autoDispose<List<EventOccurrence>>((
+  ref,
+) {
   final today = _todayDate();
   final repo = ref.watch(eventRepositoryProvider);
   return repo.expandOccurrences(today, today);
@@ -81,14 +89,14 @@ class TodayScreen extends ConsumerWidget {
             _EventsList(todayStr: todayStr),
             const SizedBox(height: 20),
 
-            // ── ConflictFeed placeholder ───────────────────────────
+            // ── Conflict feed ──────────────────────────────────────
             const SectionHeader(title: 'Conflicts & Reminders'),
-            const _ConflictFeedPlaceholder(),
+            _ConflictFeed(today: today),
             const SizedBox(height: 20),
 
-            // ── Placeholder sections for agents 2-5 ───────────────
+            // ── Today's meals ──────────────────────────────────────
             const SectionHeader(title: "Today's Meals"),
-            const _AgentPlaceholder('Meal plan — agent 3'),
+            _TodayMeals(todayStr: todayStr),
             const SizedBox(height: 20),
 
             const SectionHeader(title: 'Habits'),
@@ -142,7 +150,10 @@ class _DayOverviewStrip extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final dataAsync = ref.watch(_todayDataProvider);
     return dataAsync.when(
-      loading: () => const SizedBox(height: 40, child: LinearProgressIndicator(minHeight: 2)),
+      loading: () => const SizedBox(
+        height: 40,
+        child: LinearProgressIndicator(minHeight: 2),
+      ),
       error: (_, _) => const SizedBox.shrink(),
       data: (data) {
         final chips = <Widget>[];
@@ -196,7 +207,10 @@ class _EventsList extends ConsumerWidget {
         if (occs.isEmpty) {
           return const Padding(
             padding: EdgeInsets.only(left: 4),
-            child: Text('Nothing scheduled today', style: TextStyle(color: Colors.grey)),
+            child: Text(
+              'Nothing scheduled today',
+              style: TextStyle(color: Colors.grey),
+            ),
           );
         }
         return Column(
@@ -235,27 +249,177 @@ class _EventsList extends ConsumerWidget {
   };
 }
 
-// ── Conflict feed placeholder ─────────────────────────────────────────────────
+// ── Conflict feed ─────────────────────────────────────────────────────────────
 
-class _ConflictFeedPlaceholder extends StatelessWidget {
-  const _ConflictFeedPlaceholder();
+final _conflictsProvider = StreamProvider.autoDispose
+    .family<List<ConflictItem>, DateTime>(
+      (ref, date) => ref.watch(conflictFeedProvider).watchConflicts(date),
+    );
+
+class _ConflictFeed extends ConsumerWidget {
+  const _ConflictFeed({required this.today});
+  final DateTime today;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final async = ref.watch(_conflictsProvider(today));
+    return async.when(
+      loading: () => const SizedBox.shrink(),
+      error: (_, _) => const SizedBox.shrink(),
+      data: (items) {
+        if (items.isEmpty) {
+          return const AppCard(
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 8),
+              child: Row(
+                children: [
+                  Icon(Icons.check_circle_outline, color: Colors.green),
+                  SizedBox(width: 12),
+                  Text('No conflicts or active reminders'),
+                ],
+              ),
+            ),
+          );
+        }
+        return Column(
+          children: items.map((item) => _ConflictCard(item: item)).toList(),
+        );
+      },
+    );
+  }
+}
+
+class _ConflictCard extends StatelessWidget {
+  const _ConflictCard({required this.item});
+  final ConflictItem item;
 
   @override
   Widget build(BuildContext context) {
-    return const AppCard(
+    final color = switch (item.severity) {
+      ConflictSeverity.error => Colors.red,
+      ConflictSeverity.warning => Colors.orange,
+      ConflictSeverity.info => Colors.blue,
+    };
+    return AppCard(
       child: Padding(
-        padding: EdgeInsets.symmetric(vertical: 8),
-        child: Row(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(Icons.check_circle_outline, color: Colors.green),
-            SizedBox(width: 12),
-            Text('No conflicts or active reminders'),
+            Row(
+              children: [
+                Icon(Icons.warning_amber_rounded, color: color, size: 18),
+                const SizedBox(width: 8),
+                Expanded(child: Text(item.message)),
+              ],
+            ),
+            if (item.actions.isNotEmpty)
+              Wrap(
+                spacing: 8,
+                children: item.actions
+                    .map(
+                      (a) =>
+                          TextButton(onPressed: a.onTap, child: Text(a.label)),
+                    )
+                    .toList(),
+              ),
           ],
         ),
       ),
     );
   }
 }
+
+// ── Today's meals ─────────────────────────────────────────────────────────────
+
+final _todayMealSlotsProvider = FutureProvider.autoDispose
+    .family<List<MealSlot>, String>(
+      (ref, date) => ref.watch(mealSlotRepositoryProvider).getForDate(date),
+    );
+
+class _TodayMeals extends ConsumerWidget {
+  const _TodayMeals({required this.todayStr});
+  final String todayStr;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final async = ref.watch(_todayMealSlotsProvider(todayStr));
+    return async.when(
+      loading: () => const SizedBox.shrink(),
+      error: (_, _) => const SizedBox.shrink(),
+      data: (slots) {
+        if (slots.isEmpty) {
+          return const Padding(
+            padding: EdgeInsets.only(left: 4),
+            child: Text(
+              'No meals planned',
+              style: TextStyle(color: Colors.grey),
+            ),
+          );
+        }
+        return Column(
+          children: slots.map((s) => _MealSlotChip(slot: s)).toList(),
+        );
+      },
+    );
+  }
+}
+
+class _MealSlotChip extends ConsumerWidget {
+  const _MealSlotChip({required this.slot});
+  final MealSlot slot;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final recipeAsync = slot.recipeId != null
+        ? ref.watch(_recipeNameForTodayProvider(slot.recipeId!))
+        : const AsyncData<String?>(null);
+    final name = recipeAsync.valueOrNull;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: AppCard(
+        child: ListTile(
+          contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+          leading: Icon(_slotIcon(slot.slot), size: 20),
+          title: Text(name ?? slot.slot),
+          subtitle: Text(_capitalize(slot.slot)),
+          trailing: _statusChip(slot.status),
+        ),
+      ),
+    );
+  }
+
+  static IconData _slotIcon(String s) => switch (s) {
+    'breakfast' => Icons.free_breakfast_outlined,
+    'lunch' => Icons.lunch_dining_outlined,
+    'dinner' => Icons.dinner_dining_outlined,
+    _ => Icons.sports_bar_outlined,
+  };
+
+  static Widget _statusChip(String status) {
+    final color = switch (status) {
+      'accepted' => Colors.green,
+      'eaten' => Colors.blue,
+      'skipped' => Colors.grey,
+      _ => Colors.orange,
+    };
+    return Chip(
+      label: Text(status, style: const TextStyle(fontSize: 11)),
+      backgroundColor: color.withValues(alpha: 0.15),
+      side: BorderSide(color: color),
+      visualDensity: VisualDensity.compact,
+    );
+  }
+
+  static String _capitalize(String s) =>
+      s.isEmpty ? s : '${s[0].toUpperCase()}${s.substring(1)}';
+}
+
+final _recipeNameForTodayProvider = FutureProvider.autoDispose
+    .family<String?, int>((ref, id) async {
+      final r = await ref.watch(recipeRepositoryProvider).getById(id);
+      return r?.name;
+    });
 
 // ── Agent placeholder ─────────────────────────────────────────────────────────
 
@@ -336,9 +500,9 @@ class _QuickAddSheet extends StatelessWidget {
   }
 
   void _comingSoon(BuildContext context, String what) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('$what — coming soon')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('$what — coming soon')));
   }
 }
 
@@ -355,10 +519,6 @@ class _QuickAddTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      leading: Icon(icon),
-      title: Text(label),
-      onTap: onTap,
-    );
+    return ListTile(leading: Icon(icon), title: Text(label), onTap: onTap);
   }
 }

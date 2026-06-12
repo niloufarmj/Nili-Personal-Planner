@@ -39,7 +39,8 @@ class NotificationService {
   Future<bool> requestPermission() async {
     final android = _plugin
         .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>();
+          AndroidFlutterLocalNotificationsPlugin
+        >();
     if (android != null) {
       return await android.requestNotificationsPermission() ?? false;
     }
@@ -91,7 +92,14 @@ class NotificationService {
   }) async {
     await _ensureInit();
     final now = tz.TZDateTime.now(tz.local);
-    var scheduled = tz.TZDateTime(tz.local, now.year, now.month, now.day, hour, minute);
+    var scheduled = tz.TZDateTime(
+      tz.local,
+      now.year,
+      now.month,
+      now.day,
+      hour,
+      minute,
+    );
     if (scheduled.isBefore(now)) {
       scheduled = scheduled.add(const Duration(days: 1));
     }
@@ -118,10 +126,16 @@ class NotificationService {
   }
 
   /// Cancel a notification by [id].
-  Future<void> cancel(int id) => _plugin.cancel(id);
+  Future<void> cancel(int id) async {
+    if (!_initialized) return;
+    return _plugin.cancel(id);
+  }
 
   /// Cancel all pending notifications.
-  Future<void> cancelAll() => _plugin.cancelAll();
+  Future<void> cancelAll() async {
+    if (!_initialized) return;
+    return _plugin.cancelAll();
+  }
 
   // ── Helpers ───────────────────────────────────────────────────────────────
 
