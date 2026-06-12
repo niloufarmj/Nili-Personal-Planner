@@ -31,6 +31,17 @@ class ChartsScreen extends ConsumerWidget {
   }
 }
 
+final _chartsMonthTransactionsProvider = StreamProvider.autoDispose.family<List<Transaction>, DateTime>(
+  (ref, m) => ref
+      .watch(transactionRepositoryProvider)
+      .watchByMonthFiltered(
+        m.year,
+        m.month,
+        direction: 'out',
+        status: 'actual',
+      ),
+);
+
 // ── Category donut ────────────────────────────────────────────────────────────
 
 class _CategoryDonut extends ConsumerWidget {
@@ -40,18 +51,7 @@ class _CategoryDonut extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final txAsync = ref.watch(
-      StreamProvider.autoDispose.family<List<Transaction>, DateTime>(
-        (r, m) => r
-            .watch(transactionRepositoryProvider)
-            .watchByMonthFiltered(
-              m.year,
-              m.month,
-              direction: 'out',
-              status: 'actual',
-            ),
-      )(month),
-    );
+    final txAsync = ref.watch(_chartsMonthTransactionsProvider(month));
 
     return txAsync.when(
       loading: () => const SizedBox(

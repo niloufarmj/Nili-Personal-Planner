@@ -43,6 +43,12 @@ class DebtsScreen extends ConsumerWidget {
       );
 }
 
+final _debtsStreamProvider = StreamProvider.autoDispose.family<List<Debt>, bool>(
+  (ref, settled) => settled
+      ? ref.watch(debtRepositoryProvider).watchSettled()
+      : ref.watch(debtRepositoryProvider).watchAll(),
+);
+
 // ── Debt list ─────────────────────────────────────────────────────────────────
 
 class _DebtList extends ConsumerWidget {
@@ -52,13 +58,7 @@ class _DebtList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final listAsync = ref.watch(
-      StreamProvider.autoDispose(
-        (r) => settled
-            ? r.watch(debtRepositoryProvider).watchSettled()
-            : r.watch(debtRepositoryProvider).watchAll(),
-      ),
-    );
+    final listAsync = ref.watch(_debtsStreamProvider(settled));
 
     return listAsync.when(
       loading: () => const LinearProgressIndicator(minHeight: 2),

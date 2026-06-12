@@ -53,6 +53,10 @@ class CollectionRepository {
     _db.collections,
   )..where((c) => c.id.equals(id))).getSingleOrNull();
 
+  Future<Collection?> getByTemplate(String template) => (_db.select(
+    _db.collections,
+  )..where((c) => c.template.equals(template))).getSingleOrNull();
+
   Future<int> create({
     required String name,
     required String template,
@@ -91,6 +95,30 @@ class CollectionRepository {
 
   Future<int> delete(int id) =>
       (_db.delete(_db.collections)..where((c) => c.id.equals(id))).go();
+
+  /// Seeds the default collections on first launch if none exist.
+  Future<void> seedDefaultCollectionsIfNeeded() async {
+    final existing = await _db.select(_db.collections).get();
+    if (existing.isNotEmpty) return;
+
+    // Seed top-level collections
+    await create(name: 'Chores', template: 'chore');
+    await create(name: 'Shopping', template: 'shopping');
+    await create(name: 'Tech Wishlist', template: 'shopping');
+    await create(name: 'Life Upgrades', template: 'upgrade');
+    await create(name: 'University', template: 'task');
+    await create(name: 'Personal Projects', template: 'task');
+    await create(name: 'Personal Growth', template: 'growth');
+    await create(name: 'Hobbies', template: 'media');
+    await create(name: 'Probable Plans', template: 'probable');
+
+    // Job Hunt parent with Germany/Netherlands/Spain/Australia children
+    final jobHuntId = await create(name: 'Job Hunt', template: 'job');
+    await create(name: 'Germany', template: 'job', parentId: jobHuntId);
+    await create(name: 'Netherlands', template: 'job', parentId: jobHuntId);
+    await create(name: 'Spain', template: 'job', parentId: jobHuntId);
+    await create(name: 'Australia', template: 'job', parentId: jobHuntId);
+  }
 }
 
 // ── Riverpod provider ──────────────────────────────────────────────────────────

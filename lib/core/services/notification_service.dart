@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:timezone/data/latest_all.dart' as tz_data;
@@ -58,27 +59,31 @@ class NotificationService {
     required DateTime when,
     String? payload,
   }) async {
-    await _ensureInit();
-    final tzWhen = tz.TZDateTime.from(when, tz.local);
-    await _plugin.zonedSchedule(
-      id,
-      title,
-      body,
-      tzWhen,
-      const NotificationDetails(
-        android: AndroidNotificationDetails(
-          'personal_planner_main',
-          'Personal Planner',
-          importance: Importance.high,
-          priority: Priority.high,
+    try {
+      await _ensureInit();
+      final tzWhen = tz.TZDateTime.from(when, tz.local);
+      await _plugin.zonedSchedule(
+        id,
+        title,
+        body,
+        tzWhen,
+        const NotificationDetails(
+          android: AndroidNotificationDetails(
+            'personal_planner_main',
+            'Personal Planner',
+            importance: Importance.high,
+            priority: Priority.high,
+          ),
+          iOS: DarwinNotificationDetails(),
         ),
-        iOS: DarwinNotificationDetails(),
-      ),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
-      payload: payload,
-    );
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+        payload: payload,
+      );
+    } catch (e, s) {
+      debugPrint('NotificationService: Failed to schedule one-off notification: $e\n$s');
+    }
   }
 
   /// Schedule a daily notification at [timeOfDay] (hour:minute, local time).
@@ -90,39 +95,43 @@ class NotificationService {
     required int minute,
     String? payload,
   }) async {
-    await _ensureInit();
-    final now = tz.TZDateTime.now(tz.local);
-    var scheduled = tz.TZDateTime(
-      tz.local,
-      now.year,
-      now.month,
-      now.day,
-      hour,
-      minute,
-    );
-    if (scheduled.isBefore(now)) {
-      scheduled = scheduled.add(const Duration(days: 1));
-    }
-    await _plugin.zonedSchedule(
-      id,
-      title,
-      body,
-      scheduled,
-      const NotificationDetails(
-        android: AndroidNotificationDetails(
-          'personal_planner_daily',
-          'Daily Summary',
-          importance: Importance.defaultImportance,
-          priority: Priority.defaultPriority,
+    try {
+      await _ensureInit();
+      final now = tz.TZDateTime.now(tz.local);
+      var scheduled = tz.TZDateTime(
+        tz.local,
+        now.year,
+        now.month,
+        now.day,
+        hour,
+        minute,
+      );
+      if (scheduled.isBefore(now)) {
+        scheduled = scheduled.add(const Duration(days: 1));
+      }
+      await _plugin.zonedSchedule(
+        id,
+        title,
+        body,
+        scheduled,
+        const NotificationDetails(
+          android: AndroidNotificationDetails(
+            'personal_planner_daily',
+            'Daily Summary',
+            importance: Importance.defaultImportance,
+            priority: Priority.defaultPriority,
+          ),
+          iOS: DarwinNotificationDetails(),
         ),
-        iOS: DarwinNotificationDetails(),
-      ),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
-      matchDateTimeComponents: DateTimeComponents.time,
-      payload: payload,
-    );
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+        matchDateTimeComponents: DateTimeComponents.time,
+        payload: payload,
+      );
+    } catch (e, s) {
+      debugPrint('NotificationService: Failed to schedule daily batch: $e\n$s');
+    }
   }
 
   /// Cancel a notification by [id].

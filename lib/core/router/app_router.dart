@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/calendar/calendar_screen.dart';
@@ -7,7 +6,9 @@ import '../../features/finance/charts_screen.dart';
 import '../../features/finance/debts_screen.dart';
 import '../../features/finance/finance_screen.dart';
 import '../../features/finance/recurring_screen.dart';
+import '../../features/fitness/fitness_screen.dart';
 import '../../features/gym/gym_screen.dart';
+import '../../features/habits/habits_screen.dart';
 import '../../features/lists/lists_screen.dart';
 import '../../features/lists/screens/collection_screen.dart';
 import '../../features/meals/meals_screen.dart';
@@ -21,8 +22,8 @@ import '../../features/track/track_screen.dart';
 import '../../features/trips/travel_planner_screen.dart';
 import '../../features/trips/trip_detail_screen.dart';
 import '../../features/trips/trip_edit_sheet.dart';
+import '../../features/wellbeing/wellbeing_screen.dart';
 import '../../features/worktime/worktime_screen.dart';
-import '../design/design.dart';
 import 'routes.dart';
 import 'shell_scaffold.dart';
 
@@ -48,18 +49,18 @@ final List<RouteBase> agentRoutes = [
   ),
   // Gym
   GoRoute(path: '/gym', builder: (context, state) => const GymScreen()),
-  // Fitness, Habits, Wellbeing — registered by their screens (stubs until Step 3-6)
+  // Fitness, Habits, Wellbeing
   GoRoute(
     path: '/fitness',
-    builder: (context, state) => _stubScreen(context, 'Fitness'),
+    builder: (context, state) => const FitnessScreen(),
   ),
   GoRoute(
     path: '/habits',
-    builder: (context, state) => _stubScreen(context, 'Habits'),
+    builder: (context, state) => const HabitsScreen(),
   ),
   GoRoute(
     path: '/wellbeing',
-    builder: (context, state) => _stubScreen(context, 'Feeling Better'),
+    builder: (context, state) => const WellbeingScreen(),
   ),
   // Work time
   GoRoute(
@@ -170,12 +171,3 @@ GoRouter buildAppRouter() => GoRouter(
 );
 
 final GoRouter appRouter = buildAppRouter();
-
-Widget _stubScreen(BuildContext context, String title) => Scaffold(
-  appBar: AppBar(title: Text(title)),
-  body: EmptyState(
-    icon: Icons.construction,
-    message: '$title — coming soon',
-    hint: 'This screen will be filled by another agent.',
-  ),
-);

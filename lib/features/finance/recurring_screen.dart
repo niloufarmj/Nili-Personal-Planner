@@ -5,16 +5,16 @@ import '../../core/db/database.dart';
 import '../../core/design/design.dart';
 import 'repositories/recurring_repository.dart';
 
+final _recurringTransactionsStreamProvider = StreamProvider.autoDispose(
+  (ref) => ref.watch(recurringRepositoryProvider).watchAll(),
+);
+
 class RecurringScreen extends ConsumerWidget {
   const RecurringScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final listAsync = ref.watch(
-      StreamProvider.autoDispose(
-        (r) => r.watch(recurringRepositoryProvider).watchAll(),
-      ),
-    );
+    final listAsync = ref.watch(_recurringTransactionsStreamProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Recurring')),

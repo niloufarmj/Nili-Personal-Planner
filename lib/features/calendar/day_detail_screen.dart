@@ -2,11 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import 'package:go_router/go_router.dart';
+
+import '../../core/db/database.dart';
 import '../../core/db/repositories/event_repository.dart';
 import '../../core/design/design.dart';
 import '../finance/repositories/transaction_repository.dart';
 import '../finance/widgets/transaction_tile.dart';
 import '../gym/gym_screen.dart';
+import '../lists/repositories/item_repository.dart';
+import '../meals/meal_slot_repository.dart';
 import 'day_tag_picker.dart';
 import 'event_edit_sheet.dart';
 
@@ -49,17 +54,20 @@ class DayDetailScreen extends ConsumerWidget {
           _FinanceSection(date: date),
           const SizedBox(height: 20),
 
-          // ── Placeholder sections for other agents ─────────────────────
+          // ── Meals ─────────────────────────────────────────────────────
           const SectionHeader(title: 'Meals'),
-          const _PlaceholderSection(message: 'Meal planner — coming soon'),
+          const SizedBox(height: 8),
+          _MealsSection(date: date),
           const SizedBox(height: 20),
 
           const SectionHeader(title: 'Gym'),
           DayDetailGymSection(date: date),
           const SizedBox(height: 20),
 
+          // ── Due items ─────────────────────────────────────────────────
           const SectionHeader(title: 'Due items'),
-          const _PlaceholderSection(message: 'Task list — coming soon'),
+          const SizedBox(height: 8),
+          _DueItemsSection(date: date),
           const SizedBox(height: 80), // FAB clearance
         ],
       ),
@@ -74,18 +82,19 @@ class DayDetailScreen extends ConsumerWidget {
 
 // ── Events section ─────────────────────────────────────────────────────────────
 
+final _eventsForDateFutureProvider = FutureProvider.autoDispose.family<List<EventOccurrence>, DateTime>(
+  (ref, day) => ref.watch(eventRepositoryProvider).expandOccurrences(day, day),
+);
+
 class _EventsSection extends ConsumerWidget {
   const _EventsSection({required this.date});
   final String date;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final eventRepo = ref.watch(eventRepositoryProvider);
     final day = _parseDate(date);
 
-    final occAsync = ref.watch(
-      FutureProvider.autoDispose((_) => eventRepo.expandOccurrences(day, day)),
-    );
+    final occAsync = ref.watch(_eventsForDateFutureProvider(day));
 
     return occAsync.when(
       loading: () => const LinearProgressIndicator(minHeight: 2),
@@ -140,6 +149,10 @@ class _EventsSection extends ConsumerWidget {
   }
 }
 
+final _transactionsForDateFutureProvider = FutureProvider.autoDispose.family<List<Transaction>, String>(
+  (ref, date) => ref.watch(transactionRepositoryProvider).getByDate(date),
+);
+
 // ── Finance section ────────────────────────────────────────────────────────────
 
 class _FinanceSection extends ConsumerWidget {
@@ -148,11 +161,7 @@ class _FinanceSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final txAsync = ref.watch(
-      FutureProvider.autoDispose(
-        (_) => ref.watch(transactionRepositoryProvider).getByDate(date),
-      ),
-    );
+    final txAsync = ref.watch(_transactionsForDateFutureProvider(date));
 
     return txAsync.when(
       loading: () => const LinearProgressIndicator(minHeight: 2),
@@ -175,17 +184,134 @@ class _FinanceSection extends ConsumerWidget {
   }
 }
 
-// ── Placeholder ────────────────────────────────────────────────────────────────
+final _mealsForDateStreamProvider = StreamProvider.autoDispose.family<List<MealSlot>, String>(
+  (ref, date) {
+    final db = ref.watch(appDatabaseProvider);
+    return (db.select(db.mealSlots)..where((s) => s.date.equals(date))).watch();
+  },
+);
 
-class _PlaceholderSection extends StatelessWidget {
-  const _PlaceholderSection({required this.message});
-  final String message;
+// ── Meals Section ─────────────────────────────────────────────────────────────
+
+class _MealsSection extends ConsumerWidget {
+  const _MealsSection({required this.date});
+  final String date;
 
   @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 4, top: 4),
-      child: Text(message, style: const TextStyle(color: Colors.grey)),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final mealSlotsAsync = ref.watch(_mealsForDateStreamProvider(date));
+
+    return mealSlotsAsync.when(
+      loading: () => const LinearProgressIndicator(minHeight: 2),
+      error: (e, _) => Text('Error: $e'),
+      data: (slots) {
+        if (slots.isEmpty) {
+          return const Padding(
+            padding: EdgeInsets.only(left: 4),
+            child: Text(
+              'No meals planned today',
+              style: TextStyle(color: Colors.grey),
+            ),
+          );
+        }
+
+        return FutureBuilder<List<Recipe>>(
+          future: ref.read(appDatabaseProvider).select(ref.read(appDatabaseProvider).recipes).get(),
+          builder: (context, snapshot) {
+            final recipes = snapshot.data ?? [];
+            final recipeMap = {for (final r in recipes) r.id: r};
+
+            return Column(
+              children: slots.map((slot) {
+                final recipe = slot.recipeId != null ? recipeMap[slot.recipeId] : null;
+                final recipeName = recipe?.name ?? 'No recipe selected';
+
+                return AppCard(
+                  child: ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: Text('${slot.slot.toUpperCase()}: $recipeName'),
+                    subtitle: Text('Status: ${slot.status}'),
+                    trailing: slot.status == 'accepted'
+                        ? TextButton(
+                            onPressed: () => ref
+                                .read(mealSlotRepositoryProvider)
+                                .updateStatus(slot.date, slot.slot, 'eaten'),
+                            child: const Text('Mark Eaten'),
+                          )
+                        : null,
+                  ),
+                );
+              }).toList(),
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+final _itemsForDateStreamProvider = StreamProvider.autoDispose.family<List<Item>, String>(
+  (ref, date) {
+    final db = ref.watch(appDatabaseProvider);
+    return (db.select(db.items)..where((i) => i.dueDate.equals(date))).watch();
+  },
+);
+
+// ── Due Items Section ──────────────────────────────────────────────────────────
+
+class _DueItemsSection extends ConsumerWidget {
+  const _DueItemsSection({required this.date});
+  final String date;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final itemsAsync = ref.watch(_itemsForDateStreamProvider(date));
+
+    return itemsAsync.when(
+      loading: () => const LinearProgressIndicator(minHeight: 2),
+      error: (e, _) => Text('Error: $e'),
+      data: (items) {
+        if (items.isEmpty) {
+          return const Padding(
+            padding: EdgeInsets.only(left: 4),
+            child: Text(
+              'No items due today',
+              style: TextStyle(color: Colors.grey),
+            ),
+          );
+        }
+        return Column(
+          children: items.map((item) {
+            final isCompleted = item.status == 'done';
+            return AppCard(
+              child: ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: Checkbox(
+                  value: isCompleted,
+                  onChanged: (val) {
+                    ref.read(itemRepositoryProvider).toggleItemStatus(
+                          item.id,
+                          doneStatus: 'done',
+                          openStatus: 'open',
+                        );
+                  },
+                ),
+                title: Text(
+                  item.title,
+                  style: TextStyle(
+                    decoration: isCompleted ? TextDecoration.lineThrough : null,
+                  ),
+                ),
+                subtitle: Text('Priority: ${item.priority ?? 'normal'}'),
+                trailing: IconButton(
+                  icon: const Icon(Icons.chevron_right),
+                  onPressed: () => context.push('/collection/${item.collectionId}'),
+                ),
+              ),
+            );
+          }).toList(),
+        );
+      },
     );
   }
 }

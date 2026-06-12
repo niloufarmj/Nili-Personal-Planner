@@ -9,6 +9,14 @@ import '../../core/design/design.dart';
 import 'repositories/worktime_repository.dart';
 import 'services/rollup_service.dart';
 
+final _workContextsProvider = StreamProvider.autoDispose((ref) {
+  return ref.watch(worktimeRepositoryProvider).watchContexts();
+});
+
+final _workEntriesForDateProvider = StreamProvider.autoDispose.family<List<TimeEntry>, String>((ref, dateStr) {
+  return ref.watch(worktimeRepositoryProvider).watchEntriesForDate(dateStr);
+});
+
 // ── Timer state (persisted via SharedPreferences) ────────────────────────────
 
 const _timerContextKey = 'worktime_timer_context_id';
@@ -135,11 +143,7 @@ class _TimerCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final ctxAsync = ref.watch(
-      StreamProvider.autoDispose(
-        (r) => r.watch(worktimeRepositoryProvider).watchContexts(),
-      ),
-    );
+    final ctxAsync = ref.watch(_workContextsProvider);
 
     final isRunning = timerContextId != null;
 
@@ -328,11 +332,7 @@ class _TodayLog extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final entriesAsync = ref.watch(
-      StreamProvider.autoDispose(
-        (r) => r.watch(worktimeRepositoryProvider).watchEntriesForDate(date),
-      ),
-    );
+    final entriesAsync = ref.watch(_workEntriesForDateProvider(date));
 
     return entriesAsync.when(
       loading: () => const LinearProgressIndicator(minHeight: 2),
@@ -409,11 +409,7 @@ class _QuickAddSheetState extends ConsumerState<_QuickAddSheet> {
   @override
   Widget build(BuildContext context) {
     final insets = MediaQuery.viewInsetsOf(context);
-    final ctxAsync = ref.watch(
-      StreamProvider.autoDispose(
-        (r) => r.watch(worktimeRepositoryProvider).watchContexts(),
-      ),
-    );
+    final ctxAsync = ref.watch(_workContextsProvider);
 
     return Padding(
       padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + insets.bottom),

@@ -8295,6 +8295,18 @@ class $FitnessGoalsTable extends FitnessGoals
     type: DriftSqlType.double,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _directionMeta = const VerificationMeta(
+    'direction',
+  );
+  @override
+  late final GeneratedColumn<String> direction = GeneratedColumn<String>(
+    'direction',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('up'),
+  );
   static const VerificationMeta _deadlineMeta = const VerificationMeta(
     'deadline',
   );
@@ -8322,6 +8334,7 @@ class $FitnessGoalsTable extends FitnessGoals
     id,
     metric,
     target,
+    direction,
     deadline,
     achievedDate,
   ];
@@ -8355,6 +8368,12 @@ class $FitnessGoalsTable extends FitnessGoals
       );
     } else if (isInserting) {
       context.missing(_targetMeta);
+    }
+    if (data.containsKey('direction')) {
+      context.handle(
+        _directionMeta,
+        direction.isAcceptableOrUnknown(data['direction']!, _directionMeta),
+      );
     }
     if (data.containsKey('deadline')) {
       context.handle(
@@ -8392,6 +8411,10 @@ class $FitnessGoalsTable extends FitnessGoals
         DriftSqlType.double,
         data['${effectivePrefix}target'],
       )!,
+      direction: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}direction'],
+      )!,
       deadline: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}deadline'],
@@ -8413,12 +8436,14 @@ class FitnessGoal extends DataClass implements Insertable<FitnessGoal> {
   final int id;
   final String metric;
   final double target;
+  final String direction;
   final String? deadline;
   final String? achievedDate;
   const FitnessGoal({
     required this.id,
     required this.metric,
     required this.target,
+    required this.direction,
     this.deadline,
     this.achievedDate,
   });
@@ -8428,6 +8453,7 @@ class FitnessGoal extends DataClass implements Insertable<FitnessGoal> {
     map['id'] = Variable<int>(id);
     map['metric'] = Variable<String>(metric);
     map['target'] = Variable<double>(target);
+    map['direction'] = Variable<String>(direction);
     if (!nullToAbsent || deadline != null) {
       map['deadline'] = Variable<String>(deadline);
     }
@@ -8442,6 +8468,7 @@ class FitnessGoal extends DataClass implements Insertable<FitnessGoal> {
       id: Value(id),
       metric: Value(metric),
       target: Value(target),
+      direction: Value(direction),
       deadline: deadline == null && nullToAbsent
           ? const Value.absent()
           : Value(deadline),
@@ -8460,6 +8487,7 @@ class FitnessGoal extends DataClass implements Insertable<FitnessGoal> {
       id: serializer.fromJson<int>(json['id']),
       metric: serializer.fromJson<String>(json['metric']),
       target: serializer.fromJson<double>(json['target']),
+      direction: serializer.fromJson<String>(json['direction']),
       deadline: serializer.fromJson<String?>(json['deadline']),
       achievedDate: serializer.fromJson<String?>(json['achievedDate']),
     );
@@ -8471,6 +8499,7 @@ class FitnessGoal extends DataClass implements Insertable<FitnessGoal> {
       'id': serializer.toJson<int>(id),
       'metric': serializer.toJson<String>(metric),
       'target': serializer.toJson<double>(target),
+      'direction': serializer.toJson<String>(direction),
       'deadline': serializer.toJson<String?>(deadline),
       'achievedDate': serializer.toJson<String?>(achievedDate),
     };
@@ -8480,12 +8509,14 @@ class FitnessGoal extends DataClass implements Insertable<FitnessGoal> {
     int? id,
     String? metric,
     double? target,
+    String? direction,
     Value<String?> deadline = const Value.absent(),
     Value<String?> achievedDate = const Value.absent(),
   }) => FitnessGoal(
     id: id ?? this.id,
     metric: metric ?? this.metric,
     target: target ?? this.target,
+    direction: direction ?? this.direction,
     deadline: deadline.present ? deadline.value : this.deadline,
     achievedDate: achievedDate.present ? achievedDate.value : this.achievedDate,
   );
@@ -8494,6 +8525,7 @@ class FitnessGoal extends DataClass implements Insertable<FitnessGoal> {
       id: data.id.present ? data.id.value : this.id,
       metric: data.metric.present ? data.metric.value : this.metric,
       target: data.target.present ? data.target.value : this.target,
+      direction: data.direction.present ? data.direction.value : this.direction,
       deadline: data.deadline.present ? data.deadline.value : this.deadline,
       achievedDate: data.achievedDate.present
           ? data.achievedDate.value
@@ -8507,6 +8539,7 @@ class FitnessGoal extends DataClass implements Insertable<FitnessGoal> {
           ..write('id: $id, ')
           ..write('metric: $metric, ')
           ..write('target: $target, ')
+          ..write('direction: $direction, ')
           ..write('deadline: $deadline, ')
           ..write('achievedDate: $achievedDate')
           ..write(')'))
@@ -8514,7 +8547,8 @@ class FitnessGoal extends DataClass implements Insertable<FitnessGoal> {
   }
 
   @override
-  int get hashCode => Object.hash(id, metric, target, deadline, achievedDate);
+  int get hashCode =>
+      Object.hash(id, metric, target, direction, deadline, achievedDate);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -8522,6 +8556,7 @@ class FitnessGoal extends DataClass implements Insertable<FitnessGoal> {
           other.id == this.id &&
           other.metric == this.metric &&
           other.target == this.target &&
+          other.direction == this.direction &&
           other.deadline == this.deadline &&
           other.achievedDate == this.achievedDate);
 }
@@ -8530,12 +8565,14 @@ class FitnessGoalsCompanion extends UpdateCompanion<FitnessGoal> {
   final Value<int> id;
   final Value<String> metric;
   final Value<double> target;
+  final Value<String> direction;
   final Value<String?> deadline;
   final Value<String?> achievedDate;
   const FitnessGoalsCompanion({
     this.id = const Value.absent(),
     this.metric = const Value.absent(),
     this.target = const Value.absent(),
+    this.direction = const Value.absent(),
     this.deadline = const Value.absent(),
     this.achievedDate = const Value.absent(),
   });
@@ -8543,6 +8580,7 @@ class FitnessGoalsCompanion extends UpdateCompanion<FitnessGoal> {
     this.id = const Value.absent(),
     required String metric,
     required double target,
+    this.direction = const Value.absent(),
     this.deadline = const Value.absent(),
     this.achievedDate = const Value.absent(),
   }) : metric = Value(metric),
@@ -8551,6 +8589,7 @@ class FitnessGoalsCompanion extends UpdateCompanion<FitnessGoal> {
     Expression<int>? id,
     Expression<String>? metric,
     Expression<double>? target,
+    Expression<String>? direction,
     Expression<String>? deadline,
     Expression<String>? achievedDate,
   }) {
@@ -8558,6 +8597,7 @@ class FitnessGoalsCompanion extends UpdateCompanion<FitnessGoal> {
       if (id != null) 'id': id,
       if (metric != null) 'metric': metric,
       if (target != null) 'target': target,
+      if (direction != null) 'direction': direction,
       if (deadline != null) 'deadline': deadline,
       if (achievedDate != null) 'achieved_date': achievedDate,
     });
@@ -8567,6 +8607,7 @@ class FitnessGoalsCompanion extends UpdateCompanion<FitnessGoal> {
     Value<int>? id,
     Value<String>? metric,
     Value<double>? target,
+    Value<String>? direction,
     Value<String?>? deadline,
     Value<String?>? achievedDate,
   }) {
@@ -8574,6 +8615,7 @@ class FitnessGoalsCompanion extends UpdateCompanion<FitnessGoal> {
       id: id ?? this.id,
       metric: metric ?? this.metric,
       target: target ?? this.target,
+      direction: direction ?? this.direction,
       deadline: deadline ?? this.deadline,
       achievedDate: achievedDate ?? this.achievedDate,
     );
@@ -8591,6 +8633,9 @@ class FitnessGoalsCompanion extends UpdateCompanion<FitnessGoal> {
     if (target.present) {
       map['target'] = Variable<double>(target.value);
     }
+    if (direction.present) {
+      map['direction'] = Variable<String>(direction.value);
+    }
     if (deadline.present) {
       map['deadline'] = Variable<String>(deadline.value);
     }
@@ -8606,6 +8651,7 @@ class FitnessGoalsCompanion extends UpdateCompanion<FitnessGoal> {
           ..write('id: $id, ')
           ..write('metric: $metric, ')
           ..write('target: $target, ')
+          ..write('direction: $direction, ')
           ..write('deadline: $deadline, ')
           ..write('achievedDate: $achievedDate')
           ..write(')'))
@@ -17954,6 +18000,7 @@ typedef $$FitnessGoalsTableCreateCompanionBuilder =
       Value<int> id,
       required String metric,
       required double target,
+      Value<String> direction,
       Value<String?> deadline,
       Value<String?> achievedDate,
     });
@@ -17962,6 +18009,7 @@ typedef $$FitnessGoalsTableUpdateCompanionBuilder =
       Value<int> id,
       Value<String> metric,
       Value<double> target,
+      Value<String> direction,
       Value<String?> deadline,
       Value<String?> achievedDate,
     });
@@ -17987,6 +18035,11 @@ class $$FitnessGoalsTableFilterComposer
 
   ColumnFilters<double> get target => $composableBuilder(
     column: $table.target,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get direction => $composableBuilder(
+    column: $table.direction,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -18025,6 +18078,11 @@ class $$FitnessGoalsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get direction => $composableBuilder(
+    column: $table.direction,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get deadline => $composableBuilder(
     column: $table.deadline,
     builder: (column) => ColumnOrderings(column),
@@ -18053,6 +18111,9 @@ class $$FitnessGoalsTableAnnotationComposer
 
   GeneratedColumn<double> get target =>
       $composableBuilder(column: $table.target, builder: (column) => column);
+
+  GeneratedColumn<String> get direction =>
+      $composableBuilder(column: $table.direction, builder: (column) => column);
 
   GeneratedColumn<String> get deadline =>
       $composableBuilder(column: $table.deadline, builder: (column) => column);
@@ -18097,12 +18158,14 @@ class $$FitnessGoalsTableTableManager
                 Value<int> id = const Value.absent(),
                 Value<String> metric = const Value.absent(),
                 Value<double> target = const Value.absent(),
+                Value<String> direction = const Value.absent(),
                 Value<String?> deadline = const Value.absent(),
                 Value<String?> achievedDate = const Value.absent(),
               }) => FitnessGoalsCompanion(
                 id: id,
                 metric: metric,
                 target: target,
+                direction: direction,
                 deadline: deadline,
                 achievedDate: achievedDate,
               ),
@@ -18111,12 +18174,14 @@ class $$FitnessGoalsTableTableManager
                 Value<int> id = const Value.absent(),
                 required String metric,
                 required double target,
+                Value<String> direction = const Value.absent(),
                 Value<String?> deadline = const Value.absent(),
                 Value<String?> achievedDate = const Value.absent(),
               }) => FitnessGoalsCompanion.insert(
                 id: id,
                 metric: metric,
                 target: target,
+                direction: direction,
                 deadline: deadline,
                 achievedDate: achievedDate,
               ),

@@ -90,6 +90,8 @@ void main() {
 
     expect(find.text('Planned session'), findsOneWidget);
     expect(find.text('Done'), findsOneWidget);
+
+    await _disposeTree(tester);
   });
 
   testWidgets('DayDetailGymSection shows done session without Done button', (
@@ -111,6 +113,8 @@ void main() {
 
     expect(find.textContaining('Session done'), findsOneWidget);
     expect(find.text('Done'), findsNothing);
+
+    await _disposeTree(tester);
   });
 
   testWidgets(
@@ -127,6 +131,8 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.textContaining('Travel day'), findsOneWidget);
+
+      await _disposeTree(tester);
     },
   );
 }

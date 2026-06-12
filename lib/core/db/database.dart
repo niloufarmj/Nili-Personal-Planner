@@ -75,7 +75,7 @@ class AppDatabase extends _$AppDatabase {
   }
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -83,6 +83,9 @@ class AppDatabase extends _$AppDatabase {
     onUpgrade: (m, from, to) async {
       if (from < 2) {
         await m.createTable(choreCompletions);
+      }
+      if (from < 3) {
+        await m.addColumn(fitnessGoals, fitnessGoals.direction);
       }
     },
   );

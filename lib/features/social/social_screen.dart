@@ -7,16 +7,16 @@ import '../../core/db/database.dart';
 import '../../core/design/design.dart';
 import 'repositories/social_repository.dart';
 
+final _socialAccountsProvider = StreamProvider.autoDispose(
+  (ref) => ref.watch(socialRepositoryProvider).watchAccounts(),
+);
+
 class SocialScreen extends ConsumerWidget {
   const SocialScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final accountsAsync = ref.watch(
-      StreamProvider.autoDispose(
-        (r) => r.watch(socialRepositoryProvider).watchAccounts(),
-      ),
-    );
+    final accountsAsync = ref.watch(_socialAccountsProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Social')),
@@ -223,6 +223,10 @@ class _WeeklyBarChart extends StatelessWidget {
   }
 }
 
+final _socialLogsForAccountProvider = StreamProvider.autoDispose.family<List<SocialLog>, int>(
+  (ref, id) => ref.watch(socialRepositoryProvider).watchLogsForAccount(id),
+);
+
 // ── Log history ───────────────────────────────────────────────────────────────
 
 class _LogHistory extends ConsumerWidget {
@@ -232,11 +236,7 @@ class _LogHistory extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final logsAsync = ref.watch(
-      StreamProvider.autoDispose.family<List<SocialLog>, int>(
-        (r, id) => r.watch(socialRepositoryProvider).watchLogsForAccount(id),
-      )(accountId),
-    );
+    final logsAsync = ref.watch(_socialLogsForAccountProvider(accountId));
 
     return logsAsync.when(
       loading: () => const LinearProgressIndicator(minHeight: 2),

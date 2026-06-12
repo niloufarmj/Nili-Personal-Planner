@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import 'package:flutter/services.dart';
 import '../../core/calendar/calendar_aggregator.dart';
 import '../../core/calendar/calendar_day_data.dart';
 import '../../core/conflicts/conflict_engine.dart';
@@ -11,8 +12,11 @@ import '../../core/design/design.dart';
 import '../calendar/day_tag_picker.dart';
 import '../calendar/event_edit_sheet.dart';
 import '../../core/db/database.dart';
+import '../gym/gym_repository.dart';
+import '../habits/habit_repository.dart';
 import '../meals/meal_slot_repository.dart';
 import '../meals/recipe_repository.dart';
+import '../../core/services/backup_service.dart';
 
 // ── Provider: today's aggregated data ─────────────────────────────────────────
 
@@ -42,6 +46,8 @@ String _fmtDate(DateTime d) =>
     '${d.year.toString().padLeft(4, '0')}-'
     '${d.month.toString().padLeft(2, '0')}-'
     '${d.day.toString().padLeft(2, '0')}';
+
+final _backupNudgeDismissedProvider = StateProvider.autoDispose<bool>((ref) => false);
 
 // ── Screen ─────────────────────────────────────────────────────────────────────
 
@@ -79,6 +85,26 @@ class TodayScreen extends ConsumerWidget {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
+            if ((ref.watch(shouldNudgeProvider).value ?? false) &&
+                !ref.watch(_backupNudgeDismissedProvider)) ...[
+              _BackupNudgeCard(
+                onBackup: () async {
+                  try {
+                    await ref.read(backupServiceProvider).exportAndShare();
+                    ref.invalidate(shouldNudgeProvider);
+                  } catch (e) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Backup failed: $e')),
+                      );
+                    }
+                  }
+                },
+                onDismiss: () =>
+                    ref.read(_backupNudgeDismissedProvider.notifier).state = true,
+              ),
+              const SizedBox(height: 20),
+            ],
             // ── Day overview strip ─────────────────────────────────
             _DayOverviewStrip(todayStr: todayStr),
             const SizedBox(height: 20),
@@ -100,7 +126,11 @@ class TodayScreen extends ConsumerWidget {
             const SizedBox(height: 20),
 
             const SectionHeader(title: 'Habits'),
-            const _AgentPlaceholder('Habit tracker — agent 4'),
+            const SizedBox(height: 8),
+            _TodayHabits(todayStr: todayStr),
+            const SizedBox(height: 20),
+
+            const _TodayGymQuickDone(),
             const SizedBox(height: 80), // FAB clearance
           ],
         ),
@@ -421,17 +451,130 @@ final _recipeNameForTodayProvider = FutureProvider.autoDispose
       return r?.name;
     });
 
-// ── Agent placeholder ─────────────────────────────────────────────────────────
+final _todayActiveHabitsProvider = StreamProvider.autoDispose((ref) {
+  return ref.watch(habitRepositoryProvider).watchActiveHabits();
+});
 
-class _AgentPlaceholder extends StatelessWidget {
-  const _AgentPlaceholder(this.message);
-  final String message;
+final _todayHabitLogsProvider = StreamProvider.autoDispose.family<List<HabitLog>, String>((ref, dateStr) {
+  return ref.watch(habitRepositoryProvider).watchLogsForDate(dateStr);
+});
+
+// ── Today habits section ──────────────────────────────────────────────────────
+
+class _TodayHabits extends ConsumerWidget {
+  const _TodayHabits({required this.todayStr});
+  final String todayStr;
 
   @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 4, top: 4),
-      child: Text(message, style: const TextStyle(color: Colors.grey)),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final habitsAsync = ref.watch(_todayActiveHabitsProvider);
+    final logsAsync = ref.watch(_todayHabitLogsProvider(todayStr));
+
+    return habitsAsync.when(
+      loading: () => const SizedBox(height: 50, child: Center(child: CircularProgressIndicator())),
+      error: (e, _) => Text('Error: $e'),
+      data: (habits) {
+        if (habits.isEmpty) {
+          return const Padding(
+            padding: EdgeInsets.only(left: 4),
+            child: Text(
+              'No active habits today. Go to Track > Habits to set them up!',
+              style: TextStyle(color: Colors.grey),
+            ),
+          );
+        }
+
+        return logsAsync.when(
+          loading: () => const SizedBox.shrink(),
+          error: (e, s) => const SizedBox.shrink(),
+          data: (logs) {
+            final countByHabitId = {for (final l in logs) l.habitId: l.count};
+
+            return Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: habits.map((habit) {
+                final count = countByHabitId[habit.id] ?? 0;
+                final target = habit.targetPerDay;
+                final completed = count >= target;
+
+                final repo = ref.read(habitRepositoryProvider);
+
+                return GestureDetector(
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    repo.incrementCount(habit.id, todayStr);
+                  },
+                  onLongPress: () {
+                    HapticFeedback.mediumImpact();
+                    repo.decrementCount(habit.id, todayStr);
+                  },
+                  child: Chip(
+                    backgroundColor: completed
+                        ? Colors.green.withAlpha(40)
+                        : Theme.of(context).colorScheme.secondaryContainer,
+                    side: BorderSide(
+                      color: completed
+                          ? Colors.green
+                          : Theme.of(context).colorScheme.outlineVariant,
+                    ),
+                    avatar: Icon(
+                      completed ? Icons.check : Icons.water_drop,
+                      size: 16,
+                      color: completed ? Colors.green[700] : null,
+                    ),
+                    label: Text('$count/$target ${habit.name}'),
+                  ),
+                );
+              }).toList(),
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+// ── Today Gym quick done button ───────────────────────────────────────────────
+
+class _TodayGymQuickDone extends ConsumerWidget {
+  const _TodayGymQuickDone();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final dataAsync = ref.watch(_todayDataProvider);
+    return dataAsync.when(
+      loading: () => const SizedBox.shrink(),
+      error: (_, _) => const SizedBox.shrink(),
+      data: (data) {
+        final session = data.gymSession;
+        if (session == null || session.status != 'planned') {
+          return const SizedBox.shrink();
+        }
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: AppCard(
+            child: ListTile(
+              leading: const Icon(Icons.fitness_center, color: Colors.blue),
+              title: const Text('Planned gym session today'),
+              subtitle: const Text('Tap to mark as completed'),
+              trailing: FilledButton.icon(
+                icon: const Icon(Icons.check, size: 16),
+                label: const Text('Done'),
+                onPressed: () async {
+                  HapticFeedback.mediumImpact();
+                  await ref.read(gymRepositoryProvider).logDone(
+                        date: _fmtDate(DateTime.now()),
+                        planId: session.planId,
+                        durationMin: 45,
+                      );
+                  ref.invalidate(_todayDataProvider);
+                },
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }
@@ -520,5 +663,69 @@ class _QuickAddTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(leading: Icon(icon), title: Text(label), onTap: onTap);
+  }
+}
+
+class _BackupNudgeCard extends StatelessWidget {
+  const _BackupNudgeCard({required this.onBackup, required this.onDismiss});
+
+  final VoidCallback onBackup;
+  final VoidCallback onDismiss;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return AppCard(
+      color: cs.errorContainer.withAlpha(40),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.warning_amber_rounded, color: cs.error),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Backup Needed',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: cs.onErrorContainer,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close, size: 18),
+                  onPressed: onDismiss,
+                  visualDensity: VisualDensity.compact,
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'You haven\'t backed up your data in over 30 days. Export a zip backup now to keep your offline data safe.',
+              style: TextStyle(color: cs.onErrorContainer),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: onDismiss,
+                  child: const Text('Later'),
+                ),
+                const SizedBox(width: 8),
+                FilledButton.icon(
+                  onPressed: onBackup,
+                  icon: const Icon(Icons.share, size: 16),
+                  label: const Text('Back Up Now'),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

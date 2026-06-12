@@ -167,3 +167,11 @@ class BackupService {
 final backupServiceProvider = Provider<BackupService>(
   (_) => BackupService(),
 );
+
+final lastBackupTimeProvider = FutureProvider.autoDispose<DateTime?>((ref) {
+  return ref.watch(backupServiceProvider).lastBackupTime();
+});
+
+final shouldNudgeProvider = FutureProvider.autoDispose<bool>((ref) {
+  return ref.watch(backupServiceProvider).shouldNudge();
+});
