@@ -82,7 +82,9 @@ void main() {
     await tester.pumpAndSettle();
 
     // Pick template
-    await tester.tap(find.text('Shopping'));
+    final shoppingFinder = find.text('Shopping');
+    await tester.ensureVisible(shoppingFinder);
+    await tester.tap(shoppingFinder);
     await tester.pumpAndSettle();
 
     expect(find.text('Iran Shopping'), findsOneWidget);

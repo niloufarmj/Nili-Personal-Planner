@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/db/database.dart';
@@ -17,8 +18,14 @@ class TripDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final tripAsync = ref.watch(_tripProvider(tripId));
     return tripAsync.when(
-      loading: () =>
-          const Scaffold(body: LinearProgressIndicator(minHeight: 2)),
+      loading: () => const Scaffold(
+        body: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+          child: Center(
+            child: ShimmerSkeleton(width: double.infinity, height: 200),
+          ),
+        ),
+      ),
       error: (e, _) => Scaffold(body: Center(child: Text('Error: $e'))),
       data: (trip) {
         if (trip == null) {
@@ -40,11 +47,20 @@ class _TripDetailView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final fmt = DateFormat('d MMM yyyy');
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(trip.title),
+        title: Text(
+          trip.title,
+          style: GoogleFonts.fraunces(
+            fontSize: DesignTokens.fontTitle,
+            fontWeight: FontWeight.w600,
+            color: isDark ? DesignTokens.inkDark : DesignTokens.inkLight,
+          ),
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.edit_outlined),
@@ -71,19 +87,22 @@ class _TripDetailView extends ConsumerWidget {
         ],
       ),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         children: [
           // Status + date range
           AppCard(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Column(
               children: [
                 ListTile(
+                  contentPadding: EdgeInsets.zero,
                   leading: const Icon(Icons.info_outline),
                   title: const Text('Status'),
                   trailing: StatusChip(status: trip.status),
                 ),
                 if (trip.startDate != null && trip.endDate != null)
                   ListTile(
+                    contentPadding: EdgeInsets.zero,
                     leading: const Icon(Icons.date_range),
                     title: const Text('Dates'),
                     subtitle: Text(
@@ -93,16 +112,18 @@ class _TripDetailView extends ConsumerWidget {
                   ),
                 if (trip.location != null)
                   ListTile(
+                    contentPadding: EdgeInsets.zero,
                     leading: const Icon(Icons.place_outlined),
                     title: const Text('Location'),
                     subtitle: Text(trip.location!),
                   ),
                 if (trip.budgetCents != null)
                   ListTile(
+                    contentPadding: EdgeInsets.zero,
                     leading: const Icon(Icons.euro_outlined),
                     title: const Text('Budget'),
                     subtitle: Text(
-                      '€${(trip.budgetCents! / 100).toStringAsFixed(2)}',
+                      CurrencyFormatter.format(trip.budgetCents!),
                     ),
                   ),
               ],
@@ -110,30 +131,38 @@ class _TripDetailView extends ConsumerWidget {
           ),
 
           if (trip.description != null) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             AppCard(
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Description',
-                      style: Theme.of(context).textTheme.labelLarge,
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Description',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: isDark ? DesignTokens.inkDark : DesignTokens.inkLight,
                     ),
-                    const SizedBox(height: 4),
-                    Text(trip.description!),
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    trip.description!,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: isDark ? DesignTokens.inkSoftDark : DesignTokens.inkSoftLight,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
 
           // Packing list tap-through
           if (trip.packingCollectionId != null) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             AppCard(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: ListTile(
+                contentPadding: EdgeInsets.zero,
                 leading: const Icon(Icons.checklist),
                 title: const Text('Packing list'),
                 trailing: const Icon(Icons.chevron_right),
@@ -146,13 +175,19 @@ class _TripDetailView extends ConsumerWidget {
 
           // Links
           if (trip.links != null && trip.links!.isNotEmpty) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: 20),
             const SectionHeader(title: 'Links'),
+            const SizedBox(height: 12),
             ...trip.links!.map(
-              (link) => AppCard(
-                child: ListTile(
-                  leading: const Icon(Icons.link),
-                  title: Text(link, overflow: TextOverflow.ellipsis),
+              (link) => Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: AppCard(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const Icon(Icons.link),
+                    title: Text(link, overflow: TextOverflow.ellipsis),
+                  ),
                 ),
               ),
             ),

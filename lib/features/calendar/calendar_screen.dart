@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:intl/intl.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/calendar/calendar_aggregator.dart';
 import '../../core/calendar/calendar_day_data.dart';
-import '../../core/design/app_colors.dart';
 import '../../core/design/design.dart';
-import '../../core/router/routes.dart';
+import 'day_detail_screen.dart';
 
 // ── Providers ─────────────────────────────────────────────────────────────────
 
@@ -74,7 +74,6 @@ class _FilterNotifier extends StateNotifier<CalendarFilter> {
   );
 }
 
-// Aggregated data for the visible month ± 1 month buffer.
 final _calendarDataProvider = FutureProvider.autoDispose
     .family<Map<String, CalendarDayData>, _AggKey>((ref, key) {
       final agg = ref.watch(calendarAggregatorProvider);
@@ -125,13 +124,6 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Calendar'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.tune_outlined),
-            tooltip: 'Filters',
-            onPressed: () => _showFilterSheet(context, filter),
-          ),
-        ],
       ),
       body: Column(
         children: [
@@ -140,6 +132,21 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
             error: (_, _) => const SizedBox(height: 2),
             data: (_) => const SizedBox(height: 2),
           ),
+          _CustomCalendarHeader(
+            focusedDay: _focusedDay,
+            onLeftChevronTap: () {
+              setState(() {
+                _focusedDay = DateTime(_focusedDay.year, _focusedDay.month - 1);
+              });
+            },
+            onRightChevronTap: () {
+              setState(() {
+                _focusedDay = DateTime(_focusedDay.year, _focusedDay.month + 1);
+              });
+            },
+          ),
+          const _HorizontalFilterBar(),
+          const SizedBox(height: 8),
           Expanded(
             child: dataAsync.when(
               loading: () => _buildCalendar(context, {}),
@@ -160,6 +167,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
       firstDay: DateTime(2020),
       lastDay: DateTime(2040),
       focusedDay: _focusedDay,
+      headerVisible: false, // hidden in favor of our custom header
       selectedDayPredicate: (d) => isSameDay(_selectedDay, d),
       onDaySelected: (selected, focused) {
         setState(() {
@@ -167,15 +175,11 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
           _focusedDay = focused;
         });
         final dateStr = _fmt(selected);
-        context.push(Routes.dayDetail.replaceFirst(':date', dateStr));
+        DayDetailScreen.show(context, dateStr);
       },
       onPageChanged: (focused) => setState(() => _focusedDay = focused),
       calendarFormat: CalendarFormat.month,
       availableCalendarFormats: const {CalendarFormat.month: 'Month'},
-      headerStyle: const HeaderStyle(
-        formatButtonVisible: false,
-        titleCentered: true,
-      ),
       calendarStyle: const CalendarStyle(outsideDaysVisible: false),
       calendarBuilders: CalendarBuilders(
         defaultBuilder: (ctx, day, _) => _DayCell(
@@ -200,20 +204,142 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     );
   }
 
-  void _showFilterSheet(BuildContext context, CalendarFilter filter) {
-    showModalBottomSheet<void>(
-      context: context,
-      builder: (_) => _FilterSheet(filter: filter),
-    );
-  }
-
   static String _fmt(DateTime d) =>
       '${d.year.toString().padLeft(4, '0')}-'
       '${d.month.toString().padLeft(2, '0')}-'
       '${d.day.toString().padLeft(2, '0')}';
 }
 
-// ── Day cell ──────────────────────────────────────────────────────────────────
+// ── Custom Month Header ────────────────────────────────────────────────────────
+
+class _CustomCalendarHeader extends StatelessWidget {
+  const _CustomCalendarHeader({
+    required this.focusedDay,
+    required this.onLeftChevronTap,
+    required this.onRightChevronTap,
+  });
+
+  final DateTime focusedDay;
+  final VoidCallback onLeftChevronTap;
+  final VoidCallback onRightChevronTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    final monthStr = DateFormat('MMMM yyyy').format(focusedDay);
+    final inkColor = isDark ? DesignTokens.inkDark : DesignTokens.inkLight;
+    final btnBg = isDark ? DesignTokens.surfaceDark : DesignTokens.lineLight;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            monthStr,
+            style: GoogleFonts.fraunces(
+              fontSize: DesignTokens.fontTitle,
+              fontWeight: FontWeight.w600,
+              color: inkColor,
+            ),
+          ),
+          Row(
+            children: [
+              IconButton(
+                onPressed: onLeftChevronTap,
+                icon: Icon(Icons.chevron_left, color: inkColor, size: 20),
+                style: IconButton.styleFrom(
+                  backgroundColor: btnBg,
+                  shape: const CircleBorder(),
+                  padding: const EdgeInsets.all(8),
+                  minimumSize: const Size(40, 40),
+                ),
+              ),
+              const SizedBox(width: 8),
+              IconButton(
+                onPressed: onRightChevronTap,
+                icon: Icon(Icons.chevron_right, color: inkColor, size: 20),
+                style: IconButton.styleFrom(
+                  backgroundColor: btnBg,
+                  shape: const CircleBorder(),
+                  padding: const EdgeInsets.all(8),
+                  minimumSize: const Size(40, 40),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Horizontal Filter Bar ──────────────────────────────────────────────────────
+
+class _HorizontalFilterBar extends ConsumerWidget {
+  const _HorizontalFilterBar();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final filter = ref.watch(_calendarFilterProvider);
+    final notifier = ref.read(_calendarFilterProvider.notifier);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    final items = [
+      (label: 'Location', active: filter.showLocation, key: 'location', color: DesignTokens.butter, icon: Icons.map_outlined),
+      (label: 'Gym', active: filter.showGym, key: 'gym', color: DesignTokens.dustyBlue, icon: Icons.fitness_center),
+      (label: 'Meals', active: filter.showMeals, key: 'meals', color: DesignTokens.peach, icon: Icons.restaurant),
+      (label: 'Work', active: filter.showWork, key: 'work', color: DesignTokens.lavender, icon: Icons.work_outline),
+      (label: 'Uni', active: filter.showUni, key: 'uni', color: DesignTokens.sage, icon: Icons.school_outlined),
+      (label: 'Travel', active: filter.showTravel, key: 'travel', color: DesignTokens.sage, icon: Icons.flight),
+      (label: 'Social', active: filter.showSocial, key: 'social', color: DesignTokens.rose, icon: Icons.event),
+      (label: 'Tasks', active: filter.showTasks, key: 'tasks', color: DesignTokens.lavender, icon: Icons.task_alt),
+      (label: 'Partner', active: filter.showPartner, key: 'partner', color: DesignTokens.dustyBlueSoft, icon: Icons.favorite_border),
+      (label: 'Reminders', active: filter.showReminders, key: 'reminders', color: DesignTokens.roseSoft, icon: Icons.notifications_none),
+    ];
+
+    return SizedBox(
+      height: 48,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        itemCount: items.length,
+        itemBuilder: (context, index) {
+          final item = items[index];
+          final fg = isDark ? DesignTokens.inkDark : item.color;
+
+          return Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: FilterChip(
+              avatar: Icon(item.icon, size: 14, color: item.active ? (isDark ? DesignTokens.paperDark : Colors.white) : fg),
+              label: Text(item.label),
+              selected: item.active,
+              selectedColor: isDark ? DesignTokens.accentDark : item.color,
+              checkmarkColor: isDark ? DesignTokens.paperDark : Colors.white,
+              backgroundColor: Colors.transparent,
+              side: BorderSide(
+                color: item.active ? Colors.transparent : (isDark ? DesignTokens.lineDark : DesignTokens.lineLight),
+                width: 1,
+              ),
+              labelStyle: TextStyle(
+                color: item.active 
+                    ? (isDark ? DesignTokens.paperDark : Colors.white)
+                    : (isDark ? DesignTokens.inkDark : DesignTokens.inkLight),
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+              ),
+              onSelected: (_) => notifier.toggle(item.key),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+// ── Day Cell ───────────────────────────────────────────────────────────────────
 
 class _DayCell extends StatelessWidget {
   const _DayCell({
@@ -231,47 +357,156 @@ class _DayCell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final cs = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
+    final accentColor = isDark ? DesignTokens.accentDark : DesignTokens.accentLight;
+    final lineColor = isDark ? DesignTokens.lineDark : DesignTokens.lineLight;
+    final inkColor = isDark ? DesignTokens.inkDark : DesignTokens.inkLight;
+
     final overlay = dayData?.overlayColor;
 
-    Color? bgColor;
-    if (isSelected) {
-      bgColor = cs.primary;
-    } else if (overlay != null) {
-      bgColor = overlay.withAlpha(50);
+    final border = isToday
+        ? Border.all(color: accentColor, width: 1.5)
+        : Border.all(color: lineColor.withAlpha(50), width: 0.5);
+
+    final Color? selectColor = isSelected
+        ? accentColor.withValues(alpha: 0.12)
+        : null;
+
+    final List<Color> washColors = [];
+    if (overlay != null) {
+      washColors.add(overlay);
+    }
+    if (dayData?.gymSession != null) {
+      washColors.add(DesignTokens.dustyBlue);
+    }
+    if (dayData != null && dayData!.mealDots > 0) {
+      washColors.add(DesignTokens.peach);
+    }
+    if (dayData != null && dayData!.dueDots > 0) {
+      washColors.add(DesignTokens.lavender);
     }
 
-    final textColor = isSelected
-        ? cs.onPrimary
-        : isToday
-        ? cs.primary
-        : null;
+    // Trip continuous capsule behind number
+    final trip = dayData?.tripBars.firstOrNull;
+    Widget? tripBarWidget;
+    if (trip != null) {
+      final tripStart = _parseDate(trip.startDate!);
+      final tripEnd = _parseDate(trip.endDate!);
+      
+      final isStart = isSameDay(day, tripStart) || day.weekday == DateTime.monday;
+      final isEnd = isSameDay(day, tripEnd) || day.weekday == DateTime.sunday;
+
+      final BorderRadius radius;
+      if (isStart && isEnd) {
+        radius = BorderRadius.circular(8);
+      } else if (isStart) {
+        radius = const BorderRadius.only(topLeft: Radius.circular(8), bottomLeft: Radius.circular(8));
+      } else if (isEnd) {
+        radius = const BorderRadius.only(topRight: Radius.circular(8), bottomRight: Radius.circular(8));
+      } else {
+        radius = BorderRadius.zero;
+      }
+
+      tripBarWidget = Positioned(
+        bottom: 8,
+        left: isStart ? 4 : 0,
+        right: isEnd ? 4 : 0,
+        height: 6,
+        child: Container(
+          decoration: BoxDecoration(
+            color: (isDark ? DesignTokens.adjustColorForDark(DesignTokens.sage) : DesignTokens.sage).withValues(alpha: 0.40),
+            borderRadius: radius,
+          ),
+        ),
+      );
+    }
 
     return Container(
       margin: const EdgeInsets.all(2),
       decoration: BoxDecoration(
-        color: bgColor,
-        shape: BoxShape.circle,
-        border: isToday && !isSelected
-            ? Border.all(color: cs.primary, width: 1.5)
-            : null,
+        borderRadius: BorderRadius.circular(12),
+        border: border,
       ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            '${day.day}',
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: textColor,
-              fontWeight: isToday || isSelected ? FontWeight.bold : null,
-            ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(10.5),
+        child: Container(
+          decoration: isSelected
+              ? BoxDecoration(color: selectColor)
+              : DayWashDecoration(tagColors: washColors, isDark: isDark),
+          child: Stack(
+            children: [
+              if (tripBarWidget != null) tripBarWidget,
+
+              // Partner Strip Dotted line at top
+              if (dayData != null && (dayData!.partnerTags.isNotEmpty || dayData!.partnerEvents.isNotEmpty))
+                Positioned(
+                  top: 3,
+                  left: 4,
+                  right: 4,
+                  height: 3,
+                  child: CustomPaint(
+                    painter: DottedLinePainter(
+                      color: isDark ? DesignTokens.adjustColorForDark(DesignTokens.dustyBlueSoft) : DesignTokens.dustyBlue,
+                    ),
+                  ),
+                ),
+
+              Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      '${day.day}',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: inkColor,
+                        fontWeight: isToday || isSelected ? FontWeight.bold : null,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    if (dayData != null && !dayData!.isEmpty) _DotRow(dayData: dayData!),
+                  ],
+                ),
+              ),
+            ],
           ),
-          if (dayData != null && !dayData!.isEmpty) _DotRow(dayData: dayData!),
-        ],
+        ),
       ),
     );
   }
+
+  static DateTime _parseDate(String iso) {
+    final p = iso.split('-');
+    return DateTime(int.parse(p[0]), int.parse(p[1]), int.parse(p[2]));
+  }
 }
+
+class DottedLinePainter extends CustomPainter {
+  DottedLinePainter({required this.color});
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 2
+      ..strokeCap = StrokeCap.round;
+
+    double startX = 2.0;
+    const double dashWidth = 2.0;
+    const double dashSpace = 3.0;
+
+    while (startX < size.width - 2) {
+      canvas.drawCircle(Offset(startX, 1.0), 1.0, paint);
+      startX += dashWidth + dashSpace;
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+// ── Dots Row ──────────────────────────────────────────────────────────────────
 
 class _DotRow extends StatelessWidget {
   const _DotRow({required this.dayData});
@@ -279,155 +514,45 @@ class _DotRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (_isEmpty) return const SizedBox.shrink();
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: _buildDotWidgets().take(3).toList(),
-    );
-  }
-
-  bool get _isEmpty =>
-      dayData.eventOccurrences.isEmpty &&
-      dayData.tripBars.isEmpty &&
-      dayData.gymSession == null &&
-      dayData.mealDots == 0 &&
-      dayData.dueDots == 0;
-
-  List<Widget> _buildDotWidgets() {
-    final widgets = <Widget>[];
-
+    final List<Color> dotColors = [];
     if (dayData.eventOccurrences.isNotEmpty) {
-      widgets.add(_filledDot(AppColors.catSocial));
+      dotColors.add(AppColors.catSocial);
     }
     if (dayData.tripBars.isNotEmpty) {
-      widgets.add(_filledDot(AppColors.travel));
+      dotColors.add(AppColors.travel);
     }
     if (dayData.gymSession != null) {
-      // outlined dot = planned, filled dot = done, faded = missed
-      final s = dayData.gymSession!;
-      widgets.add(_gymDot(s.status));
+      dotColors.add(AppColors.catFitness);
     }
     if (dayData.mealDots > 0) {
-      widgets.add(_filledDot(AppColors.catMeals));
+      dotColors.add(AppColors.catMeals);
     }
     if (dayData.dueDots > 0) {
-      widgets.add(_filledDot(AppColors.catWork));
+      dotColors.add(AppColors.catWork);
     }
-    return widgets;
-  }
 
-  static Widget _filledDot(Color c) => Container(
-    width: 4,
-    height: 4,
-    margin: const EdgeInsets.symmetric(horizontal: 1),
-    decoration: BoxDecoration(color: c, shape: BoxShape.circle),
-  );
+    if (dotColors.isEmpty) return const SizedBox.shrink();
 
-  static Widget _gymDot(String status) {
-    const color = AppColors.catFitness;
-    if (status == 'done') return _filledDot(color);
-    if (status == 'planned') {
-      return Container(
-        width: 5,
-        height: 5,
-        margin: const EdgeInsets.symmetric(horizontal: 1),
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(color: color, width: 1.5),
-        ),
-      );
-    }
-    // missed — faded filled dot
-    return _filledDot(color.withAlpha(80));
-  }
-}
+    final showOverflow = dotColors.length > 4;
+    final visibleDots = dotColors.take(4).toList();
 
-// ── Filter bottom sheet ────────────────────────────────────────────────────────
-
-class _FilterSheet extends ConsumerWidget {
-  const _FilterSheet({required this.filter});
-  final CalendarFilter filter;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final notifier = ref.read(_calendarFilterProvider.notifier);
-    final current = ref.watch(_calendarFilterProvider);
-
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Show on calendar',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 8,
-              runSpacing: 4,
-              children: [
-                _Chip(
-                  'Location',
-                  current.showLocation,
-                  () => notifier.toggle('location'),
-                ),
-                _Chip('Gym', current.showGym, () => notifier.toggle('gym')),
-                _Chip(
-                  'Meals',
-                  current.showMeals,
-                  () => notifier.toggle('meals'),
-                ),
-                _Chip('Work', current.showWork, () => notifier.toggle('work')),
-                _Chip('Uni', current.showUni, () => notifier.toggle('uni')),
-                _Chip(
-                  'Travel',
-                  current.showTravel,
-                  () => notifier.toggle('travel'),
-                ),
-                _Chip(
-                  'Social',
-                  current.showSocial,
-                  () => notifier.toggle('social'),
-                ),
-                _Chip(
-                  'Tasks',
-                  current.showTasks,
-                  () => notifier.toggle('tasks'),
-                ),
-                _Chip(
-                  'Partner',
-                  current.showPartner,
-                  () => notifier.toggle('partner'),
-                ),
-                _Chip(
-                  'Reminders',
-                  current.showReminders,
-                  () => notifier.toggle('reminders'),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _Chip extends StatelessWidget {
-  const _Chip(this.label, this.active, this.onTap);
-  final String label;
-  final bool active;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return FilterChip(
-      label: Text(label),
-      selected: active,
-      onSelected: (_) => onTap(),
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        ...visibleDots.map((c) => Container(
+          width: 4,
+          height: 4,
+          margin: const EdgeInsets.symmetric(horizontal: 1),
+          decoration: BoxDecoration(color: c, shape: BoxShape.circle),
+        )),
+        if (showOverflow)
+          Container(
+            width: 3,
+            height: 3,
+            margin: const EdgeInsets.symmetric(horizontal: 1),
+            decoration: const BoxDecoration(color: Colors.grey, shape: BoxShape.circle),
+          ),
+      ],
     );
   }
 }

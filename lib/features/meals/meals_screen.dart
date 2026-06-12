@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/db/database.dart';
@@ -40,12 +41,21 @@ class MealsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final selectedWeek = ref.watch(_selectedWeekProvider);
     final slotsAsync = ref.watch(_weekSlotsProvider(selectedWeek));
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Meals — week of ${_fmt(selectedWeek)}'),
+        title: Text(
+          'Meals — week of ${_fmt(selectedWeek)}',
+          style: GoogleFonts.fraunces(
+            fontSize: DesignTokens.fontTitle,
+            fontWeight: FontWeight.w600,
+            color: isDark ? DesignTokens.inkDark : DesignTokens.inkLight,
+          ),
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.chevron_left),
@@ -68,7 +78,12 @@ class MealsScreen extends ConsumerWidget {
         children: [
           Expanded(
             child: slotsAsync.when(
-              loading: () => const LinearProgressIndicator(minHeight: 2),
+              loading: () => const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(24),
+                  child: ShimmerSkeleton(width: double.infinity, height: 300),
+                ),
+              ),
               error: (e, _) => Center(child: Text('Error: $e')),
               data: (slots) => _WeekGrid(week: selectedWeek, slots: slots),
             ),
@@ -97,84 +112,118 @@ class _WeekGrid extends ConsumerWidget {
     final slotMap = {for (final s in slots) '${s.date}:${s.slot}': s};
     final days = List.generate(7, (i) => week.add(Duration(days: i)));
     final dayFmt = DateFormat('EEE\nd');
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return tagsAsync.when(
-      loading: () => const LinearProgressIndicator(minHeight: 2),
+      loading: () => const Center(
+        child: Padding(
+          padding: EdgeInsets.all(24),
+          child: ShimmerSkeleton(width: double.infinity, height: 300),
+        ),
+      ),
       error: (e, _) => Center(child: Text('Error: $e')),
       data: (tagsByDate) {
         return SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: SingleChildScrollView(
-            child: Table(
-              defaultColumnWidth: const IntrinsicColumnWidth(),
-              children: [
-                // Header row
-                TableRow(
-                  decoration: BoxDecoration(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.surfaceContainerHighest,
-                  ),
-                  children: [
-                    const _Cell(child: SizedBox(width: 80)),
-                    ...days.map((d) {
-                      final dateStr = _dateStr(d);
-                      final tags = tagsByDate[dateStr] ?? [];
-                      return _Cell(
-                        child: Column(
-                          children: [
-                            Text(
-                              dayFmt.format(d),
-                              textAlign: TextAlign.center,
-                              style: Theme.of(context).textTheme.labelSmall,
-                            ),
-                            if (tags.isNotEmpty)
-                              Wrap(
-                                children: tags
-                                    .map(
-                                      (t) => Padding(
-                                        padding: const EdgeInsets.only(
-                                          right: 2,
-                                        ),
-                                        child: Icon(
-                                          Icons.circle,
-                                          size: 6,
-                                          color: _tagColor(t.name),
-                                        ),
-                                      ),
-                                    )
-                                    .toList(),
-                              ),
-                          ],
-                        ),
-                      );
-                    }),
-                  ],
-                ),
-                // One row per slot
-                ..._allSlots.map(
-                  (slot) => TableRow(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Table(
+                defaultColumnWidth: const IntrinsicColumnWidth(),
+                children: [
+                  // Header row
+                  TableRow(
+                    decoration: BoxDecoration(
+                      color: isDark ? DesignTokens.lineDark : DesignTokens.lineLight,
+                      borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                    ),
                     children: [
-                      _Cell(
-                        child: Text(
-                          _slotLabel(slot),
-                          style: Theme.of(context).textTheme.labelSmall,
-                        ),
-                      ),
+                      const _Cell(child: SizedBox(width: 80)),
                       ...days.map((d) {
                         final dateStr = _dateStr(d);
-                        final key = '$dateStr:$slot';
-                        final mealSlot = slotMap[key];
-                        return _MealCell(
-                          date: dateStr,
-                          slot: slot,
-                          mealSlot: mealSlot,
+                        final tags = tagsByDate[dateStr] ?? [];
+                        final tagColors = tags.map((t) => AppColors.forTagName(t.name)).toList();
+
+                        return Container(
+                          decoration: DayWashDecoration(
+                            tagColors: tagColors,
+                            isDark: isDark,
+                          ),
+                          child: _Cell(
+                            child: Column(
+                              children: [
+                                Text(
+                                  dayFmt.format(d),
+                                  textAlign: TextAlign.center,
+                                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    color: isDark ? DesignTokens.inkDark : DesignTokens.inkLight,
+                                  ),
+                                ),
+                                if (tags.isNotEmpty)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 4.0),
+                                    child: Wrap(
+                                      children: tags
+                                          .map(
+                                            (t) => Padding(
+                                              padding: const EdgeInsets.only(
+                                                right: 2,
+                                              ),
+                                              child: Icon(
+                                                Icons.circle,
+                                                size: 6,
+                                                color: _tagColor(t.name),
+                                              ),
+                                            ),
+                                          )
+                                          .toList(),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
                         );
                       }),
                     ],
                   ),
-                ),
-              ],
+                  // One row per slot
+                  ..._allSlots.map(
+                    (slot) => TableRow(
+                      children: [
+                        _Cell(
+                          child: Text(
+                            _slotLabel(slot),
+                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: isDark ? DesignTokens.inkSoftDark : DesignTokens.inkSoftLight,
+                            ),
+                          ),
+                        ),
+                        ...days.map((d) {
+                          final dateStr = _dateStr(d);
+                          final key = '$dateStr:$slot';
+                          final mealSlot = slotMap[key];
+                          final tags = tagsByDate[dateStr] ?? [];
+                          final tagColors = tags.map((t) => AppColors.forTagName(t.name)).toList();
+
+                          return Container(
+                            decoration: DayWashDecoration(
+                              tagColors: tagColors,
+                              isDark: isDark,
+                            ),
+                            child: _MealCell(
+                              date: dateStr,
+                              slot: slot,
+                              mealSlot: mealSlot,
+                            ),
+                          );
+                        }),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         );

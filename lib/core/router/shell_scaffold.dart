@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../design/tokens.dart';
 import 'routes.dart';
 
 /// 5-tab bottom-navigation shell used by the StatefulShellRoute.
@@ -27,21 +28,33 @@ class ShellScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final lineColor = isDark ? DesignTokens.lineDark : DesignTokens.lineLight;
+
     return Scaffold(
       body: shell,
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: shell.currentIndex,
-        onTap: (index) =>
-            shell.goBranch(index, initialLocation: index == shell.currentIndex),
-        items: _tabs
-            .map(
-              (t) => BottomNavigationBarItem(
-                icon: Icon(t.icon),
-                activeIcon: Icon(t.activeIcon),
-                label: t.label,
-              ),
-            )
-            .toList(),
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          border: Border(
+            top: BorderSide(color: lineColor, width: 1),
+          ),
+        ),
+        child: BottomNavigationBar(
+          currentIndex: shell.currentIndex,
+          elevation: 0,
+          onTap: (index) =>
+              shell.goBranch(index, initialLocation: index == shell.currentIndex),
+          items: _tabs
+              .map(
+                (t) => BottomNavigationBarItem(
+                  icon: Icon(t.icon),
+                  activeIcon: Icon(t.activeIcon),
+                  label: t.label,
+                ),
+              )
+              .toList(),
+        ),
       ),
     );
   }
@@ -57,3 +70,4 @@ extension ShellRouteHelper on GoRouter {
     Routes.more,
   ];
 }
+

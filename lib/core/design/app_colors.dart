@@ -1,41 +1,47 @@
 import 'package:flutter/material.dart';
+import 'tokens.dart';
 
-/// Central color palette for the Personal Planner app.
+/// Central color palette for the Personal Planner app, deriving values from [DesignTokens].
 abstract final class AppColors {
   // ── Location overlays ──────────────────────────────────────────
-  static const Color linz = Color(0xFFF5C518);
-  static const Color salzburg = Color(0xFF7C5CBF);
-  static const Color travel = Color(0xFF3EBF6F);
+  static const Color linz = DesignTokens.butter;
+  static const Color salzburg = DesignTokens.lavender;
+  static const Color travel = DesignTokens.sage;
 
   // ── Priority ───────────────────────────────────────────────────
-  static const Color priorityHigh = Color(0xFFE53935);
-  static const Color priorityNormal = Color(0xFF1E88E5);
-  static const Color priorityLow = Color(0xFF757575);
+  static const Color priorityHigh = DesignTokens.accentLight;
+  static const Color priorityNormal = DesignTokens.dustyBlue;
+  static const Color priorityLow = DesignTokens.inkSoftLight;
 
   // ── Category palette (event types, collections) ────────────────
-  static const Color catSocial = Color(0xFFFF7043);
-  static const Color catAppointment = Color(0xFF00ACC1);
-  static const Color catPartner = Color(0xFFAB47BC);
-  static const Color catUni = Color(0xFF43A047);
-  static const Color catWork = Color(0xFF1565C0);
-  static const Color catFinance = Color(0xFF00897B);
-  static const Color catFitness = Color(0xFFEF6C00);
-  static const Color catMeals = Color(0xFF6D4C41);
-  static const Color catHabits = Color(0xFF0288D1);
+  static const Color catSocial = DesignTokens.rose;
+  static const Color catAppointment = DesignTokens.blush;
+  static const Color catPartner = DesignTokens.dustyBlueSoft;
+  static const Color catUni = DesignTokens.sage;
+  static const Color catWork = DesignTokens.lavender;
+  static const Color catFinance = DesignTokens.sage;
+  static const Color catFitness = DesignTokens.dustyBlue;
+  static const Color catMeals = DesignTokens.peach;
+  static const Color catHabits = DesignTokens.dustyBlue;
 
   // ── Surface / neutral ──────────────────────────────────────────
-  static const Color surface = Color(0xFFFAFAFA);
-  static const Color surfaceDark = Color(0xFF121212);
-  static const Color cardLight = Color(0xFFFFFFFF);
-  static const Color cardDark = Color(0xFF1E1E1E);
-  static const Color divider = Color(0xFFE0E0E0);
-  static const Color dividerDark = Color(0xFF2C2C2C);
+  static const Color surface = DesignTokens.paperLight;
+  static const Color surfaceDark = DesignTokens.paperDark;
+  static const Color cardLight = DesignTokens.surfaceLight;
+  static const Color cardDark = DesignTokens.surfaceDark;
+  static const Color divider = DesignTokens.lineLight;
+  static const Color dividerDark = DesignTokens.lineDark;
 
   // ── Status chips ───────────────────────────────────────────────
-  static const Color statusOpen = Color(0xFFE0E0E0);
-  static const Color statusDone = Color(0xFFC8E6C9);
-  static const Color statusBlocked = Color(0xFFFFCDD2);
-  static const Color statusPlanned = Color(0xFFBBDEFB);
+  static const Color statusOpen = DesignTokens.lineLight;
+  static const Color statusDone = DesignTokens.success;
+  static const Color statusBlocked = DesignTokens.danger;
+  static const Color statusPlanned = DesignTokens.dustyBlueSoft;
+
+  // ── Custom semantic helpers ────────────────────────────────────
+  static const Color success = DesignTokens.success;
+  static const Color warning = DesignTokens.warning;
+  static const Color danger = DesignTokens.danger;
 
   /// Returns the canonical color for a tag kind/name combination.
   static Color forTagName(String name) => switch (name.toLowerCase()) {
@@ -53,3 +59,4 @@ abstract final class AppColors {
     _ => priorityNormal,
   };
 }
+

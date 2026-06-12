@@ -9,6 +9,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../db/database.dart';
+
 /// Export / import a full backup zip containing the SQLite DB + images.
 ///
 /// Zip layout:
@@ -16,7 +18,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 ///   planner.db      — copy of the SQLite database
 ///   images/         — all user images
 class BackupService {
-  BackupService();
+  final AppDatabase _db;
+  BackupService(this._db);
 
   static const _lastBackupKey = 'last_backup_epoch_ms';
   // 30 days in milliseconds
@@ -120,6 +123,7 @@ class BackupService {
 
   Future<bool> _restoreZip(String zipPath) async {
     try {
+      await _db.close();
       final bytes = await File(zipPath).readAsBytes();
       final archive = ZipDecoder().decodeBytes(bytes);
 
@@ -165,7 +169,7 @@ class BackupService {
 // ── Riverpod provider ──────────────────────────────────────────────────────────
 
 final backupServiceProvider = Provider<BackupService>(
-  (_) => BackupService(),
+  (ref) => BackupService(ref.watch(appDatabaseProvider)),
 );
 
 final lastBackupTimeProvider = FutureProvider.autoDispose<DateTime?>((ref) {

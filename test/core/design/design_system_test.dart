@@ -74,12 +74,12 @@ void main() {
 
     testWidgets('shows High label for priority 1', (tester) async {
       await tester.pumpWidget(_wrap(const PriorityBadge(priority: 1)));
-      expect(find.textContaining('High'), findsOneWidget);
+      expect(find.textContaining('HIGH'), findsOneWidget);
     });
 
     testWidgets('shows Low label for priority 3', (tester) async {
       await tester.pumpWidget(_wrap(const PriorityBadge(priority: 3)));
-      expect(find.textContaining('Low'), findsOneWidget);
+      expect(find.textContaining('LOW'), findsOneWidget);
     });
   });
 

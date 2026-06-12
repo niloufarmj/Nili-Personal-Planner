@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/design/design.dart';
 import '../models/forecast_result.dart';
@@ -20,8 +21,36 @@ class ForecastCard extends ConsumerWidget {
     final forecastAsync = ref.watch(_forecastFamilyProvider(month));
 
     return forecastAsync.when(
-      loading: () =>
-          const AppCard(child: LinearProgressIndicator(minHeight: 2)),
+      loading: () => const AppCard(
+        child: Padding(
+          padding: EdgeInsets.all(4),
+          child: Column(
+            children: [
+              Center(child: ShimmerSkeleton(width: 180, height: 16)),
+              SizedBox(height: 12),
+              Center(child: ShimmerSkeleton(width: 140, height: 36)),
+              SizedBox(height: 16),
+              Divider(height: 1),
+              SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  ShimmerSkeleton(width: 80, height: 14),
+                  ShimmerSkeleton(width: 60, height: 14),
+                ],
+              ),
+              SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  ShimmerSkeleton(width: 80, height: 14),
+                  ShimmerSkeleton(width: 60, height: 14),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
       error: (e, _) => AppCard(child: Text('Forecast error: $e')),
       data: (result) => _ForecastCardData(result: result),
     );
@@ -35,9 +64,16 @@ class _ForecastCardData extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tt = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     final balance = result.estimatedEndBalanceCents;
-    final balanceColor = balance >= 0 ? Colors.green[700] : Colors.red[700];
+    final balanceColor = balance >= 0
+        ? (isDark ? DesignTokens.success.withValues(alpha: 0.9) : DesignTokens.success)
+        : (isDark ? DesignTokens.danger.withValues(alpha: 0.9) : DesignTokens.danger);
+
+    final greenColor = isDark ? DesignTokens.success.withValues(alpha: 0.9) : DesignTokens.success;
+    final redColor = isDark ? DesignTokens.danger.withValues(alpha: 0.9) : DesignTokens.danger;
 
     return AppCard(
       child: Padding(
@@ -45,29 +81,41 @@ class _ForecastCardData extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('Est. End-of-Month', style: tt.titleSmall),
-                Text(
-                  CurrencyFormatter.format(balance),
-                  style: tt.titleLarge?.copyWith(
-                    color: balanceColor,
-                    fontWeight: FontWeight.bold,
+            Center(
+              child: Column(
+                children: [
+                  Text(
+                    'Est. End-of-Month',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: isDark ? DesignTokens.inkSoftDark : DesignTokens.inkSoftLight,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 1.0,
+                    ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 8),
+                  Text(
+                    CurrencyFormatter.format(balance),
+                    style: GoogleFonts.fraunces(
+                      fontSize: 32,
+                      fontWeight: FontWeight.w600,
+                      color: balanceColor,
+                    ),
+                  ),
+                ],
+              ),
             ),
-            const Divider(height: 16),
+            const SizedBox(height: 16),
+            const Divider(height: 1),
+            const SizedBox(height: 12),
             _Row(
               label: 'Actual in',
               value: result.actualInCents,
-              color: Colors.green[700],
+              color: greenColor,
             ),
             _Row(
               label: 'Actual out',
               value: -result.actualOutCents,
-              color: Colors.red[700],
+              color: redColor,
             ),
             if (result.projectedRemainingOutCents > 0 ||
                 result.projectedRemainingInCents > 0) ...[
@@ -75,12 +123,12 @@ class _ForecastCardData extends StatelessWidget {
               _Row(
                 label: 'Projected in',
                 value: result.projectedRemainingInCents,
-                color: Colors.green[400],
+                color: isDark ? DesignTokens.success.withValues(alpha: 0.6) : DesignTokens.success.withValues(alpha: 0.8),
               ),
               _Row(
                 label: 'Projected out',
                 value: -result.projectedRemainingOutCents,
-                color: Colors.red[400],
+                color: isDark ? DesignTokens.danger.withValues(alpha: 0.6) : DesignTokens.danger.withValues(alpha: 0.8),
               ),
             ],
             if (result.plannedOutCents > 0 || result.plannedInCents > 0) ...[
@@ -88,12 +136,12 @@ class _ForecastCardData extends StatelessWidget {
               _Row(
                 label: 'Planned in',
                 value: result.plannedInCents,
-                color: Colors.blue[400],
+                color: isDark ? DesignTokens.dustyBlue.withValues(alpha: 0.8) : DesignTokens.dustyBlue,
               ),
               _Row(
                 label: 'Planned out',
                 value: -result.plannedOutCents,
-                color: Colors.orange[400],
+                color: isDark ? DesignTokens.peach.withValues(alpha: 0.8) : DesignTokens.peach,
               ),
             ],
           ],
@@ -112,15 +160,23 @@ class _Row extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
+      padding: const EdgeInsets.symmetric(vertical: 3),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: Theme.of(context).textTheme.bodySmall),
+          Text(
+            label,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: isDark ? DesignTokens.inkSoftDark : DesignTokens.inkSoftLight,
+            ),
+          ),
           Text(
             CurrencyFormatter.format(value.abs()),
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            style: theme.textTheme.bodySmall?.copyWith(
               color: color,
               fontWeight: FontWeight.w600,
             ),

@@ -7,6 +7,7 @@ import 'package:personal_planner/core/db/database.dart';
 import 'package:personal_planner/core/db/repositories/day_repository.dart';
 import 'package:personal_planner/core/db/repositories/event_repository.dart';
 import 'package:drift/drift.dart' show Value;
+import 'package:personal_planner/core/design/design.dart';
 
 AppDatabase _makeDb() => AppDatabase(NativeDatabase.memory());
 
@@ -73,8 +74,8 @@ void main() {
         end: DateTime(2025, 1, 5),
       );
       final day = data['2025-01-05']!;
-      // Travel's green (#3EBF6F) should win over linz yellow
-      expect(day.overlayColor, const Color(0xFF3EBF6F));
+      // Travel's sage should win over linz butter
+      expect(day.overlayColor, AppColors.travel);
     });
 
     test('linz overlay set when only linz tag present', () async {
@@ -88,7 +89,7 @@ void main() {
         start: DateTime(2025, 1, 10),
         end: DateTime(2025, 1, 10),
       );
-      expect(data['2025-01-10']!.overlayColor, const Color(0xFFF5C518));
+      expect(data['2025-01-10']!.overlayColor, AppColors.linz);
     });
 
     // ── Multi-tag activity icons ───────────────────────────────────────────────

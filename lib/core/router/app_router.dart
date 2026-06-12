@@ -1,4 +1,6 @@
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:animations/animations.dart';
 
 import '../../features/calendar/calendar_screen.dart';
 import '../../features/calendar/day_detail_screen.dart';
@@ -24,83 +26,205 @@ import '../../features/trips/trip_detail_screen.dart';
 import '../../features/trips/trip_edit_sheet.dart';
 import '../../features/wellbeing/wellbeing_screen.dart';
 import '../../features/worktime/worktime_screen.dart';
+import '../design/styleguide_screen.dart';
 import 'routes.dart';
 import 'shell_scaffold.dart';
+
+/// Helper to wrap a widget builder with a 200ms fade-through transition.
+Page<dynamic> _fadeThroughPage({
+  required BuildContext context,
+  required GoRouterState state,
+  required Widget child,
+}) {
+  return CustomTransitionPage<void>(
+    key: state.pageKey,
+    child: child,
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      return FadeThroughTransition(
+        animation: animation,
+        secondaryAnimation: secondaryAnimation,
+        child: child,
+      );
+    },
+    transitionDuration: const Duration(milliseconds: 200),
+  );
+}
 
 /// Extension point: agents 2-5 register extra routes here.
 /// Keep the list sorted by feature area.
 final List<RouteBase> agentRoutes = [
   // Finance
-  GoRoute(path: '/finance', builder: (context, state) => const FinanceScreen()),
+  GoRoute(
+    path: '/finance',
+    pageBuilder: (context, state) => _fadeThroughPage(
+      context: context,
+      state: state,
+      child: const FinanceScreen(),
+    ),
+  ),
   GoRoute(
     path: '/finance/charts',
-    builder: (context, state) {
+    pageBuilder: (context, state) {
       final month = (state.extra as DateTime?) ?? DateTime.now();
-      return ChartsScreen(month: month);
+      return _fadeThroughPage(
+        context: context,
+        state: state,
+        child: ChartsScreen(month: month),
+      );
     },
   ),
   GoRoute(
     path: '/finance/recurring',
-    builder: (context, state) => const RecurringScreen(),
+    pageBuilder: (context, state) => _fadeThroughPage(
+      context: context,
+      state: state,
+      child: const RecurringScreen(),
+    ),
   ),
   GoRoute(
     path: '/finance/debts',
-    builder: (context, state) => const DebtsScreen(),
+    pageBuilder: (context, state) => _fadeThroughPage(
+      context: context,
+      state: state,
+      child: const DebtsScreen(),
+    ),
   ),
   // Gym
-  GoRoute(path: '/gym', builder: (context, state) => const GymScreen()),
+  GoRoute(
+    path: '/gym',
+    pageBuilder: (context, state) => _fadeThroughPage(
+      context: context,
+      state: state,
+      child: const GymScreen(),
+    ),
+  ),
   // Fitness, Habits, Wellbeing
   GoRoute(
     path: '/fitness',
-    builder: (context, state) => const FitnessScreen(),
+    pageBuilder: (context, state) => _fadeThroughPage(
+      context: context,
+      state: state,
+      child: const FitnessScreen(),
+    ),
   ),
   GoRoute(
     path: '/habits',
-    builder: (context, state) => const HabitsScreen(),
+    pageBuilder: (context, state) => _fadeThroughPage(
+      context: context,
+      state: state,
+      child: const HabitsScreen(),
+    ),
   ),
   GoRoute(
     path: '/wellbeing',
-    builder: (context, state) => const WellbeingScreen(),
+    pageBuilder: (context, state) => _fadeThroughPage(
+      context: context,
+      state: state,
+      child: const WellbeingScreen(),
+    ),
   ),
   // Work time
   GoRoute(
     path: '/worktime',
-    builder: (context, state) => const WorktimeScreen(),
+    pageBuilder: (context, state) => _fadeThroughPage(
+      context: context,
+      state: state,
+      child: const WorktimeScreen(),
+    ),
   ),
   // Social
-  GoRoute(path: '/social', builder: (context, state) => const SocialScreen()),
+  GoRoute(
+    path: '/social',
+    pageBuilder: (context, state) => _fadeThroughPage(
+      context: context,
+      state: state,
+      child: const SocialScreen(),
+    ),
+  ),
   // Trips
   GoRoute(
     path: '/trips',
-    builder: (context, state) => const TravelPlannerScreen(),
+    pageBuilder: (context, state) => _fadeThroughPage(
+      context: context,
+      state: state,
+      child: const TravelPlannerScreen(),
+    ),
   ),
   GoRoute(
     path: '/trips/new',
-    builder: (context, state) => const TripEditSheet(),
+    pageBuilder: (context, state) => _fadeThroughPage(
+      context: context,
+      state: state,
+      child: const TripEditSheet(),
+    ),
   ),
   GoRoute(
     path: '/trips/:id',
-    builder: (context, state) =>
-        TripDetailScreen(tripId: int.parse(state.pathParameters['id']!)),
+    pageBuilder: (context, state) => _fadeThroughPage(
+      context: context,
+      state: state,
+      child: TripDetailScreen(tripId: int.parse(state.pathParameters['id']!)),
+    ),
   ),
   // Reminders
   GoRoute(
     path: '/reminders',
-    builder: (context, state) => const RemindersScreen(),
+    pageBuilder: (context, state) => _fadeThroughPage(
+      context: context,
+      state: state,
+      child: const RemindersScreen(),
+    ),
   ),
   // Partner
-  GoRoute(path: '/partner', builder: (context, state) => const PartnerScreen()),
+  GoRoute(
+    path: '/partner',
+    pageBuilder: (context, state) => _fadeThroughPage(
+      context: context,
+      state: state,
+      child: const PartnerScreen(),
+    ),
+  ),
   // Meals
-  GoRoute(path: '/meals', builder: (context, state) => const MealsScreen()),
-  GoRoute(path: '/recipes', builder: (context, state) => const RecipesScreen()),
+  GoRoute(
+    path: '/meals',
+    pageBuilder: (context, state) => _fadeThroughPage(
+      context: context,
+      state: state,
+      child: const MealsScreen(),
+    ),
+  ),
+  GoRoute(
+    path: '/recipes',
+    pageBuilder: (context, state) => _fadeThroughPage(
+      context: context,
+      state: state,
+      child: const RecipesScreen(),
+    ),
+  ),
   GoRoute(
     path: '/recipe/new',
-    builder: (context, state) => const RecipeEditScreen(),
+    pageBuilder: (context, state) => _fadeThroughPage(
+      context: context,
+      state: state,
+      child: const RecipeEditScreen(),
+    ),
   ),
   GoRoute(
     path: '/recipe/:id',
-    builder: (context, state) =>
-        RecipeEditScreen(existingId: int.parse(state.pathParameters['id']!)),
+    pageBuilder: (context, state) => _fadeThroughPage(
+      context: context,
+      state: state,
+      child: RecipeEditScreen(existingId: int.parse(state.pathParameters['id']!)),
+    ),
+  ),
+  // Debug
+  GoRoute(
+    path: '/debug/styleguide',
+    pageBuilder: (context, state) => _fadeThroughPage(
+      context: context,
+      state: state,
+      child: const StyleguideScreen(),
+    ),
   ),
 ];
 
@@ -116,7 +240,11 @@ GoRouter buildAppRouter() => GoRouter(
           routes: [
             GoRoute(
               path: Routes.today,
-              builder: (context, state) => const TodayScreen(),
+              pageBuilder: (context, state) => _fadeThroughPage(
+                context: context,
+                state: state,
+                child: const TodayScreen(),
+              ),
             ),
           ],
         ),
@@ -124,7 +252,11 @@ GoRouter buildAppRouter() => GoRouter(
           routes: [
             GoRoute(
               path: Routes.calendar,
-              builder: (context, state) => const CalendarScreen(),
+              pageBuilder: (context, state) => _fadeThroughPage(
+                context: context,
+                state: state,
+                child: const CalendarScreen(),
+              ),
             ),
           ],
         ),
@@ -132,7 +264,11 @@ GoRouter buildAppRouter() => GoRouter(
           routes: [
             GoRoute(
               path: Routes.lists,
-              builder: (context, state) => const ListsScreen(),
+              pageBuilder: (context, state) => _fadeThroughPage(
+                context: context,
+                state: state,
+                child: const ListsScreen(),
+              ),
             ),
           ],
         ),
@@ -140,7 +276,11 @@ GoRouter buildAppRouter() => GoRouter(
           routes: [
             GoRoute(
               path: Routes.track,
-              builder: (context, state) => const TrackScreen(),
+              pageBuilder: (context, state) => _fadeThroughPage(
+                context: context,
+                state: state,
+                child: const TrackScreen(),
+              ),
             ),
           ],
         ),
@@ -148,7 +288,11 @@ GoRouter buildAppRouter() => GoRouter(
           routes: [
             GoRoute(
               path: Routes.more,
-              builder: (context, state) => const MoreScreen(),
+              pageBuilder: (context, state) => _fadeThroughPage(
+                context: context,
+                state: state,
+                child: const MoreScreen(),
+              ),
             ),
           ],
         ),
@@ -157,13 +301,20 @@ GoRouter buildAppRouter() => GoRouter(
     // Deep-link routes (outside the shell, full-screen)
     GoRoute(
       path: Routes.dayDetail,
-      builder: (context, state) =>
-          DayDetailScreen(date: state.pathParameters['date']!),
+      pageBuilder: (context, state) => _fadeThroughPage(
+        context: context,
+        state: state,
+        child: DayDetailScreen(date: state.pathParameters['date']!),
+      ),
     ),
     GoRoute(
       path: Routes.collection,
-      builder: (context, state) => CollectionScreen(
-        collectionId: int.parse(state.pathParameters['id']!),
+      pageBuilder: (context, state) => _fadeThroughPage(
+        context: context,
+        state: state,
+        child: CollectionScreen(
+          collectionId: int.parse(state.pathParameters['id']!),
+        ),
       ),
     ),
     ...agentRoutes,

@@ -50,6 +50,13 @@ dependencies:
   uuid: ^4.5.1
   collection: ^1.19.1
   fl_chart: ^1.2.0
+  google_fonts: ^8.1.0
+  flutter_animate: ^4.5.2
+  figma_squircle: ^0.6.3
+  animations: ^2.2.0
+  shimmer: ^3.0.0
+  confetti: ^0.8.0
+  flutter_svg: ^2.3.0
 
 dev_dependencies:
   flutter_test:
@@ -63,3 +70,6 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/google_fonts/
+

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/db/database.dart';
 import '../../core/design/design.dart';
@@ -9,6 +10,73 @@ import 'repositories/collection_repository.dart';
 import 'templates/template_registry.dart';
 import 'widgets/collection_counts.dart';
 
+// Helper to extract country flag emojis
+String getCountryFlag(String name) {
+  final cleanName = name.trim().toLowerCase();
+  if (cleanName == 'germany') return '🇩🇪';
+  if (cleanName == 'netherlands') return '🇳🇱';
+  if (cleanName == 'spain') return '🇪🇸';
+  if (cleanName == 'australia') return '🇦🇺';
+  if (cleanName == 'austria') return '🇦🇹';
+  if (cleanName == 'belgium') return '🇧🇪';
+  if (cleanName == 'canada') return '🇨🇦';
+  if (cleanName == 'france') return '🇫🇷';
+  if (cleanName == 'italy') return '🇮🇹';
+  return '';
+}
+
+String withCountryFlag(String name) {
+  final flag = getCountryFlag(name);
+  return flag.isNotEmpty ? '$flag $name' : name;
+}
+
+Color getTemplateSoftColor(String templateId, bool isDark) {
+  if (isDark) {
+    final baseColor = switch (templateId) {
+      'simple' => DesignTokens.rose,
+      'chore' => DesignTokens.sage,
+      'shopping' => DesignTokens.peach,
+      'upgrade' => DesignTokens.butter,
+      'task' => DesignTokens.lavender,
+      'job' => DesignTokens.dustyBlue,
+      'growth' => DesignTokens.blush,
+      'media' => DesignTokens.rose,
+      'probable' => DesignTokens.lavender,
+      _ => DesignTokens.rose,
+    };
+    return DesignTokens.resolvePastelFill(color: baseColor, isDark: true);
+  } else {
+    return switch (templateId) {
+      'simple' => DesignTokens.roseSoft,
+      'chore' => DesignTokens.sageSoft,
+      'shopping' => DesignTokens.peachSoft,
+      'upgrade' => DesignTokens.butterSoft,
+      'task' => DesignTokens.lavenderSoft,
+      'job' => DesignTokens.dustyBlueSoft,
+      'growth' => DesignTokens.blushSoft,
+      'media' => DesignTokens.roseSoft,
+      'probable' => DesignTokens.lavenderSoft,
+      _ => DesignTokens.roseSoft,
+    };
+  }
+}
+
+Color getTemplateMainColor(String templateId, bool isDark) {
+  final color = switch (templateId) {
+    'simple' => DesignTokens.rose,
+    'chore' => DesignTokens.sage,
+    'shopping' => DesignTokens.peach,
+    'upgrade' => DesignTokens.butter,
+    'task' => DesignTokens.lavender,
+    'job' => DesignTokens.dustyBlue,
+    'growth' => DesignTokens.blush,
+    'media' => DesignTokens.rose,
+    'probable' => DesignTokens.lavender,
+    _ => DesignTokens.rose,
+  };
+  return isDark ? DesignTokens.adjustColorForDark(color) : color;
+}
+
 /// Lists tab — grid of all list-engine collections.
 class ListsScreen extends ConsumerWidget {
   const ListsScreen({super.key});
@@ -16,12 +84,25 @@ class ListsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final collectionsAsync = ref.watch(_allCollectionsProvider);
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Lists')),
+      appBar: AppBar(
+        title: Text(
+          'Lists',
+          style: GoogleFonts.fraunces(
+            fontSize: DesignTokens.fontTitle,
+            fontWeight: FontWeight.w600,
+            color: isDark ? DesignTokens.inkDark : DesignTokens.inkLight,
+          ),
+        ),
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showNewListFlow(context, ref),
         tooltip: 'New list',
+        backgroundColor: isDark ? DesignTokens.accentDark : DesignTokens.accentLight,
+        foregroundColor: Colors.white,
         child: const Icon(Icons.add),
       ),
       body: collectionsAsync.when(
@@ -45,9 +126,16 @@ class ListsScreen extends ConsumerWidget {
   }
 
   Future<void> _showNewListFlow(BuildContext context, WidgetRef ref) async {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     final result = await showModalBottomSheet<_NewListResult>(
       context: context,
       isScrollControlled: true,
+      backgroundColor: isDark ? DesignTokens.paperDark : DesignTokens.paperLight,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(DesignTokens.radiusSheet)),
+      ),
       builder: (_) => const _NewListSheet(),
     );
     if (result == null || !context.mounted) return;
@@ -83,7 +171,7 @@ class _CollectionsGrid extends StatelessWidget {
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
+      padding: const EdgeInsets.fromLTRB(24, 8, 24, 100),
       itemCount: byTemplate.length,
       itemBuilder: (context, i) {
         final templateId = byTemplate.keys.elementAt(i);
@@ -98,14 +186,14 @@ class _CollectionsGrid extends StatelessWidget {
               physics: const NeverScrollableScrollPhysics(),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
-                mainAxisSpacing: 10,
-                crossAxisSpacing: 10,
-                childAspectRatio: 1.5,
+                mainAxisSpacing: 12,
+                crossAxisSpacing: 12,
+                childAspectRatio: 1.25,
               ),
               itemCount: cols.length,
               itemBuilder: (context, j) => _CollectionCard(collection: cols[j]),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 16),
           ],
         );
       },
@@ -123,30 +211,52 @@ class _CollectionCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final template = TemplateRegistry.get(collection.template);
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    final softBg = getTemplateSoftColor(collection.template, isDark);
+    final mainColor = getTemplateMainColor(collection.template, isDark);
+    final inkColor = isDark ? DesignTokens.inkDark : DesignTokens.inkLight;
 
     return GestureDetector(
       onLongPress: () => _showContextMenu(context, ref),
       child: AppCard(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(16),
+        color: softBg,
         onTap: () => context.push(Routes.collectionPath(collection.id)),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                Icon(template.icon, size: 20),
-                const SizedBox(width: 6),
+                Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: isDark ? DesignTokens.surfaceDark : Colors.white,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(template.icon, size: 16, color: mainColor),
+                ),
+                const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    collection.name,
-                    style: Theme.of(context).textTheme.titleSmall,
+                    withCountryFlag(collection.name),
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: inkColor,
+                    ),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
             ),
             const Spacer(),
-            CollectionCounts(collectionId: collection.id, template: template),
+            CollectionProgressBar(
+              collectionId: collection.id,
+              template: template,
+              mainColor: mainColor,
+            ),
           ],
         ),
       ),
@@ -221,7 +331,12 @@ class _CollectionContextSheet extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           ListTile(
-            title: Text(name, style: Theme.of(context).textTheme.titleMedium),
+            title: Text(
+              withCountryFlag(name),
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
           ),
           const Divider(height: 1),
           ListTile(
@@ -290,7 +405,7 @@ class _NewListSheetState extends State<_NewListSheet> {
   Widget build(BuildContext context) {
     final insets = MediaQuery.viewInsetsOf(context);
     return Padding(
-      padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + insets.bottom),
+      padding: EdgeInsets.fromLTRB(24, 20, 24, 24 + insets.bottom),
       child: AnimatedSwitcher(
         duration: const Duration(milliseconds: 200),
         child: _step == null ? _namePage() : _templatePage(),
@@ -299,12 +414,19 @@ class _NewListSheetState extends State<_NewListSheet> {
   }
 
   Widget _namePage() {
+    final theme = Theme.of(context);
     return Column(
       key: const ValueKey('name'),
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text('New list', style: Theme.of(context).textTheme.titleLarge),
+        Text(
+          'New list',
+          style: theme.textTheme.headlineSmall?.copyWith(
+            fontFamily: GoogleFonts.fraunces().fontFamily,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
         const SizedBox(height: 16),
         TextField(
           controller: _nameController,
@@ -319,6 +441,13 @@ class _NewListSheetState extends State<_NewListSheet> {
         const SizedBox(height: 16),
         FilledButton(
           onPressed: _goToTemplatePicker,
+          style: FilledButton.styleFrom(
+            backgroundColor: theme.brightness == Brightness.dark
+                ? DesignTokens.accentDark
+                : DesignTokens.accentLight,
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(vertical: 14),
+          ),
           child: const Text('Next: pick template'),
         ),
       ],
@@ -326,6 +455,8 @@ class _NewListSheetState extends State<_NewListSheet> {
   }
 
   Widget _templatePage() {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     return Column(
       key: const ValueKey('template'),
       mainAxisSize: MainAxisSize.min,
@@ -339,20 +470,62 @@ class _NewListSheetState extends State<_NewListSheet> {
             ),
             Text(
               'Choose a template',
-              style: Theme.of(context).textTheme.titleMedium,
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontFamily: GoogleFonts.fraunces().fontFamily,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ],
         ),
-        const SizedBox(height: 8),
-        ...TemplateRegistry.all.map(
-          (t) => ListTile(
-            leading: Icon(t.icon),
-            title: Text(t.label),
-            selected: _selectedTemplate == t.id,
-            onTap: () => _pickTemplate(t.id),
-          ),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 10,
+          runSpacing: 10,
+          children: TemplateRegistry.all.map(
+            (t) {
+              final isSelected = _selectedTemplate == t.id;
+              final mainColor = getTemplateMainColor(t.id, isDark);
+              final softColor = getTemplateSoftColor(t.id, isDark);
+              final inkColor = isDark ? DesignTokens.inkDark : DesignTokens.inkLight;
+
+              return GestureDetector(
+                onTap: () => _pickTemplate(t.id),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: softColor,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: isSelected ? mainColor : (isDark ? DesignTokens.lineDark : DesignTokens.lineLight),
+                      width: isSelected ? 2 : 1,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(t.icon, size: 16, color: mainColor),
+                      const SizedBox(width: 8),
+                      Text(
+                        t.label,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: inkColor,
+                        ),
+                      ),
+                      if (isSelected) ...[
+                        const SizedBox(width: 6),
+                        Icon(Icons.check_circle, size: 16, color: DesignTokens.success),
+                      ],
+                    ],
+                  ),
+                ),
+              );
+            },
+          ).toList(),
         ),
       ],
     );
   }
 }
+
+

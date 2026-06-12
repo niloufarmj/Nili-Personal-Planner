@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/db/database.dart';
@@ -12,16 +13,42 @@ class RemindersScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final remindersAsync = ref.watch(_remindersProvider);
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Reminders')),
+      appBar: AppBar(
+        title: Text(
+          'Reminders',
+          style: GoogleFonts.fraunces(
+            fontSize: DesignTokens.fontTitle,
+            fontWeight: FontWeight.w600,
+            color: isDark ? DesignTokens.inkDark : DesignTokens.inkLight,
+          ),
+        ),
+      ),
       floatingActionButton: FloatingActionButton(
         heroTag: 'reminder_fab',
+        backgroundColor: isDark ? DesignTokens.accentDark : DesignTokens.accentLight,
+        foregroundColor: isDark ? DesignTokens.paperDark : DesignTokens.paperLight,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(DesignTokens.radiusInput),
+        ),
         onPressed: () => ReminderEditSheet.show(context),
         child: const Icon(Icons.add),
       ),
       body: remindersAsync.when(
-        loading: () => const LinearProgressIndicator(minHeight: 2),
+        loading: () => Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          child: Column(
+            children: const [
+              ShimmerSkeleton(width: double.infinity, height: 80),
+              SizedBox(height: 16),
+              ShimmerSkeleton(width: double.infinity, height: 80),
+            ],
+          ),
+        ),
         error: (e, _) => Center(child: Text('Error: $e')),
         data: (reminders) {
           if (reminders.isEmpty) {
@@ -43,20 +70,23 @@ class RemindersScreen extends ConsumerWidget {
           final closed = reminders.where((r) => r.status != 'open').toList();
 
           return ListView(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
             children: [
               if (active.isNotEmpty) ...[
                 const SectionHeader(title: 'Active now'),
+                const SizedBox(height: 12),
                 ...active.map((r) => _ReminderCard(r)),
                 const SizedBox(height: 16),
               ],
               if (upcoming.isNotEmpty) ...[
                 const SectionHeader(title: 'Upcoming'),
+                const SizedBox(height: 12),
                 ...upcoming.map((r) => _ReminderCard(r)),
                 const SizedBox(height: 16),
               ],
               if (closed.isNotEmpty) ...[
                 const SectionHeader(title: 'Closed'),
+                const SizedBox(height: 12),
                 ...closed.map((r) => _ReminderCard(r)),
               ],
               const SizedBox(height: 80),
@@ -85,24 +115,45 @@ class _ReminderCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    
     final fmt = DateFormat('d MMM yyyy');
     final startDt = _parse(reminder.windowStart);
     final endDt = reminder.windowEnd != null
         ? _parse(reminder.windowEnd!)
         : null;
 
-    return AppCard(
-      child: ListTile(
-        leading: PriorityBadge(priority: reminder.priority),
-        title: Text(reminder.title),
-        subtitle: Text(
-          endDt != null
-              ? '${fmt.format(startDt)} – ${fmt.format(endDt)}'
-              : 'From ${fmt.format(startDt)}',
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: AppCard(
+        child: ListTile(
+          contentPadding: EdgeInsets.zero,
+          leading: PriorityBadge(priority: reminder.priority),
+          title: Text(
+            reminder.title,
+            style: theme.textTheme.bodyLarge?.copyWith(
+              fontWeight: FontWeight.w600,
+              fontSize: DesignTokens.fontBody,
+              color: isDark ? DesignTokens.inkDark : DesignTokens.inkLight,
+            ),
+          ),
+          subtitle: Padding(
+            padding: const EdgeInsets.only(top: 4.0),
+            child: Text(
+              endDt != null
+                  ? '${fmt.format(startDt)} – ${fmt.format(endDt)}'
+                  : 'From ${fmt.format(startDt)}',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontSize: DesignTokens.fontCaption,
+                color: isDark ? DesignTokens.inkSoftDark : DesignTokens.inkSoftLight,
+              ),
+            ),
+          ),
+          trailing: StatusChip(status: reminder.status),
+          onTap: () => ReminderEditSheet.show(context, existing: reminder),
+          onLongPress: () => _showActions(context, ref),
         ),
-        trailing: StatusChip(status: reminder.status),
-        onTap: () => ReminderEditSheet.show(context, existing: reminder),
-        onLongPress: () => _showActions(context, ref),
       ),
     );
   }
