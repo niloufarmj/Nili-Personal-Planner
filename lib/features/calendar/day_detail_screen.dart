@@ -4,6 +4,9 @@ import 'package:intl/intl.dart';
 
 import '../../core/db/repositories/event_repository.dart';
 import '../../core/design/design.dart';
+import '../finance/repositories/transaction_repository.dart';
+import '../finance/widgets/transaction_tile.dart';
+import '../gym/gym_screen.dart';
 import 'day_tag_picker.dart';
 import 'event_edit_sheet.dart';
 
@@ -18,9 +21,7 @@ class DayDetailScreen extends ConsumerWidget {
     final headerFmt = DateFormat('EEEE, MMMM d, yyyy');
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(headerFmt.format(parsed)),
-      ),
+      appBar: AppBar(title: Text(headerFmt.format(parsed))),
       floatingActionButton: FloatingActionButton.small(
         heroTag: 'day_detail_fab',
         tooltip: 'Add event',
@@ -42,13 +43,19 @@ class DayDetailScreen extends ConsumerWidget {
           _EventsSection(date: date),
           const SizedBox(height: 20),
 
-          // ── Placeholder sections for agents 2-5 ──────────────────────
+          // ── Finance (planned transactions) ────────────────────────────
+          const SectionHeader(title: 'Finance'),
+          const SizedBox(height: 8),
+          _FinanceSection(date: date),
+          const SizedBox(height: 20),
+
+          // ── Placeholder sections for other agents ─────────────────────
           const SectionHeader(title: 'Meals'),
           const _PlaceholderSection(message: 'Meal planner — coming soon'),
           const SizedBox(height: 20),
 
           const SectionHeader(title: 'Gym'),
-          const _PlaceholderSection(message: 'Fitness tracker — coming soon'),
+          DayDetailGymSection(date: date),
           const SizedBox(height: 20),
 
           const SectionHeader(title: 'Due items'),
@@ -77,9 +84,7 @@ class _EventsSection extends ConsumerWidget {
     final day = _parseDate(date);
 
     final occAsync = ref.watch(
-      FutureProvider.autoDispose(
-        (_) => eventRepo.expandOccurrences(day, day),
-      ),
+      FutureProvider.autoDispose((_) => eventRepo.expandOccurrences(day, day)),
     );
 
     return occAsync.when(
@@ -132,6 +137,41 @@ class _EventsSection extends ConsumerWidget {
   static DateTime _parseDate(String iso) {
     final p = iso.split('-');
     return DateTime(int.parse(p[0]), int.parse(p[1]), int.parse(p[2]));
+  }
+}
+
+// ── Finance section ────────────────────────────────────────────────────────────
+
+class _FinanceSection extends ConsumerWidget {
+  const _FinanceSection({required this.date});
+  final String date;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final txAsync = ref.watch(
+      FutureProvider.autoDispose(
+        (_) => ref.watch(transactionRepositoryProvider).getByDate(date),
+      ),
+    );
+
+    return txAsync.when(
+      loading: () => const LinearProgressIndicator(minHeight: 2),
+      error: (e, _) => Text('Error: $e'),
+      data: (txs) {
+        if (txs.isEmpty) {
+          return const Padding(
+            padding: EdgeInsets.only(left: 4),
+            child: Text(
+              'No transactions',
+              style: TextStyle(color: Colors.grey),
+            ),
+          );
+        }
+        return Column(
+          children: txs.map((tx) => TransactionTile(transaction: tx)).toList(),
+        );
+      },
+    );
   }
 }
 
