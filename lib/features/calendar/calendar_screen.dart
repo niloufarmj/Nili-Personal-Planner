@@ -14,8 +14,8 @@ import '../../core/router/routes.dart';
 
 final _calendarFilterProvider =
     StateNotifierProvider<_FilterNotifier, CalendarFilter>(
-  (_) => _FilterNotifier(),
-);
+      (_) => _FilterNotifier(),
+    );
 
 class _FilterNotifier extends StateNotifier<CalendarFilter> {
   _FilterNotifier() : super(CalendarFilter.all) {
@@ -77,9 +77,9 @@ class _FilterNotifier extends StateNotifier<CalendarFilter> {
 // Aggregated data for the visible month ± 1 month buffer.
 final _calendarDataProvider = FutureProvider.autoDispose
     .family<Map<String, CalendarDayData>, _AggKey>((ref, key) {
-  final agg = ref.watch(calendarAggregatorProvider);
-  return agg.getDataForRange(key.start, key.end, filter: key.filter);
-});
+      final agg = ref.watch(calendarAggregatorProvider);
+      return agg.getDataForRange(key.start, key.end, filter: key.filter);
+    });
 
 class _AggKey {
   const _AggKey({required this.start, required this.end, required this.filter});
@@ -119,11 +119,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
   @override
   Widget build(BuildContext context) {
     final filter = ref.watch(_calendarFilterProvider);
-    final key = _AggKey(
-      start: _windowStart,
-      end: _windowEnd,
-      filter: filter,
-    );
+    final key = _AggKey(start: _windowStart, end: _windowEnd, filter: filter);
     final dataAsync = ref.watch(_calendarDataProvider(key));
 
     return Scaffold(
@@ -270,8 +266,7 @@ class _DayCell extends StatelessWidget {
               fontWeight: isToday || isSelected ? FontWeight.bold : null,
             ),
           ),
-          if (dayData != null && !dayData!.isEmpty)
-            _DotRow(dayData: dayData!),
+          if (dayData != null && !dayData!.isEmpty) _DotRow(dayData: dayData!),
         ],
       ),
     );
@@ -284,28 +279,66 @@ class _DotRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dots = <Color>[
-      if (dayData.eventOccurrences.isNotEmpty) AppColors.catSocial,
-      if (dayData.tripBars.isNotEmpty) AppColors.travel,
-      if (dayData.gymSession != null) AppColors.catFitness,
-      if (dayData.mealDots > 0) AppColors.catMeals,
-      if (dayData.dueDots > 0) AppColors.catWork,
-    ];
-    if (dots.isEmpty) return const SizedBox.shrink();
+    if (_isEmpty) return const SizedBox.shrink();
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
-      children: dots
-          .take(3)
-          .map(
-            (c) => Container(
-              width: 4,
-              height: 4,
-              margin: const EdgeInsets.symmetric(horizontal: 1),
-              decoration: BoxDecoration(color: c, shape: BoxShape.circle),
-            ),
-          )
-          .toList(),
+      children: _buildDotWidgets().take(3).toList(),
     );
+  }
+
+  bool get _isEmpty =>
+      dayData.eventOccurrences.isEmpty &&
+      dayData.tripBars.isEmpty &&
+      dayData.gymSession == null &&
+      dayData.mealDots == 0 &&
+      dayData.dueDots == 0;
+
+  List<Widget> _buildDotWidgets() {
+    final widgets = <Widget>[];
+
+    if (dayData.eventOccurrences.isNotEmpty) {
+      widgets.add(_filledDot(AppColors.catSocial));
+    }
+    if (dayData.tripBars.isNotEmpty) {
+      widgets.add(_filledDot(AppColors.travel));
+    }
+    if (dayData.gymSession != null) {
+      // outlined dot = planned, filled dot = done, faded = missed
+      final s = dayData.gymSession!;
+      widgets.add(_gymDot(s.status));
+    }
+    if (dayData.mealDots > 0) {
+      widgets.add(_filledDot(AppColors.catMeals));
+    }
+    if (dayData.dueDots > 0) {
+      widgets.add(_filledDot(AppColors.catWork));
+    }
+    return widgets;
+  }
+
+  static Widget _filledDot(Color c) => Container(
+    width: 4,
+    height: 4,
+    margin: const EdgeInsets.symmetric(horizontal: 1),
+    decoration: BoxDecoration(color: c, shape: BoxShape.circle),
+  );
+
+  static Widget _gymDot(String status) {
+    const color = AppColors.catFitness;
+    if (status == 'done') return _filledDot(color);
+    if (status == 'planned') {
+      return Container(
+        width: 5,
+        height: 5,
+        margin: const EdgeInsets.symmetric(horizontal: 1),
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(color: color, width: 1.5),
+        ),
+      );
+    }
+    // missed — faded filled dot
+    return _filledDot(color.withAlpha(80));
   }
 }
 
@@ -327,23 +360,53 @@ class _FilterSheet extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Show on calendar',
-                style: Theme.of(context).textTheme.titleMedium),
+            Text(
+              'Show on calendar',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
             const SizedBox(height: 12),
             Wrap(
               spacing: 8,
               runSpacing: 4,
               children: [
-                _Chip('Location', current.showLocation, () => notifier.toggle('location')),
+                _Chip(
+                  'Location',
+                  current.showLocation,
+                  () => notifier.toggle('location'),
+                ),
                 _Chip('Gym', current.showGym, () => notifier.toggle('gym')),
-                _Chip('Meals', current.showMeals, () => notifier.toggle('meals')),
+                _Chip(
+                  'Meals',
+                  current.showMeals,
+                  () => notifier.toggle('meals'),
+                ),
                 _Chip('Work', current.showWork, () => notifier.toggle('work')),
                 _Chip('Uni', current.showUni, () => notifier.toggle('uni')),
-                _Chip('Travel', current.showTravel, () => notifier.toggle('travel')),
-                _Chip('Social', current.showSocial, () => notifier.toggle('social')),
-                _Chip('Tasks', current.showTasks, () => notifier.toggle('tasks')),
-                _Chip('Partner', current.showPartner, () => notifier.toggle('partner')),
-                _Chip('Reminders', current.showReminders, () => notifier.toggle('reminders')),
+                _Chip(
+                  'Travel',
+                  current.showTravel,
+                  () => notifier.toggle('travel'),
+                ),
+                _Chip(
+                  'Social',
+                  current.showSocial,
+                  () => notifier.toggle('social'),
+                ),
+                _Chip(
+                  'Tasks',
+                  current.showTasks,
+                  () => notifier.toggle('tasks'),
+                ),
+                _Chip(
+                  'Partner',
+                  current.showPartner,
+                  () => notifier.toggle('partner'),
+                ),
+                _Chip(
+                  'Reminders',
+                  current.showReminders,
+                  () => notifier.toggle('reminders'),
+                ),
               ],
             ),
           ],

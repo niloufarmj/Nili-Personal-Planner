@@ -3917,6 +3917,330 @@ class SubtasksCompanion extends UpdateCompanion<Subtask> {
   }
 }
 
+class $ChoreCompletionsTable extends ChoreCompletions
+    with TableInfo<$ChoreCompletionsTable, ChoreCompletion> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ChoreCompletionsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _itemIdMeta = const VerificationMeta('itemId');
+  @override
+  late final GeneratedColumn<int> itemId = GeneratedColumn<int>(
+    'item_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES items (id)',
+    ),
+  );
+  static const VerificationMeta _completedAtMeta = const VerificationMeta(
+    'completedAt',
+  );
+  @override
+  late final GeneratedColumn<String> completedAt = GeneratedColumn<String>(
+    'completed_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _dueDateAtCompletionMeta =
+      const VerificationMeta('dueDateAtCompletion');
+  @override
+  late final GeneratedColumn<String> dueDateAtCompletion =
+      GeneratedColumn<String>(
+        'due_date_at_completion',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    itemId,
+    completedAt,
+    dueDateAtCompletion,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'chore_completions';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ChoreCompletion> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('item_id')) {
+      context.handle(
+        _itemIdMeta,
+        itemId.isAcceptableOrUnknown(data['item_id']!, _itemIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_itemIdMeta);
+    }
+    if (data.containsKey('completed_at')) {
+      context.handle(
+        _completedAtMeta,
+        completedAt.isAcceptableOrUnknown(
+          data['completed_at']!,
+          _completedAtMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_completedAtMeta);
+    }
+    if (data.containsKey('due_date_at_completion')) {
+      context.handle(
+        _dueDateAtCompletionMeta,
+        dueDateAtCompletion.isAcceptableOrUnknown(
+          data['due_date_at_completion']!,
+          _dueDateAtCompletionMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ChoreCompletion map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ChoreCompletion(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      itemId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}item_id'],
+      )!,
+      completedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}completed_at'],
+      )!,
+      dueDateAtCompletion: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}due_date_at_completion'],
+      ),
+    );
+  }
+
+  @override
+  $ChoreCompletionsTable createAlias(String alias) {
+    return $ChoreCompletionsTable(attachedDatabase, alias);
+  }
+}
+
+class ChoreCompletion extends DataClass implements Insertable<ChoreCompletion> {
+  final int id;
+  final int itemId;
+  final String completedAt;
+  final String? dueDateAtCompletion;
+  const ChoreCompletion({
+    required this.id,
+    required this.itemId,
+    required this.completedAt,
+    this.dueDateAtCompletion,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['item_id'] = Variable<int>(itemId);
+    map['completed_at'] = Variable<String>(completedAt);
+    if (!nullToAbsent || dueDateAtCompletion != null) {
+      map['due_date_at_completion'] = Variable<String>(dueDateAtCompletion);
+    }
+    return map;
+  }
+
+  ChoreCompletionsCompanion toCompanion(bool nullToAbsent) {
+    return ChoreCompletionsCompanion(
+      id: Value(id),
+      itemId: Value(itemId),
+      completedAt: Value(completedAt),
+      dueDateAtCompletion: dueDateAtCompletion == null && nullToAbsent
+          ? const Value.absent()
+          : Value(dueDateAtCompletion),
+    );
+  }
+
+  factory ChoreCompletion.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ChoreCompletion(
+      id: serializer.fromJson<int>(json['id']),
+      itemId: serializer.fromJson<int>(json['itemId']),
+      completedAt: serializer.fromJson<String>(json['completedAt']),
+      dueDateAtCompletion: serializer.fromJson<String?>(
+        json['dueDateAtCompletion'],
+      ),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'itemId': serializer.toJson<int>(itemId),
+      'completedAt': serializer.toJson<String>(completedAt),
+      'dueDateAtCompletion': serializer.toJson<String?>(dueDateAtCompletion),
+    };
+  }
+
+  ChoreCompletion copyWith({
+    int? id,
+    int? itemId,
+    String? completedAt,
+    Value<String?> dueDateAtCompletion = const Value.absent(),
+  }) => ChoreCompletion(
+    id: id ?? this.id,
+    itemId: itemId ?? this.itemId,
+    completedAt: completedAt ?? this.completedAt,
+    dueDateAtCompletion: dueDateAtCompletion.present
+        ? dueDateAtCompletion.value
+        : this.dueDateAtCompletion,
+  );
+  ChoreCompletion copyWithCompanion(ChoreCompletionsCompanion data) {
+    return ChoreCompletion(
+      id: data.id.present ? data.id.value : this.id,
+      itemId: data.itemId.present ? data.itemId.value : this.itemId,
+      completedAt: data.completedAt.present
+          ? data.completedAt.value
+          : this.completedAt,
+      dueDateAtCompletion: data.dueDateAtCompletion.present
+          ? data.dueDateAtCompletion.value
+          : this.dueDateAtCompletion,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ChoreCompletion(')
+          ..write('id: $id, ')
+          ..write('itemId: $itemId, ')
+          ..write('completedAt: $completedAt, ')
+          ..write('dueDateAtCompletion: $dueDateAtCompletion')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, itemId, completedAt, dueDateAtCompletion);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ChoreCompletion &&
+          other.id == this.id &&
+          other.itemId == this.itemId &&
+          other.completedAt == this.completedAt &&
+          other.dueDateAtCompletion == this.dueDateAtCompletion);
+}
+
+class ChoreCompletionsCompanion extends UpdateCompanion<ChoreCompletion> {
+  final Value<int> id;
+  final Value<int> itemId;
+  final Value<String> completedAt;
+  final Value<String?> dueDateAtCompletion;
+  const ChoreCompletionsCompanion({
+    this.id = const Value.absent(),
+    this.itemId = const Value.absent(),
+    this.completedAt = const Value.absent(),
+    this.dueDateAtCompletion = const Value.absent(),
+  });
+  ChoreCompletionsCompanion.insert({
+    this.id = const Value.absent(),
+    required int itemId,
+    required String completedAt,
+    this.dueDateAtCompletion = const Value.absent(),
+  }) : itemId = Value(itemId),
+       completedAt = Value(completedAt);
+  static Insertable<ChoreCompletion> custom({
+    Expression<int>? id,
+    Expression<int>? itemId,
+    Expression<String>? completedAt,
+    Expression<String>? dueDateAtCompletion,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (itemId != null) 'item_id': itemId,
+      if (completedAt != null) 'completed_at': completedAt,
+      if (dueDateAtCompletion != null)
+        'due_date_at_completion': dueDateAtCompletion,
+    });
+  }
+
+  ChoreCompletionsCompanion copyWith({
+    Value<int>? id,
+    Value<int>? itemId,
+    Value<String>? completedAt,
+    Value<String?>? dueDateAtCompletion,
+  }) {
+    return ChoreCompletionsCompanion(
+      id: id ?? this.id,
+      itemId: itemId ?? this.itemId,
+      completedAt: completedAt ?? this.completedAt,
+      dueDateAtCompletion: dueDateAtCompletion ?? this.dueDateAtCompletion,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (itemId.present) {
+      map['item_id'] = Variable<int>(itemId.value);
+    }
+    if (completedAt.present) {
+      map['completed_at'] = Variable<String>(completedAt.value);
+    }
+    if (dueDateAtCompletion.present) {
+      map['due_date_at_completion'] = Variable<String>(
+        dueDateAtCompletion.value,
+      );
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ChoreCompletionsCompanion(')
+          ..write('id: $id, ')
+          ..write('itemId: $itemId, ')
+          ..write('completedAt: $completedAt, ')
+          ..write('dueDateAtCompletion: $dueDateAtCompletion')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $TransactionsTable extends Transactions
     with TableInfo<$TransactionsTable, Transaction> {
   @override
@@ -10889,6 +11213,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $CollectionsTable collections = $CollectionsTable(this);
   late final $ItemsTable items = $ItemsTable(this);
   late final $SubtasksTable subtasks = $SubtasksTable(this);
+  late final $ChoreCompletionsTable choreCompletions = $ChoreCompletionsTable(
+    this,
+  );
   late final $TransactionsTable transactions = $TransactionsTable(this);
   late final $RecurringTransactionsTable recurringTransactions =
       $RecurringTransactionsTable(this);
@@ -10926,6 +11253,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     collections,
     items,
     subtasks,
+    choreCompletions,
     transactions,
     recurringTransactions,
     debts,
@@ -12979,6 +13307,26 @@ final class $$ItemsTableReferences
     );
   }
 
+  static MultiTypedResultKey<$ChoreCompletionsTable, List<ChoreCompletion>>
+  _choreCompletionsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.choreCompletions,
+    aliasName: $_aliasNameGenerator(db.items.id, db.choreCompletions.itemId),
+  );
+
+  $$ChoreCompletionsTableProcessedTableManager get choreCompletionsRefs {
+    final manager = $$ChoreCompletionsTableTableManager(
+      $_db,
+      $_db.choreCompletions,
+    ).filter((f) => f.itemId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _choreCompletionsRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
   static MultiTypedResultKey<$TransactionsTable, List<Transaction>>
   _transactionsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
     db.transactions,
@@ -13128,6 +13476,31 @@ class $$ItemsTableFilterComposer extends Composer<_$AppDatabase, $ItemsTable> {
           }) => $$SubtasksTableFilterComposer(
             $db: $db,
             $table: $db.subtasks,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> choreCompletionsRefs(
+    Expression<bool> Function($$ChoreCompletionsTableFilterComposer f) f,
+  ) {
+    final $$ChoreCompletionsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.choreCompletions,
+      getReferencedColumn: (t) => t.itemId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ChoreCompletionsTableFilterComposer(
+            $db: $db,
+            $table: $db.choreCompletions,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -13384,6 +13757,31 @@ class $$ItemsTableAnnotationComposer
     return f(composer);
   }
 
+  Expression<T> choreCompletionsRefs<T extends Object>(
+    Expression<T> Function($$ChoreCompletionsTableAnnotationComposer a) f,
+  ) {
+    final $$ChoreCompletionsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.choreCompletions,
+      getReferencedColumn: (t) => t.itemId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ChoreCompletionsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.choreCompletions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
   Expression<T> transactionsRefs<T extends Object>(
     Expression<T> Function($$TransactionsTableAnnotationComposer a) f,
   ) {
@@ -13451,6 +13849,7 @@ class $$ItemsTableTableManager
           PrefetchHooks Function({
             bool collectionId,
             bool subtasksRefs,
+            bool choreCompletionsRefs,
             bool transactionsRefs,
             bool timeEntriesRefs,
           })
@@ -13536,6 +13935,7 @@ class $$ItemsTableTableManager
               ({
                 collectionId = false,
                 subtasksRefs = false,
+                choreCompletionsRefs = false,
                 transactionsRefs = false,
                 timeEntriesRefs = false,
               }) {
@@ -13543,6 +13943,7 @@ class $$ItemsTableTableManager
                   db: db,
                   explicitlyWatchedTables: [
                     if (subtasksRefs) db.subtasks,
+                    if (choreCompletionsRefs) db.choreCompletions,
                     if (transactionsRefs) db.transactions,
                     if (timeEntriesRefs) db.timeEntries,
                   ],
@@ -13591,6 +13992,27 @@ class $$ItemsTableTableManager
                                 table,
                                 p0,
                               ).subtasksRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.itemId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (choreCompletionsRefs)
+                        await $_getPrefetchedData<
+                          Item,
+                          $ItemsTable,
+                          ChoreCompletion
+                        >(
+                          currentTable: table,
+                          referencedTable: $$ItemsTableReferences
+                              ._choreCompletionsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$ItemsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).choreCompletionsRefs,
                           referencedItemsForCurrentItem:
                               (item, referencedItems) => referencedItems.where(
                                 (e) => e.itemId == item.id,
@@ -13658,6 +14080,7 @@ typedef $$ItemsTableProcessedTableManager =
       PrefetchHooks Function({
         bool collectionId,
         bool subtasksRefs,
+        bool choreCompletionsRefs,
         bool transactionsRefs,
         bool timeEntriesRefs,
       })
@@ -13972,6 +14395,312 @@ typedef $$SubtasksTableProcessedTableManager =
       $$SubtasksTableUpdateCompanionBuilder,
       (Subtask, $$SubtasksTableReferences),
       Subtask,
+      PrefetchHooks Function({bool itemId})
+    >;
+typedef $$ChoreCompletionsTableCreateCompanionBuilder =
+    ChoreCompletionsCompanion Function({
+      Value<int> id,
+      required int itemId,
+      required String completedAt,
+      Value<String?> dueDateAtCompletion,
+    });
+typedef $$ChoreCompletionsTableUpdateCompanionBuilder =
+    ChoreCompletionsCompanion Function({
+      Value<int> id,
+      Value<int> itemId,
+      Value<String> completedAt,
+      Value<String?> dueDateAtCompletion,
+    });
+
+final class $$ChoreCompletionsTableReferences
+    extends
+        BaseReferences<_$AppDatabase, $ChoreCompletionsTable, ChoreCompletion> {
+  $$ChoreCompletionsTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $ItemsTable _itemIdTable(_$AppDatabase db) => db.items.createAlias(
+    $_aliasNameGenerator(db.choreCompletions.itemId, db.items.id),
+  );
+
+  $$ItemsTableProcessedTableManager get itemId {
+    final $_column = $_itemColumn<int>('item_id')!;
+
+    final manager = $$ItemsTableTableManager(
+      $_db,
+      $_db.items,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_itemIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$ChoreCompletionsTableFilterComposer
+    extends Composer<_$AppDatabase, $ChoreCompletionsTable> {
+  $$ChoreCompletionsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get completedAt => $composableBuilder(
+    column: $table.completedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get dueDateAtCompletion => $composableBuilder(
+    column: $table.dueDateAtCompletion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$ItemsTableFilterComposer get itemId {
+    final $$ItemsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.itemId,
+      referencedTable: $db.items,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ItemsTableFilterComposer(
+            $db: $db,
+            $table: $db.items,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ChoreCompletionsTableOrderingComposer
+    extends Composer<_$AppDatabase, $ChoreCompletionsTable> {
+  $$ChoreCompletionsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get completedAt => $composableBuilder(
+    column: $table.completedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get dueDateAtCompletion => $composableBuilder(
+    column: $table.dueDateAtCompletion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$ItemsTableOrderingComposer get itemId {
+    final $$ItemsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.itemId,
+      referencedTable: $db.items,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ItemsTableOrderingComposer(
+            $db: $db,
+            $table: $db.items,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ChoreCompletionsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ChoreCompletionsTable> {
+  $$ChoreCompletionsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get completedAt => $composableBuilder(
+    column: $table.completedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get dueDateAtCompletion => $composableBuilder(
+    column: $table.dueDateAtCompletion,
+    builder: (column) => column,
+  );
+
+  $$ItemsTableAnnotationComposer get itemId {
+    final $$ItemsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.itemId,
+      referencedTable: $db.items,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ItemsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.items,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ChoreCompletionsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ChoreCompletionsTable,
+          ChoreCompletion,
+          $$ChoreCompletionsTableFilterComposer,
+          $$ChoreCompletionsTableOrderingComposer,
+          $$ChoreCompletionsTableAnnotationComposer,
+          $$ChoreCompletionsTableCreateCompanionBuilder,
+          $$ChoreCompletionsTableUpdateCompanionBuilder,
+          (ChoreCompletion, $$ChoreCompletionsTableReferences),
+          ChoreCompletion,
+          PrefetchHooks Function({bool itemId})
+        > {
+  $$ChoreCompletionsTableTableManager(
+    _$AppDatabase db,
+    $ChoreCompletionsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ChoreCompletionsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ChoreCompletionsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ChoreCompletionsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> itemId = const Value.absent(),
+                Value<String> completedAt = const Value.absent(),
+                Value<String?> dueDateAtCompletion = const Value.absent(),
+              }) => ChoreCompletionsCompanion(
+                id: id,
+                itemId: itemId,
+                completedAt: completedAt,
+                dueDateAtCompletion: dueDateAtCompletion,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int itemId,
+                required String completedAt,
+                Value<String?> dueDateAtCompletion = const Value.absent(),
+              }) => ChoreCompletionsCompanion.insert(
+                id: id,
+                itemId: itemId,
+                completedAt: completedAt,
+                dueDateAtCompletion: dueDateAtCompletion,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$ChoreCompletionsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({itemId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (itemId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.itemId,
+                                referencedTable:
+                                    $$ChoreCompletionsTableReferences
+                                        ._itemIdTable(db),
+                                referencedColumn:
+                                    $$ChoreCompletionsTableReferences
+                                        ._itemIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$ChoreCompletionsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ChoreCompletionsTable,
+      ChoreCompletion,
+      $$ChoreCompletionsTableFilterComposer,
+      $$ChoreCompletionsTableOrderingComposer,
+      $$ChoreCompletionsTableAnnotationComposer,
+      $$ChoreCompletionsTableCreateCompanionBuilder,
+      $$ChoreCompletionsTableUpdateCompanionBuilder,
+      (ChoreCompletion, $$ChoreCompletionsTableReferences),
+      ChoreCompletion,
       PrefetchHooks Function({bool itemId})
     >;
 typedef $$TransactionsTableCreateCompanionBuilder =
@@ -19952,6 +20681,8 @@ class $AppDatabaseManager {
       $$ItemsTableTableManager(_db, _db.items);
   $$SubtasksTableTableManager get subtasks =>
       $$SubtasksTableTableManager(_db, _db.subtasks);
+  $$ChoreCompletionsTableTableManager get choreCompletions =>
+      $$ChoreCompletionsTableTableManager(_db, _db.choreCompletions);
   $$TransactionsTableTableManager get transactions =>
       $$TransactionsTableTableManager(_db, _db.transactions);
   $$RecurringTransactionsTableTableManager get recurringTransactions =>
