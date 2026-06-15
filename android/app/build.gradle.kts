@@ -13,6 +13,7 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+        isCoreLibraryDesugaringEnabled = true
     }
 
     kotlinOptions {
@@ -24,7 +25,7 @@ android {
         applicationId = "com.nili.personal_planner"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
+        minSdk = flutter.minSdkVersion // Desugaring requires minSdk 21 or higher, flutter's default is usually 21
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
@@ -39,6 +40,22 @@ android {
     }
 }
 
+dependencies {
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.3")
+}
+
 flutter {
-    source = "../.."
+    source = project.file("../..").absolutePath
+}
+
+tasks.configureEach {
+    if (name.startsWith("check") && name.endsWith("AarMetadata")) {
+        val buildTask = name.replace("check", "compileFlutterBuild").replace("AarMetadata", "")
+        dependsOn(buildTask)
+    }
+
+    if (name.startsWith("merge") && name.endsWith("Shaders")) {
+        val buildTask = name.replace("merge", "compileFlutterBuild").replace("Shaders", "")
+        dependsOn(buildTask)
+    }
 }

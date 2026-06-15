@@ -22,9 +22,11 @@ class CalendarAggregator {
   }) async {
     // Build skeleton — every day in window gets an entry.
     final result = <String, _MutableDayData>{};
-    for (var d = _dayOnly(start);
-        !d.isAfter(_dayOnly(end));
-        d = d.add(const Duration(days: 1))) {
+    for (
+      var d = _dayOnly(start);
+      !d.isAfter(_dayOnly(end));
+      d = d.add(const Duration(days: 1))
+    ) {
       result[_fmt(d)] = _MutableDayData(d);
     }
 
@@ -37,6 +39,7 @@ class CalendarAggregator {
       if (filter.showMeals) _applyMealDots(result, start, end),
       if (filter.showGym) _applyGymSessions(result, start, end),
       if (filter.showTasks) _applyDueDots(result, start, end),
+      if (filter.showFinance) _applyFinanceDots(result, start, end),
     ]);
 
     return result.map((k, v) => MapEntry(k, v.build()));
@@ -53,20 +56,21 @@ class CalendarAggregator {
     final startStr = _fmt(_dayOnly(start));
     final endStr = _fmt(_dayOnly(end));
 
-    final rows = await (_db.select(_db.dayTags)
-          ..where(
-            (dt) => dt.date.isBiggerOrEqualValue(startStr) &
-                dt.date.isSmallerOrEqualValue(endStr),
-          ))
-        .get();
+    final rows =
+        await (_db.select(_db.dayTags)..where(
+              (dt) =>
+                  dt.date.isBiggerOrEqualValue(startStr) &
+                  dt.date.isSmallerOrEqualValue(endStr),
+            ))
+            .get();
 
     if (rows.isEmpty) return;
 
     // Load all tags in one query.
     final tagIds = rows.map((r) => r.tagId).toSet().toList();
-    final tags = await (_db.select(_db.tags)
-          ..where((t) => t.id.isIn(tagIds)))
-        .get();
+    final tags = await (_db.select(
+      _db.tags,
+    )..where((t) => t.id.isIn(tagIds))).get();
     final tagById = {for (final t in tags) t.id: t};
 
     for (final row in rows) {
@@ -128,9 +132,9 @@ class CalendarAggregator {
     DateTime start,
     DateTime end,
   ) async {
-    final trips = await (_db.select(_db.trips)
-          ..where((t) => t.status.equals('final')))
-        .get();
+    final trips = await (_db.select(
+      _db.trips,
+    )..where((t) => t.status.equals('final'))).get();
 
     for (final trip in trips) {
       if (trip.startDate == null || trip.endDate == null) continue;
@@ -140,9 +144,11 @@ class CalendarAggregator {
       final rangeStart = ts.isBefore(start) ? start : ts;
       final rangeEnd = te.isAfter(end) ? end : te;
       if (rangeStart.isAfter(rangeEnd)) continue;
-      for (var d = _dayOnly(rangeStart);
-          !d.isAfter(_dayOnly(rangeEnd));
-          d = d.add(const Duration(days: 1))) {
+      for (
+        var d = _dayOnly(rangeStart);
+        !d.isAfter(_dayOnly(rangeEnd));
+        d = d.add(const Duration(days: 1))
+      ) {
         result[_fmt(d)]?.tripBars.add(trip);
       }
     }
@@ -159,26 +165,29 @@ class CalendarAggregator {
     final endStr = _fmt(_dayOnly(end));
 
     // Active reminders whose window overlaps with [start..end].
-    final reminders = await (_db.select(_db.reminders)
-          ..where(
-            (r) =>
-                r.status.equals('open') &
-                r.windowStart.isSmallerOrEqualValue(endStr) &
-                (r.windowEnd.isNull() |
-                    r.windowEnd.isBiggerOrEqualValue(startStr)),
-          ))
-        .get();
+    final reminders =
+        await (_db.select(_db.reminders)..where(
+              (r) =>
+                  r.status.equals('open') &
+                  r.windowStart.isSmallerOrEqualValue(endStr) &
+                  (r.windowEnd.isNull() |
+                      r.windowEnd.isBiggerOrEqualValue(startStr)),
+            ))
+            .get();
 
     for (final rem in reminders) {
       final ws = _parseDate(rem.windowStart);
-      final we =
-          rem.windowEnd != null ? _parseDate(rem.windowEnd!) : _dayOnly(end);
+      final we = rem.windowEnd != null
+          ? _parseDate(rem.windowEnd!)
+          : _dayOnly(end);
       final rangeStart = ws.isBefore(start) ? start : ws;
       final rangeEnd = we.isAfter(end) ? end : we;
       if (rangeStart.isAfter(rangeEnd)) continue;
-      for (var d = _dayOnly(rangeStart);
-          !d.isAfter(_dayOnly(rangeEnd));
-          d = d.add(const Duration(days: 1))) {
+      for (
+        var d = _dayOnly(rangeStart);
+        !d.isAfter(_dayOnly(rangeEnd));
+        d = d.add(const Duration(days: 1))
+      ) {
         result[_fmt(d)]?.reminders.add(rem);
       }
     }
@@ -194,13 +203,13 @@ class CalendarAggregator {
     final startStr = _fmt(_dayOnly(start));
     final endStr = _fmt(_dayOnly(end));
 
-    final slots = await (_db.select(_db.mealSlots)
-          ..where(
-            (ms) =>
-                ms.date.isBiggerOrEqualValue(startStr) &
-                ms.date.isSmallerOrEqualValue(endStr),
-          ))
-        .get();
+    final slots =
+        await (_db.select(_db.mealSlots)..where(
+              (ms) =>
+                  ms.date.isBiggerOrEqualValue(startStr) &
+                  ms.date.isSmallerOrEqualValue(endStr),
+            ))
+            .get();
 
     for (final slot in slots) {
       final day = result[slot.date];
@@ -218,13 +227,13 @@ class CalendarAggregator {
     final startStr = _fmt(_dayOnly(start));
     final endStr = _fmt(_dayOnly(end));
 
-    final sessions = await (_db.select(_db.gymSessions)
-          ..where(
-            (gs) =>
-                gs.date.isBiggerOrEqualValue(startStr) &
-                gs.date.isSmallerOrEqualValue(endStr),
-          ))
-        .get();
+    final sessions =
+        await (_db.select(_db.gymSessions)..where(
+              (gs) =>
+                  gs.date.isBiggerOrEqualValue(startStr) &
+                  gs.date.isSmallerOrEqualValue(endStr),
+            ))
+            .get();
 
     for (final session in sessions) {
       final day = result[session.date];
@@ -243,19 +252,44 @@ class CalendarAggregator {
     final startStr = _fmt(_dayOnly(start));
     final endStr = _fmt(_dayOnly(end));
 
-    final items = await (_db.select(_db.items)
-          ..where(
-            (i) =>
-                i.dueDate.isNotNull() &
-                i.dueDate.isBiggerOrEqualValue(startStr) &
-                i.dueDate.isSmallerOrEqualValue(endStr),
-          ))
-        .get();
+    final items =
+        await (_db.select(_db.items)..where(
+              (i) =>
+                  i.dueDate.isNotNull() &
+                  i.dueDate.isBiggerOrEqualValue(startStr) &
+                  i.dueDate.isSmallerOrEqualValue(endStr),
+            ))
+            .get();
 
     for (final item in items) {
       if (item.dueDate == null) continue;
       final day = result[item.dueDate!];
       if (day != null) day.dueDots++;
+    }
+  }
+
+  // ── Finance dots (planned transactions) ───────────────────────────────────
+
+  Future<void> _applyFinanceDots(
+    Map<String, _MutableDayData> result,
+    DateTime start,
+    DateTime end,
+  ) async {
+    final startStr = _fmt(_dayOnly(start));
+    final endStr = _fmt(_dayOnly(end));
+
+    final txs =
+        await (_db.select(_db.transactions)..where(
+              (t) =>
+                  t.status.equals('planned') &
+                  t.date.isBiggerOrEqualValue(startStr) &
+                  t.date.isSmallerOrEqualValue(endStr),
+            ))
+            .get();
+
+    for (final tx in txs) {
+      final day = result[tx.date];
+      if (day != null) day.financeDots++;
     }
   }
 
@@ -295,6 +329,7 @@ class _MutableDayData {
   int mealDots = 0;
   GymSession? gymSession;
   int dueDots = 0;
+  int financeDots = 0;
   final List<Reminder> reminders = [];
   final List<Tag> partnerTags = [];
   final List<EventOccurrence> partnerEvents = [];
@@ -308,6 +343,7 @@ class _MutableDayData {
     mealDots: mealDots,
     gymSession: gymSession,
     dueDots: dueDots,
+    financeDots: financeDots,
     activeReminders: List.unmodifiable(reminders),
     partnerTags: List.unmodifiable(partnerTags),
     partnerEvents: List.unmodifiable(partnerEvents),

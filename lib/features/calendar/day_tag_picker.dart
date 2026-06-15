@@ -1,7 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/db/database.dart';
 import '../../core/db/repositories/day_repository.dart';
+
+final _allTagsProvider = StreamProvider.autoDispose(
+  (ref) => ref.watch(dayRepositoryProvider).watchAllTags(),
+);
+
+final _activeTagsForDateProvider = FutureProvider.autoDispose.family<List<Tag>, String>(
+  (ref, date) => ref.watch(dayRepositoryProvider).getTagsForDate(date),
+);
 
 /// Inline tag picker shown on the day detail sheet.
 /// Displays all available tags as chips; active ones are highlighted.
@@ -14,12 +23,8 @@ class DayTagPicker extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final repo = ref.watch(dayRepositoryProvider);
 
-    final allTagsAsync = ref.watch(
-      StreamProvider.autoDispose((_) => repo.watchAllTags()),
-    );
-    final activeFuture = ref.watch(
-      FutureProvider.autoDispose((_) => repo.getTagsForDate(date)),
-    );
+    final allTagsAsync = ref.watch(_allTagsProvider);
+    final activeFuture = ref.watch(_activeTagsForDateProvider(date));
 
     return allTagsAsync.when(
       loading: () => const SizedBox.shrink(),
@@ -55,11 +60,7 @@ class DayTagPicker extends ConsumerWidget {
                   } else {
                     await repo.removeTag(date, tag.id);
                   }
-                  ref.invalidate(
-                    FutureProvider.autoDispose(
-                      (_) => repo.getTagsForDate(date),
-                    ),
-                  );
+                  ref.invalidate(_activeTagsForDateProvider(date));
                 },
               );
             }).toList(),

@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
+import '../tokens.dart';
 
-import '../app_colors.dart';
-
-/// Colored chip representing an item status (open, done, planned, blocked).
+/// Colored chip representing an item status (open, done, planned, blocked), complying with WCAG AA contrast.
 class StatusChip extends StatelessWidget {
   const StatusChip({required this.status, super.key, this.compact = false});
 
@@ -11,43 +10,51 @@ class StatusChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final (label, bg, fg) = _resolve(status);
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    final (label, baseColor) = _resolve(status);
+    final bg = DesignTokens.resolvePastelFill(color: baseColor, isDark: isDark);
+    final fg = isDark ? DesignTokens.inkDark : DesignTokens.inkLight;
+
     return Container(
       padding: compact
-          ? const EdgeInsets.symmetric(horizontal: 6, vertical: 2)
-          : const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          ? const EdgeInsets.symmetric(horizontal: 8, vertical: 2)
+          : const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       decoration: BoxDecoration(
         color: bg,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(DesignTokens.radiusInput),
+        border: Border.all(
+          color: isDark ? DesignTokens.lineDark : DesignTokens.lineLight,
+          width: 1,
+        ),
       ),
       child: Text(
-        label,
-        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+        label.toUpperCase(),
+        style: theme.textTheme.labelSmall?.copyWith(
           color: fg,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 1.0,
         ),
       ),
     );
   }
 
-  static (String, Color, Color) _resolve(String status) => switch (status
-      .toLowerCase()) {
-    'done' => ('Done', AppColors.statusDone, const Color(0xFF2E7D32)),
-    'blocked' => ('Blocked', AppColors.statusBlocked, const Color(0xFFC62828)),
+  static (String, Color) _resolve(String status) => switch (status.toLowerCase()) {
+    'done' => ('Done', DesignTokens.success),
+    'blocked' => ('Blocked', DesignTokens.danger),
     'planned' || 'suggested' => (
       status[0].toUpperCase() + status.substring(1),
-      AppColors.statusPlanned,
-      const Color(0xFF1565C0),
+      DesignTokens.dustyBlue,
     ),
     'in_progress' || 'in-progress' => (
       'In Progress',
-      const Color(0xFFFFF9C4),
-      const Color(0xFFF57F17),
+      DesignTokens.butter,
     ),
     _ => (
       status[0].toUpperCase() + status.substring(1),
-      AppColors.statusOpen,
-      const Color(0xFF424242),
+      DesignTokens.inkSoftLight,
     ),
   };
 }
+

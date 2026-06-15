@@ -5,6 +5,7 @@ import 'connection/connection.dart';
 
 import 'converters/json_map_converter.dart';
 import 'converters/string_list_converter.dart';
+import 'tables/chore_tables.dart';
 import 'tables/core_day_tables.dart';
 import 'tables/finance_tables.dart';
 import 'tables/fitness_tables.dart';
@@ -29,6 +30,7 @@ part 'database.g.dart';
     Collections,
     Items,
     Subtasks,
+    ChoreCompletions,
     // Finance
     Transactions,
     RecurringTransactions,
@@ -62,13 +64,18 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? e]) : super(e ?? connect());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (m) => m.createAll(),
     onUpgrade: (m, from, to) async {
-      // Future migrations go here
+      if (from < 2) {
+        await m.createTable(choreCompletions);
+      }
+      if (from < 3) {
+        await m.addColumn(fitnessGoals, fitnessGoals.direction);
+      }
     },
   );
 }
