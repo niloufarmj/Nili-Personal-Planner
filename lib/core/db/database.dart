@@ -1,10 +1,7 @@
-import 'dart:io';
-
 import 'package:drift/drift.dart';
-import 'package:drift/native.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
+
+import 'connection/connection.dart';
 
 import 'converters/json_map_converter.dart';
 import 'converters/string_list_converter.dart';
@@ -62,15 +59,7 @@ part 'database.g.dart';
   ],
 )
 class AppDatabase extends _$AppDatabase {
-  AppDatabase([QueryExecutor? e]) : super(e ?? _openConnection());
-
-  static LazyDatabase _openConnection() {
-    return LazyDatabase(() async {
-      final dbFolder = await getApplicationDocumentsDirectory();
-      final file = File(p.join(dbFolder.path, 'app.db'));
-      return NativeDatabase.createInBackground(file);
-    });
-  }
+  AppDatabase([QueryExecutor? e]) : super(e ?? connect());
 
   @override
   int get schemaVersion => 1;

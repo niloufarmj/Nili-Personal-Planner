@@ -79,10 +79,7 @@ class ImageService {
   Future<List<String>> listAll() async {
     final dir = await _imagesDir();
     final entities = await dir.list().toList();
-    return entities
-        .whereType<File>()
-        .map((f) => f.path)
-        .toList();
+    return entities.whereType<File>().map((f) => f.path).toList();
   }
 
   // ── Helpers ───────────────────────────────────────────────────────────────
