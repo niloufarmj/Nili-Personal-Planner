@@ -135,6 +135,14 @@ class SeedParser {
           );
         }
       }
+
+      for (final log in data.periodLogs) {
+        if (!_isValidDate(log.startDate)) {
+          warnings.add(
+            "Period Log: start_date '${log.startDate}' is malformed (expected YYYY-MM-DD).",
+          );
+        }
+      }
     } catch (e) {
       warnings.add('Failed to decode JSON: $e');
     }

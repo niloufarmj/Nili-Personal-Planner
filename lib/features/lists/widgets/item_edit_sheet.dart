@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/db/database.dart';
+import '../../../core/design/design.dart';
+import '../../finance/services/projection_service.dart';
 import '../repositories/item_repository.dart';
 import '../templates/template_registry.dart';
 
@@ -143,7 +145,7 @@ class _ItemEditSheetState extends ConsumerState<ItemEditSheet> {
                 ),
 
               // Planned cost
-              if (template.fields.plannedCost)
+              if (template.fields.plannedCost) ...[
                 Padding(
                   padding: const EdgeInsets.only(bottom: 12),
                   child: _CostField(
@@ -151,6 +153,24 @@ class _ItemEditSheetState extends ConsumerState<ItemEditSheet> {
                     onChanged: (v) => setState(() => _plannedCostCents = v),
                   ),
                 ),
+                if (_dueDate != null && _plannedCostCents != null && _plannedCostCents! > 0) ...[
+                  Builder(
+                    builder: (context) {
+                      final parsedDate = DateTime.tryParse(_dueDate!);
+                      if (parsedDate != null) {
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: _SmartForecastWidget(
+                            targetDate: parsedDate,
+                            plannedCost: _plannedCostCents! / 100.0,
+                          ),
+                        );
+                      }
+                      return const SizedBox.shrink();
+                    },
+                  ),
+                ],
+              ],
 
               // Template meta fields
               ...template.metaFields.map(
@@ -412,6 +432,38 @@ class _MetaField extends StatelessWidget {
           : def.type == MetaFieldType.url
           ? TextInputType.url
           : TextInputType.text,
+    );
+  }
+}
+
+class _SmartForecastWidget extends ConsumerWidget {
+  const _SmartForecastWidget({required this.targetDate, required this.plannedCost});
+
+  final DateTime targetDate;
+  final double plannedCost;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final params = SmartForecastParams(targetDate: targetDate, plannedCost: plannedCost);
+    final forecastAsync = ref.watch(smartForecastFamilyProvider(params));
+
+    return forecastAsync.maybeWhen(
+      data: (balance) {
+        final formattedDate = '${targetDate.day}/${targetDate.month}/${targetDate.year}';
+        final formattedBalance = CurrencyFormatter.format(balance.abs().round() * 100);
+        final isNegative = balance < 0;
+        final color = isNegative ? DesignTokens.danger : DesignTokens.success;
+
+        return Text(
+          'If you spend this, your estimated left balance on $formattedDate would be '
+          '${balance >= 0 ? "" : "–"}$formattedBalance',
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: color,
+                fontWeight: FontWeight.w600,
+              ),
+        );
+      },
+      orElse: () => const SizedBox.shrink(),
     );
   }
 }

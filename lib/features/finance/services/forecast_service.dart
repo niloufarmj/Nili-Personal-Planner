@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart' show Value;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/db/database.dart';
@@ -14,6 +15,7 @@ class ForecastService {
 
   /// Fetches data and runs [compute] for [month].
   Future<ForecastResult> computeForMonth(DateTime month) async {
+    await syncRecurringTransactions();
     final transactions = await _txRepo.getByMonth(month.year, month.month);
     final projected = await _recurringRepo.expandForMonth(month);
     return compute(
@@ -89,6 +91,58 @@ class ForecastService {
       estimatedEndBalanceCents: endBalance,
       categoryBreakdown: Map.unmodifiable(catBreakdown),
     );
+  }
+
+  Future<void> syncRecurringTransactions() async {
+    final now = DateTime.now();
+    final recurring = await _recurringRepo.getAll();
+
+    for (final rt in recurring) {
+      if (!rt.active) continue;
+
+      final parts = rt.startMonth.split('-');
+      if (parts.length != 2) continue;
+      final startYear = int.tryParse(parts[0]);
+      final startMonthVal = int.tryParse(parts[1]);
+      if (startYear == null || startMonthVal == null) continue;
+
+      var current = DateTime(startYear, startMonthVal);
+      final limit = DateTime(now.year, now.month);
+
+      while (current.isBefore(limit) ||
+          (current.year == limit.year && current.month == limit.month)) {
+        final lastDay = DateTime(current.year, current.month + 1, 0).day;
+        final day = rt.dayOfMonth.clamp(1, lastDay);
+        final occurrenceDate = DateTime(current.year, current.month, day);
+
+        if (!occurrenceDate.isAfter(now)) {
+          final dateStr = '${occurrenceDate.year.toString().padLeft(4, '0')}-'
+              '${occurrenceDate.month.toString().padLeft(2, '0')}-'
+              '${occurrenceDate.day.toString().padLeft(2, '0')}';
+
+          final noteText = 'Recurring: ${rt.name}';
+
+          final existing = await _txRepo.getByDate(dateStr);
+          final alreadySynced =
+              existing.any((tx) => tx.note == noteText && tx.status == 'actual');
+
+          if (!alreadySynced) {
+            await _txRepo.create(
+              TransactionsCompanion.insert(
+                date: dateStr,
+                amountCents: rt.amountCents,
+                direction: rt.direction,
+                status: 'actual',
+                category: rt.category,
+                note: Value(noteText),
+              ),
+            );
+          }
+        }
+
+        current = DateTime(current.year, current.month + 1);
+      }
+    }
   }
 
   static String _dateStr(DateTime d) =>

@@ -1,9 +1,11 @@
+import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/db/database.dart';
 import '../../../core/design/design.dart';
+import '../../finance/repositories/transaction_repository.dart';
 import '../repositories/collection_repository.dart';
 import '../repositories/item_repository.dart';
 import '../templates/template_registry.dart';
@@ -168,14 +170,9 @@ class _ItemTileState extends ConsumerState<_ItemTile> {
       ),
       confirmDismiss: (direction) async {
         if (direction == DismissDirection.startToEnd) {
-          // Capture messenger before the await to avoid async-gap context use.
           final messenger = ScaffoldMessenger.of(context);
-          await repo.toggleItemStatus(
-            item.id,
-            doneStatus: template.doneStatus,
-            openStatus: template.openStatus,
-          );
-          if (mounted) _showUndoSnackbar(messenger, ref, item, template);
+          final ok = await _handleStatusToggle();
+          if (ok && mounted) _showUndoSnackbar(messenger, ref, item, template);
           return false; // tile stays; status updated reactively
         } else {
           // Swipe left = delete
@@ -194,11 +191,7 @@ class _ItemTileState extends ConsumerState<_ItemTile> {
               children: [
                 // Status checkbox / icon
                 GestureDetector(
-                  onTap: () => repo.toggleItemStatus(
-                    item.id,
-                    doneStatus: template.doneStatus,
-                    openStatus: template.openStatus,
-                  ),
+                  onTap: () => _handleStatusToggle(),
                   child: Padding(
                     padding: const EdgeInsets.only(right: 10, top: 2),
                     child: Icon(
@@ -333,6 +326,99 @@ class _ItemTileState extends ConsumerState<_ItemTile> {
         template: widget.template,
         item: widget.item,
       ),
+    );
+  }
+
+  Future<bool> _handleStatusToggle() async {
+    final item = widget.item;
+    final template = widget.template;
+    final repo = ref.read(itemRepositoryProvider);
+    final isGoingToDone = item.status != template.doneStatus;
+
+    if (widget.collection.template == 'shopping' && isGoingToDone) {
+      final double? realCost = await _showRealCostDialog(context, item);
+      if (realCost == null) return false;
+
+      await repo.toggleItemStatus(
+        item.id,
+        doneStatus: template.doneStatus,
+        openStatus: template.openStatus,
+      );
+
+      final cents = (realCost * 100).round();
+      final todayStr = DateFormat('yyyy-MM-dd').format(DateTime.now());
+      final txRepo = ref.read(transactionRepositoryProvider);
+      await txRepo.create(
+        TransactionsCompanion.insert(
+          date: todayStr,
+          amountCents: cents,
+          direction: 'out',
+          status: 'actual',
+          category: 'shopping',
+          note: Value('Bought: ${item.title}'),
+          itemId: Value(item.id),
+        ),
+      );
+      return true;
+    } else {
+      await repo.toggleItemStatus(
+        item.id,
+        doneStatus: template.doneStatus,
+        openStatus: template.openStatus,
+      );
+      return true;
+    }
+  }
+
+  Future<double?> _showRealCostDialog(BuildContext context, Item item) async {
+    final defaultPrice = (item.plannedCostCents ?? 0) / 100.0;
+    final controller = TextEditingController(
+      text: defaultPrice > 0 ? defaultPrice.toStringAsFixed(2) : '',
+    );
+
+    return showDialog<double>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Confirm Real Cost'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text('How much did "${item.title}" actually cost?'),
+              const SizedBox(height: 16),
+              TextField(
+                controller: controller,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                autofocus: true,
+                decoration: const InputDecoration(
+                  labelText: 'Price (€)',
+                  border: OutlineInputBorder(),
+                  prefixText: '€ ',
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () {
+                final double? val = double.tryParse(controller.text);
+                if (val != null && val >= 0) {
+                  Navigator.of(context).pop(val);
+                } else if (controller.text.isEmpty) {
+                  Navigator.of(context).pop(0.0);
+                }
+              },
+              child: const Text('Confirm'),
+            ),
+          ],
+        );
+      },
     );
   }
 }

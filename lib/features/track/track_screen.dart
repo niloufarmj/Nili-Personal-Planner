@@ -222,6 +222,14 @@ class TrackScreen extends ConsumerWidget {
             route: '/meals',
             color: DesignTokens.peach,
           ),
+          const SizedBox(height: 16),
+          _TrackEntry(
+            icon: Icons.calendar_today_outlined,
+            title: 'Period Tracker',
+            subtitle: 'Cycle prediction, ovulation & stats',
+            route: '/period',
+            color: DesignTokens.rose,
+          ),
         ],
       ),
     );

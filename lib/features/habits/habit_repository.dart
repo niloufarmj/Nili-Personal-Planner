@@ -140,39 +140,27 @@ class HabitRepository {
 
   Future<void> seedDefaultHabitsIfNeeded() async {
     final existing = await _db.select(_db.habits).get();
-    if (existing.isNotEmpty) return;
 
-    final defaults = [
-      HabitsCompanion.insert(
-        name: 'Water',
-        targetPerDay: const Value(8),
-        reminderTimes: const Value(['09:00', '13:00', '17:00', '21:00']),
-      ),
-      HabitsCompanion.insert(
-        name: 'Skincare AM',
-        targetPerDay: const Value(1),
-        reminderTimes: const Value(['09:00']),
-      ),
-      HabitsCompanion.insert(
-        name: 'Skincare PM',
-        targetPerDay: const Value(1),
-        reminderTimes: const Value(['21:00']),
-      ),
-      HabitsCompanion.insert(
-        name: 'Teeth',
-        targetPerDay: const Value(2),
-        reminderTimes: const Value(['09:00', '21:00']),
-      ),
-      HabitsCompanion.insert(
-        name: 'Reading',
-        targetPerDay: const Value(1),
-        reminderTimes: const Value(['17:00']),
-      ),
-    ];
-
-    for (final companion in defaults) {
-      await _db.into(_db.habits).insert(companion);
+    Future<void> insertIfMissing(String name, int target, List<String> times) async {
+      final exists = existing.any((h) => h.name.toLowerCase() == name.toLowerCase());
+      if (!exists) {
+        await _db.into(_db.habits).insert(
+          HabitsCompanion.insert(
+            name: name,
+            targetPerDay: Value(target),
+            reminderTimes: Value(times),
+          ),
+        );
+      }
     }
+
+    await insertIfMissing('Water', 8, ['09:00', '13:00', '17:00', '21:00']);
+    await insertIfMissing('Skincare AM', 1, ['09:00']);
+    await insertIfMissing('Skincare PM', 1, ['21:00']);
+    await insertIfMissing('Teeth', 2, ['09:00', '21:00']);
+    await insertIfMissing('Reading', 1, ['17:00']);
+    await insertIfMissing('Taking daily multi vitamin', 1, ['09:00']);
+    await insertIfMissing('Taking daily iron pills', 1, ['09:00']);
 
     await scheduleHabitReminders();
   }

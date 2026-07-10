@@ -80,6 +80,15 @@ class MoreScreen extends ConsumerWidget {
                   }
                 },
               ),
+              const SizedBox(height: 12),
+
+              _MoreEntry(
+                icon: Icons.emoji_events_outlined,
+                title: 'Achievements & Badges',
+                subtitle: 'Unlock rewards for keeping up with goals',
+                color: DesignTokens.butter,
+                onTap: () => context.push(Routes.badges),
+              ),
               const SizedBox(height: 28),
               const SectionHeader(title: 'Data Safety'),
               const SizedBox(height: 12),

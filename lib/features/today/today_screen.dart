@@ -21,6 +21,9 @@ import '../habits/habit_repository.dart';
 import '../meals/meal_slot_repository.dart';
 import '../meals/recipe_repository.dart';
 import '../../core/services/backup_service.dart';
+import '../period/services/period_service.dart';
+import '../badges/badge_service.dart';
+import 'next_7_days_screen.dart';
 
 // ── Provider: today's aggregated data ─────────────────────────────────────────
 
@@ -132,6 +135,9 @@ class TodayScreen extends ConsumerWidget {
                         ),
                         const SizedBox(height: 20),
                       ],
+                      // ── Period banner ──────────────────────────────────────
+                      const _TodayPeriodBanner(),
+
                       // ── Day overview strip ─────────────────────────────────
                       _DayOverviewStrip(todayStr: todayStr),
                       const SizedBox(height: 12),
@@ -140,6 +146,13 @@ class TodayScreen extends ConsumerWidget {
                       const SectionHeader(title: "Today's Events"),
                       _EventsList(todayStr: todayStr),
                       const SizedBox(height: 20),
+
+                      // ── Next 7 Days Plans ──────────────────────────────────
+                      const _Next7DaysPreview(),
+                      const SizedBox(height: 20),
+
+                      // ── Achievements ───────────────────────────────────────
+                      const _AchievementsPreview(),
 
                       // ── Conflict feed ──────────────────────────────────────
                       const SectionHeader(title: 'Conflicts & Reminders'),
@@ -1368,6 +1381,275 @@ class _BackupNudgeCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+// ── Period tracker banner ──────────────────────────────────────────────────
+
+class _TodayPeriodBanner extends ConsumerWidget {
+  const _TodayPeriodBanner();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    final service = ref.watch(periodServiceProvider);
+
+    return FutureBuilder<Map<String, dynamic>>(
+      future: service.getCycleState(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) return const SizedBox.shrink();
+
+        final state = snapshot.data!;
+        final isOnPeriod = state['isOnPeriod'] as bool;
+        final daysUntilNext = state['daysUntilNext'] as int;
+
+        final bool showBanner = isOnPeriod || daysUntilNext <= 3;
+        if (!showBanner) return const SizedBox.shrink();
+
+        String title = '';
+        Color color = DesignTokens.rose;
+        IconData icon = Icons.favorite;
+
+        if (isOnPeriod) {
+          title = 'Period Active';
+          icon = Icons.water_drop;
+        } else if (daysUntilNext < 0) {
+          title = 'Period is ${daysUntilNext.abs()} days late!';
+          color = DesignTokens.warning;
+          icon = Icons.warning_amber_outlined;
+        } else {
+          title = 'Period starting in $daysUntilNext days';
+          color = DesignTokens.roseSoft;
+          icon = Icons.calendar_today_outlined;
+        }
+
+        final bg = DesignTokens.resolvePastelFill(color: color, isDark: isDark);
+
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 16),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: bg,
+              borderRadius: BorderRadius.circular(DesignTokens.radiusCard),
+              border: Border.all(color: color.withValues(alpha: 0.3)),
+            ),
+            child: Row(
+              children: [
+                Icon(icon, color: color, size: 20),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: isDark ? DesignTokens.inkDark : DesignTokens.inkLight,
+                    ),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () => context.push('/period'),
+                  child: const Text('Log'),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+// ── Next 7 Days Preview Card ───────────────────────────────────────────────
+
+class _Next7DaysPreview extends ConsumerWidget {
+  const _Next7DaysPreview();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final plansAsync = ref.watch(next7DaysDataProvider);
+
+    return plansAsync.when(
+      loading: () => const SizedBox(height: 50, child: Center(child: CircularProgressIndicator())),
+      error: (_, __) => const SizedBox.shrink(),
+      data: (data) {
+        final days = data.days;
+        final planById = data.planById;
+        final List<Widget> previews = [];
+        int count = 0;
+
+        for (int i = 1; i < days.length; i++) {
+          if (count >= 3) break;
+          final day = days[i];
+          final dateStr = DateFormat('EEE, MMM d').format(day.date);
+
+          for (final gym in day.gymSessions) {
+            if (count >= 3) break;
+            final planName = planById[gym.planId]?.name ?? '';
+            previews.add(_PreviewRow(
+              dateStr: dateStr,
+              title: planName.isNotEmpty ? 'Gym - Plan $planName' : 'Gym Workout',
+              icon: Icons.fitness_center,
+              color: DesignTokens.dustyBlue,
+            ));
+            count++;
+          }
+          for (final ev in day.events) {
+            if (count >= 3) break;
+            previews.add(_PreviewRow(
+              dateStr: dateStr,
+              title: ev.event.title,
+              icon: Icons.event,
+              color: DesignTokens.rose,
+            ));
+            count++;
+          }
+          for (final t in day.tasks) {
+            if (count >= 3) break;
+            previews.add(_PreviewRow(
+              dateStr: dateStr,
+              title: t.title,
+              icon: Icons.check_circle_outline,
+              color: DesignTokens.lavender,
+            ));
+            count++;
+          }
+        }
+
+        return AppCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Next 7 Days Plans',
+                    style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                  TextButton(
+                    onPressed: () => context.push('/next-7-days'),
+                    child: const Text('See All'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              if (previews.isEmpty)
+                Text(
+                  'No upcoming plans for next week.',
+                  style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey),
+                )
+              else
+                Column(children: previews),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _PreviewRow extends StatelessWidget {
+  const _PreviewRow({
+    required this.dateStr,
+    required this.title,
+    required this.icon,
+    required this.color,
+  });
+
+  final String dateStr;
+  final String title;
+  final IconData icon;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6.0),
+      child: Row(
+        children: [
+          Icon(icon, color: color, size: 14),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              title,
+              style: theme.textTheme.bodyMedium?.copyWith(fontSize: 13),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          Text(
+            dateStr,
+            style: theme.textTheme.bodySmall?.copyWith(
+              fontSize: 11,
+              color: isDark ? DesignTokens.inkSoftDark : DesignTokens.inkSoftLight,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Achievements Preview Card ──────────────────────────────────────────────
+
+class _AchievementsPreview extends ConsumerWidget {
+  const _AchievementsPreview();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final badgesAsync = ref.watch(earnedBadgesProvider);
+
+    return badgesAsync.when(
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
+      data: (badges) {
+        final unlockedCount = badges.where((b) => b.isUnlocked).length;
+        if (unlockedCount == 0) return const SizedBox.shrink();
+
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 20),
+          child: AppCard(
+            child: InkWell(
+              onTap: () => context.push('/badges'),
+              child: Row(
+                children: [
+                  const Icon(Icons.emoji_events, color: DesignTokens.butter, size: 24),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Achievements & Badges',
+                          style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'You have unlocked $unlockedCount / ${badges.length} badges!',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: isDark ? DesignTokens.inkSoftDark : DesignTokens.inkSoftLight,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Icon(Icons.chevron_right, color: Colors.grey),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

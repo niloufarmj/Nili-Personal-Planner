@@ -277,6 +277,23 @@ class SeedDebt {
   }
 }
 
+class SeedPeriodLog {
+  final String startDate;
+  final int durationDays;
+
+  SeedPeriodLog({
+    required this.startDate,
+    required this.durationDays,
+  });
+
+  factory SeedPeriodLog.fromJson(Map<String, dynamic> json) {
+    return SeedPeriodLog(
+      startDate: json['start_date'] as String? ?? '',
+      durationDays: json['duration_days'] as int? ?? 5,
+    );
+  }
+}
+
 class SeedData {
   final int version;
   final String generated;
@@ -287,6 +304,7 @@ class SeedData {
   final SeedFitness fitness;
   final List<SeedHabit> habits;
   final List<SeedDebt> debts;
+  final List<SeedPeriodLog> periodLogs;
 
   SeedData({
     required this.version,
@@ -298,6 +316,7 @@ class SeedData {
     required this.fitness,
     required this.habits,
     required this.debts,
+    required this.periodLogs,
   });
 
   factory SeedData.fromJson(Map<String, dynamic> json) {
@@ -334,6 +353,11 @@ class SeedData {
       debts:
           (json['debts'] as List?)
               ?.map((e) => SeedDebt.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
+      periodLogs:
+          (json['period_logs'] as List?)
+              ?.map((e) => SeedPeriodLog.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
     );

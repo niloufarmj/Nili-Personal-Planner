@@ -9,8 +9,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/db/database.dart';
 import '../../core/design/design.dart';
+import '../../core/router/routes.dart';
 import '../../core/services/image_service.dart';
 import 'fitness_repository.dart';
+import 'package:go_router/go_router.dart';
 
 // ── State for custom field definitions ────────────────────────────────────────
 
@@ -201,7 +203,7 @@ class _MeasurementsTab extends ConsumerWidget {
       floatingActionButton: FloatingActionButton(
         heroTag: 'measurements_fab',
         child: const Icon(Icons.add),
-        onPressed: () => _showAddMeasurementSheet(context, ref),
+        onPressed: () => context.push(Routes.fitnessLog),
       ),
       body: mAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -228,14 +230,6 @@ class _MeasurementsTab extends ConsumerWidget {
           );
         },
       ),
-    );
-  }
-
-  void _showAddMeasurementSheet(BuildContext context, WidgetRef ref) {
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      builder: (_) => const _MeasurementAddSheet(),
     );
   }
 }
@@ -426,151 +420,6 @@ class _MeasurementCard extends ConsumerWidget {
           .read(fitnessRepositoryProvider)
           .deleteMeasurement(measurement.id);
     }
-  }
-}
-
-// ── Add measurement sheet ──────────────────────────────────────────────────────
-
-class _MeasurementAddSheet extends ConsumerStatefulWidget {
-  const _MeasurementAddSheet();
-
-  @override
-  ConsumerState<_MeasurementAddSheet> createState() =>
-      _MeasurementAddSheetState();
-}
-
-class _MeasurementAddSheetState extends ConsumerState<_MeasurementAddSheet> {
-  final _formKey = GlobalKey<FormState>();
-  final _weightCtrl = TextEditingController();
-  final _customCtrls = <String, TextEditingController>{};
-  DateTime _date = DateTime.now();
-
-  @override
-  void dispose() {
-    _weightCtrl.dispose();
-    for (final c in _customCtrls.values) {
-      c.dispose();
-    }
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final customFields = ref.watch(_customFieldsProvider);
-    final insets = MediaQuery.viewInsetsOf(context);
-
-    for (final field in customFields) {
-      _customCtrls.putIfAbsent(field, () => TextEditingController());
-    }
-
-    return Padding(
-      padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + insets.bottom),
-      child: Form(
-        key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              'Log Measurements',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 12),
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.calendar_today),
-              title: Text('Date: ${DateFormat('yyyy-MM-dd').format(_date)}'),
-              trailing: TextButton(
-                onPressed: _selectDate,
-                child: const Text('Change'),
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextFormField(
-              controller: _weightCtrl,
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
-              decoration: const InputDecoration(
-                labelText: 'Weight (kg)',
-                border: OutlineInputBorder(),
-              ),
-              validator: (v) {
-                if (v != null && v.isNotEmpty && double.tryParse(v) == null) {
-                  return 'Invalid number';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 12),
-            ...customFields.map((field) {
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: TextFormField(
-                  controller: _customCtrls[field],
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
-                  ),
-                  decoration: InputDecoration(
-                    labelText: field.replaceAll('_', ' '),
-                    border: const OutlineInputBorder(),
-                  ),
-                  validator: (v) {
-                    if (v != null &&
-                        v.isNotEmpty &&
-                        double.tryParse(v) == null) {
-                      return 'Invalid number';
-                    }
-                    return null;
-                  },
-                ),
-              );
-            }),
-            const SizedBox(height: 16),
-            FilledButton(onPressed: _submit, child: const Text('Save')),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Future<void> _selectDate() async {
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: _date,
-      firstDate: DateTime(2020),
-      lastDate: DateTime.now(),
-    );
-    if (picked != null) {
-      setState(() => _date = picked);
-    }
-  }
-
-  Future<void> _submit() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    final weight = double.tryParse(_weightCtrl.text);
-    final fields = <String, double>{};
-    for (final entry in _customCtrls.entries) {
-      final val = double.tryParse(entry.value.text);
-      if (val != null) {
-        fields[entry.key] = val;
-      }
-    }
-
-    final dateStr = DateFormat('yyyy-MM-dd').format(_date);
-
-    await ref
-        .read(fitnessRepositoryProvider)
-        .createMeasurement(
-          MeasurementsCompanion.insert(
-            date: dateStr,
-            weightKg: Value(weight),
-            fields: Value(fields.isEmpty ? null : fields),
-          ),
-        );
-
-    if (mounted) Navigator.of(context).pop();
   }
 }
 

@@ -9,6 +9,7 @@ import '../../core/calendar/calendar_aggregator.dart';
 import '../../core/calendar/calendar_day_data.dart';
 import '../../core/design/design.dart';
 import 'day_detail_screen.dart';
+import '../period/services/period_service.dart';
 
 // ── Providers ─────────────────────────────────────────────────────────────────
 
@@ -121,6 +122,10 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     final key = _AggKey(start: _windowStart, end: _windowEnd, filter: filter);
     final dataAsync = ref.watch(_calendarDataProvider(key));
 
+    final actualPeriods = ref.watch(actualPeriodDatesProvider);
+    final predictedPeriods = ref.watch(predictedPeriodDatesProvider).value ?? {};
+    final ovulationDates = ref.watch(predictedOvulationDatesProvider).value ?? {};
+
     return Scaffold(
       appBar: AppBar(title: const Text('Calendar')),
       body: Column(
@@ -147,9 +152,9 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
           const SizedBox(height: 8),
           Expanded(
             child: dataAsync.when(
-              loading: () => _buildCalendar(context, {}),
+              loading: () => _buildCalendar(context, {}, actualPeriods, predictedPeriods, ovulationDates),
               error: (e, _) => Center(child: Text('Error: $e')),
-              data: (data) => _buildCalendar(context, data),
+              data: (data) => _buildCalendar(context, data, actualPeriods, predictedPeriods, ovulationDates),
             ),
           ),
         ],
@@ -160,6 +165,9 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
   Widget _buildCalendar(
     BuildContext context,
     Map<String, CalendarDayData> data,
+    Set<String> actualPeriods,
+    Set<String> predictedPeriods,
+    Set<String> ovulationDates,
   ) {
     return TableCalendar<CalendarDayData>(
       firstDay: DateTime(2020),
@@ -180,24 +188,42 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
       availableCalendarFormats: const {CalendarFormat.month: 'Month'},
       calendarStyle: const CalendarStyle(outsideDaysVisible: false),
       calendarBuilders: CalendarBuilders(
-        defaultBuilder: (ctx, day, _) => _DayCell(
-          day: day,
-          dayData: data[_fmt(day)],
-          isSelected: false,
-          isToday: false,
-        ),
-        todayBuilder: (ctx, day, _) => _DayCell(
-          day: day,
-          dayData: data[_fmt(day)],
-          isSelected: false,
-          isToday: true,
-        ),
-        selectedBuilder: (ctx, day, _) => _DayCell(
-          day: day,
-          dayData: data[_fmt(day)],
-          isSelected: true,
-          isToday: isSameDay(day, DateTime.now()),
-        ),
+        defaultBuilder: (ctx, day, _) {
+          final dateStr = _fmt(day);
+          return _DayCell(
+            day: day,
+            dayData: data[dateStr],
+            isSelected: false,
+            isToday: false,
+            isPeriod: actualPeriods.contains(dateStr),
+            isPredictedPeriod: predictedPeriods.contains(dateStr),
+            isOvulation: ovulationDates.contains(dateStr),
+          );
+        },
+        todayBuilder: (ctx, day, _) {
+          final dateStr = _fmt(day);
+          return _DayCell(
+            day: day,
+            dayData: data[dateStr],
+            isSelected: false,
+            isToday: true,
+            isPeriod: actualPeriods.contains(dateStr),
+            isPredictedPeriod: predictedPeriods.contains(dateStr),
+            isOvulation: ovulationDates.contains(dateStr),
+          );
+        },
+        selectedBuilder: (ctx, day, _) {
+          final dateStr = _fmt(day);
+          return _DayCell(
+            day: day,
+            dayData: data[dateStr],
+            isSelected: true,
+            isToday: isSameDay(day, DateTime.now()),
+            isPeriod: actualPeriods.contains(dateStr),
+            isPredictedPeriod: predictedPeriods.contains(dateStr),
+            isOvulation: ovulationDates.contains(dateStr),
+          );
+        },
       ),
     );
   }
@@ -413,12 +439,18 @@ class _DayCell extends StatelessWidget {
     required this.isSelected,
     required this.isToday,
     this.dayData,
+    this.isPeriod = false,
+    this.isPredictedPeriod = false,
+    this.isOvulation = false,
   });
 
   final DateTime day;
   final CalendarDayData? dayData;
   final bool isSelected;
   final bool isToday;
+  final bool isPeriod;
+  final bool isPredictedPeriod;
+  final bool isOvulation;
 
   @override
   Widget build(BuildContext context) {
@@ -442,6 +474,14 @@ class _DayCell extends StatelessWidget {
         : null;
 
     final List<Color> washColors = [];
+    if (isPeriod) {
+      washColors.add(DesignTokens.rose);
+    } else if (isPredictedPeriod) {
+      washColors.add(DesignTokens.roseSoft);
+    } else if (isOvulation) {
+      washColors.add(DesignTokens.lavenderSoft);
+    }
+
     if (overlay != null) {
       washColors.add(overlay);
     }

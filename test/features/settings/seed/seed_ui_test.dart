@@ -105,7 +105,7 @@ void main() {
   testWidgets(
     'Load seed data tile is present and triggers flow when debugSeedingEnabled is true',
     (tester) async {
-      await tester.binding.setSurfaceSize(const Size(800, 1200));
+      await tester.binding.setSurfaceSize(const Size(800, 1600));
       addTearDown(() => tester.binding.setSurfaceSize(null));
 
       final mockSeeder = MockSeederService();
