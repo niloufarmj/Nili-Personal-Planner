@@ -1,57 +1,95 @@
 # Nili Personal Planner 🚀
 
-A comprehensive, beautifully designed, and offline-first personal organizer built with Flutter. Nili Personal Planner combines daily habit tracking, list management, travel planning, fitness logs, period predictions, achievements gamification, and intelligent finance forecasting into a unified dashboard.
+A comprehensive, beautifully designed, and offline-first personal organizer built with Flutter. Nili Personal Planner integrates day-to-day agendas, modular tracking engines, recipe books, fitness records, social media logs, period forecasting, gamified achievements, and intelligent finance forecasting into a unified dashboard.
 
 ---
 
-## 🌟 Key Features
+## 🌟 Core Modules & Features
 
-### 📅 Today's Dashboard & Next 7 Days
-*   **Daily Hydration & Skincare**: Track water glasses, skincare routines, vitamin schedules, and dental habits.
-*   **Daily Focus & Priorities**: Mark checklist tasks and priorities with gamified feedback.
-*   **7-Day Horizon Planner**: Dedicated view displaying upcoming deadlines and plans for the next week.
+### 📅 1. Planner & Calendar
+*   **Day Tagging**: Personalize daily logs with custom tags, mood emojis, energy levels, and statuses.
+*   **Daily Agenda**: Create and schedule events with start/end times, category labels, descriptions, and custom alerts.
+*   **Reminders Engine**: Manage custom notifications, recurring triggers, and alarm configurations.
 
-### 💰 Intelligent Finance Tracking & Forecasting
-*   **Income & Expense Log**: Filterable transactions list with categorization.
-*   **Auto-Syncing Subscriptions & Salary**: Set your monthly salary day (e.g., 1250 on the 27th) and subscriptions (Klimaticket, internet, Claude, etc.). The app automatically logs passed transactions when you load the dashboard.
-*   **Smart Balance Forecaster**: When editing travel plans or shopping items, Nili forecasts your estimated left balance on the target date. The forecast combines:
-    *   Current actual balance.
-    *   Active recurring salaries/subscriptions.
-    *   Planned future expenses.
-    *   A pro-rated mean of your historical variable spending (groceries, shopping, health, etc.).
-*   **Debts Center**: Track money you owe (`i_owe`) or are owed (`owes_me`). Supports editing, and automatically prompts you to log matching payments or payoffs in your finances when a debt's amount is changed.
+### ☀️ 2. Today's Dashboard & Next 7 Days
+*   **Daily Focus & Priorities**: Highlight key tasks and manage checklist priorities with gamified completion feedback.
+*   **Hydration Tracker**: Keep count of daily water glass intake.
+*   **Self-Care & Skincare Checklist**: Monitor AM/PM skincare routines, vitamin intake (multi-vitamin, vitamin D), and dental hygiene.
+*   **7-Day Horizon Planner**: View upcoming deadlines, scheduled appointments, and tasks in a rolling weekly dashboard.
 
-### 🩸 Period Tracker
-*   **Cycle Prediction**: Automatically predicts your next period dates, signals when it is near, and marks it late if past due.
-*   **Ovulation Detection**: Predicts fertile days and ovulation dates based on historical logs.
-*   **Visual Cycle Diagrams**: Renders interactive graphs of your cycle history.
-*   **Calendar Sync**: Highlights period days directly in the main planner calendar using dedicated rose themes.
+### 💰 3. Intelligent Finance & Forecasting
+*   **Transactions Ledger**: Record actual income and expenses with tag support and categories.
+*   **Auto-Syncing Subscriptions & Salary**: Pre-define salary transfers (e.g., 1250 on the 27th) and recurring subscriptions (Klimaticket, Internet, Claude, etc.). The background auto-sync engine automatically logs past-due items upon opening the app.
+*   **Smart Balance Forecaster**: Displays real-time estimated balance subtitles when planning travel budgets or items:
+    `"If you spend this, your estimated left balance on [Date] would be €[Amount]"`
+    The engine integrates current actual balances, future planned income, future recurring bills, and a pro-rated mean of historical variable spends.
+*   **Debts Center**: Track money owed (`i_owe`) or owed to you (`owes_me`). Supports interactive amount editing and auto-prompts to log matching payments/payoffs in your transaction ledger.
 
-### 🏋️ Trackers & Logs
-*   **Fitness Center**: Log weight, waist size, chest, hips, biceps, and thighs. Support for goal tracking and state photo uploads.
-*   **Wellbeing & Self-Care**: Track meditation, reading, and wellness sessions.
-*   **Meal Planner**: Plan weekly menus and log completed/eaten meals.
-*   **Work Time Tracker**: Log working hours with a live timer to review total working productivity.
-*   **Job Hunt Tracker**: Track applications, companies applied to, interview statuses, and application timelines.
+### 🎒 4. Lists, Chores & Collections
+*   **Template-Driven Collections**: Create shopping lists, travel packing guides, custom todo lists, or job hunt trackers.
+*   **Subtasks & Checklists**: Break down list items into smaller multi-step subtasks.
+*   **Periodic Chores**: Log periodic tasks (cleaning, laundry, plant watering) with history logs.
+*   **Shopping Actual Cost Prompts**: Mark items as "bought" to prompt for actual costs and automatically record them as shopping transactions.
 
-### 🏆 Gamification & Badges
-*   **22 Unique Achievements**: Badges covering fitness, work, self-care, habits, list completions, and job applications.
-*   **Linear Fill Bars**: Each badge card shows a real-time progress bar indicating how close you are to unlocking it (e.g., 5/10 days is 50% filled).
-*   **Shareable Achievements**: Click any unlocked badge to open a stylized card and export it to other apps or share it with friends.
+### ✈️ 5. Smart Travel Planner
+*   **Destinations & Budgets**: Detail travel periods, destination descriptions, and budgets.
+*   **Packing Lists**: Generate packing lists linked directly to your travel dates.
+*   **Forecast Integration**: Live forecaster computes whether your trip budget is sustainable based on future financial schedules.
+
+### 🥩 6. Meal Planner & Recipe Book
+*   **Ingredient Bank**: Manage pantry supplies, measuring units, and quantities.
+*   **Recipe Creator**: Detail recipes, prep times, cooking steps, and list ingredient mappings.
+*   **Weekly Meal Slot Board**: Plan weekly breakfasts, lunches, dinners, and snacks. Mark slots as `'planned'` or `'eaten'`.
+
+### 🏋️ 7. Fitness, Gym & Weight Metrics
+*   **Workout Routine Creator**: Design workout plans with custom exercises, sets, reps, and target weights.
+*   **Gym Session Tracker**: Check in to gym sessions and log completed exercises in real-time.
+*   **Body Metrics Log**: Track weight, waist, chest, hip, bicep, and thigh dimensions. Supports goal-setting, metric directions (`gain` or `lose`), and progress state photo uploads.
+
+### 🧘 8. Wellbeing & Mindfulness
+*   **Self-Care Catalog**: Choose wellbeing actions (reading, meditation, spa, stretching) and log completions.
+*   **Mood Tracker**: Connect mood logs with daily logs to analyze patterns.
+
+### 🩸 9. Period Tracker
+*   **Cycle Predictions**: Track period dates, fertile windows, and ovulation days.
+*   **Late Markers**: Flags late periods dynamically.
+*   **Cycle Diagrams**: Visual cycle history graphs.
+*   **Calendar Sync**: Highlights period days on the main planner calendar using dedicated rose styling.
+
+### ⏱️ 10. Work Time Tracker
+*   **Focus Contexts**: Organize work sessions by contexts or categories.
+*   **Live Work Timer**: Track work durations with a stopwatch. Logs total hours and minutes to review productivity.
+
+### 📱 11. Social Media tracker
+*   **Account Profiles**: Track multiple social profiles.
+*   **Social Activity Logs**: Schedule and record posts or story logs, and track follower growth metrics.
+
+### 🏆 12. Achievements & Badges
+*   **22 Unique Badges**: Awarded for streaks (habits), gym sessions, task completion milestones, work hours, self-care records, and job applications.
+*   **Linear Fill Bars**: Grid items display visual completion progress bars (e.g., 5/10 workouts is 50% filled).
+*   **Shareable Achievements**: Click any unlocked badge to open a stylized card and export it to share with friends.
 
 ---
 
 ## 🛠️ Technical Stack & Architecture
 
-Nili Personal Planner is built using a clean, modern, and modular architectural pattern:
-
 *   **Framework**: [Flutter](https://flutter.dev) (Dart)
-*   **State Management**: [Riverpod](https://riverpod.dev) (Decoupled, compile-safe, and family providers)
-*   **Local Database**: [Drift](https://drift.simonbinder.eu) (SQLite wrapper for Dart offering fast, type-safe, reactive stream queries)
-*   **UI/UX**: Custom design system utilizing curated theme palettes, glassmorphism, elegant dark modes, and micro-animations.
-*   **Local Notifications**: Scheduled daily batch alarms for habits and reminders.
+*   **State Management**: [Riverpod](https://riverpod.dev) (Dynamic family providers and state control)
+*   **Local Database**: [Drift](https://drift.simonbinder.eu) (SQLite wrapper offering type-safe, reactive stream queries)
+*   **Database Schema**: Designed with structured SQLite schemas defined in Dart:
+    *   [core_day_tables.dart](file:///M:/Nili-Personal-Planner/lib/core/db/tables/core_day_tables.dart) (Tags, DayTags, Events, Trips, Reminders)
+    *   [list_engine_tables.dart](file:///M:/Nili-Personal-Planner/lib/core/db/tables/list_engine_tables.dart) (Collections, Items, Subtasks, ChoreCompletions)
+    *   [finance_tables.dart](file:///M:/Nili-Personal-Planner/lib/core/db/tables/finance_tables.dart) (Transactions, RecurringTransactions, Debts)
+    *   [meals_tables.dart](file:///M:/Nili-Personal-Planner/lib/core/db/tables/meals_tables.dart) (Ingredients, Recipes, MealSlots)
+    *   [fitness_tables.dart](file:///M:/Nili-Personal-Planner/lib/core/db/tables/fitness_tables.dart) (Workouts, GymSessions, Metrics)
+    *   [wellbeing_tables.dart](file:///M:/Nili-Personal-Planner/lib/core/db/tables/wellbeing_tables.dart) (Actions, Logs)
+    *   [period_tables.dart](file:///M:/Nili-Personal-Planner/lib/core/db/tables/period_tables.dart) (Period logs)
+    *   [work_tables.dart](file:///M:/Nili-Personal-Planner/lib/core/db/tables/work_tables.dart) (Contexts, Time logs)
+    *   [social_tables.dart](file:///M:/Nili-Personal-Planner/lib/core/db/tables/social_tables.dart) (Accounts, Social logs)
 
-### 📂 Directory Structure
+---
+
+## 📂 Directory Structure
 
 ```text
 lib/
@@ -61,7 +99,7 @@ lib/
 │   ├── router/             # App routing and navigation declarations
 │   └── services/           # Global notifications, backup and file service engines
 └── features/
-    ├── badges/             # Gamification models, service, and Achievements screen
+    ├── badges/             # Achievements, calculations, and badges screen
     ├── calendar/           # Main Planner calendar, event sheets, and day details
     ├── finance/            # Transactions list, recurring sync, debts, and forecast logic
     ├── fitness/            # Body metrics tracking, photo uploads, and goal sheets
@@ -122,5 +160,5 @@ flutter test
 
 ## 🔒 Backup & Privacy
 
-*   **100% Private**: Your data never leaves your device. All calculations, predictions, pictures, and records are stored locally in the sqlite container.
+*   **100% Private**: Your data never leaves your device. All calculations, predictions, pictures, and records are stored locally in the SQLite container.
 *   **Backup & Restore**: Easily export your database configuration and metrics as a ZIP file on the *Settings & More* screen, or load seed/mock data during local development.
