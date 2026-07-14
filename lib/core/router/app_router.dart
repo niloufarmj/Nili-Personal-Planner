@@ -9,6 +9,7 @@ import '../../features/finance/debts_screen.dart';
 import '../../features/finance/finance_screen.dart';
 import '../../features/finance/recurring_screen.dart';
 import '../../features/fitness/fitness_screen.dart';
+import '../../features/fitness/fitness_log_screen.dart';
 import '../../features/gym/gym_screen.dart';
 import '../../features/habits/habits_screen.dart';
 import '../../features/lists/lists_screen.dart';
@@ -26,6 +27,9 @@ import '../../features/trips/trip_detail_screen.dart';
 import '../../features/trips/trip_edit_sheet.dart';
 import '../../features/wellbeing/wellbeing_screen.dart';
 import '../../features/worktime/worktime_screen.dart';
+import '../../features/period/period_screen.dart';
+import '../../features/badges/badges_screen.dart';
+import '../../features/today/next_7_days_screen.dart';
 import '../design/styleguide_screen.dart';
 import 'routes.dart';
 import 'shell_scaffold.dart';
@@ -105,6 +109,14 @@ final List<RouteBase> agentRoutes = [
       context: context,
       state: state,
       child: const FitnessScreen(),
+    ),
+  ),
+  GoRoute(
+    path: '/fitness/log',
+    pageBuilder: (context, state) => _fadeThroughPage(
+      context: context,
+      state: state,
+      child: const FitnessLogScreen(),
     ),
   ),
   GoRoute(
@@ -214,7 +226,33 @@ final List<RouteBase> agentRoutes = [
     pageBuilder: (context, state) => _fadeThroughPage(
       context: context,
       state: state,
-      child: RecipeEditScreen(existingId: int.parse(state.pathParameters['id']!)),
+      child: RecipeEditScreen(
+        existingId: int.parse(state.pathParameters['id']!),
+      ),
+    ),
+  ),
+  GoRoute(
+    path: Routes.period,
+    pageBuilder: (context, state) => _fadeThroughPage(
+      context: context,
+      state: state,
+      child: const PeriodScreen(),
+    ),
+  ),
+  GoRoute(
+    path: Routes.badges,
+    pageBuilder: (context, state) => _fadeThroughPage(
+      context: context,
+      state: state,
+      child: const BadgesScreen(),
+    ),
+  ),
+  GoRoute(
+    path: Routes.next7Days,
+    pageBuilder: (context, state) => _fadeThroughPage(
+      context: context,
+      state: state,
+      child: const Next7DaysScreen(),
     ),
   ),
   // Debug

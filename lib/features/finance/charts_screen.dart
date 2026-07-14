@@ -44,16 +44,17 @@ class ChartsScreen extends ConsumerWidget {
   }
 }
 
-final _chartsMonthTransactionsProvider = StreamProvider.autoDispose.family<List<Transaction>, DateTime>(
-  (ref, m) => ref
-      .watch(transactionRepositoryProvider)
-      .watchByMonthFiltered(
-        m.year,
-        m.month,
-        direction: 'out',
-        status: 'actual',
-      ),
-);
+final _chartsMonthTransactionsProvider = StreamProvider.autoDispose
+    .family<List<Transaction>, DateTime>(
+      (ref, m) => ref
+          .watch(transactionRepositoryProvider)
+          .watchByMonthFiltered(
+            m.year,
+            m.month,
+            direction: 'out',
+            status: 'actual',
+          ),
+    );
 
 // ── Category donut ────────────────────────────────────────────────────────────
 
@@ -100,7 +101,7 @@ class _CategoryDonut extends ConsumerWidget {
 
         final sorted = totals.entries.toList()
           ..sort((a, b) => b.value.compareTo(a.value));
-        
+
         final palette = [
           DesignTokens.rose,
           DesignTokens.sage,
@@ -114,8 +115,8 @@ class _CategoryDonut extends ConsumerWidget {
 
         final sections = sorted.indexed.map(((int, MapEntry<String, int>) e) {
           final (i, entry) = e;
-          final color = isDark 
-              ? DesignTokens.adjustColorForDark(palette[i % palette.length]) 
+          final color = isDark
+              ? DesignTokens.adjustColorForDark(palette[i % palette.length])
               : palette[i % palette.length];
           return PieChartSectionData(
             value: entry.value.toDouble(),
@@ -168,11 +169,11 @@ class _SixMonthBars extends ConsumerWidget {
           ref.watch(transactionRepositoryProvider).getByMonth(m.year, m.month),
     );
 
-    final greenColor = isDark 
-        ? DesignTokens.adjustColorForDark(DesignTokens.success) 
+    final greenColor = isDark
+        ? DesignTokens.adjustColorForDark(DesignTokens.success)
         : DesignTokens.success;
-    final redColor = isDark 
-        ? DesignTokens.adjustColorForDark(DesignTokens.danger) 
+    final redColor = isDark
+        ? DesignTokens.adjustColorForDark(DesignTokens.danger)
         : DesignTokens.danger;
 
     return FutureBuilder<List<List<Transaction>>>(
@@ -209,13 +210,17 @@ class _SixMonthBars extends ConsumerWidget {
                 toY: inCents / 100,
                 color: greenColor,
                 width: 12,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(4),
+                ),
               ),
               BarChartRodData(
                 toY: outCents / 100,
                 color: redColor,
                 width: 12,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(4),
+                ),
               ),
             ],
           );
@@ -249,7 +254,9 @@ class _SixMonthBars extends ConsumerWidget {
                               style: TextStyle(
                                 fontSize: 10,
                                 fontWeight: FontWeight.w600,
-                                color: isDark ? DesignTokens.inkSoftDark : DesignTokens.inkSoftLight,
+                                color: isDark
+                                    ? DesignTokens.inkSoftDark
+                                    : DesignTokens.inkSoftLight,
                               ),
                             ),
                           );
@@ -271,7 +278,9 @@ class _SixMonthBars extends ConsumerWidget {
                     show: true,
                     drawVerticalLine: false,
                     getDrawingHorizontalLine: (value) => FlLine(
-                      color: isDark ? DesignTokens.lineDark : DesignTokens.lineLight,
+                      color: isDark
+                          ? DesignTokens.lineDark
+                          : DesignTokens.lineLight,
                       strokeWidth: 1,
                       dashArray: [4, 4], // dotted lines
                     ),

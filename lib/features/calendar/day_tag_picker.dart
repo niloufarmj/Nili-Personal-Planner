@@ -8,9 +8,10 @@ final _allTagsProvider = StreamProvider.autoDispose(
   (ref) => ref.watch(dayRepositoryProvider).watchAllTags(),
 );
 
-final _activeTagsForDateProvider = FutureProvider.autoDispose.family<List<Tag>, String>(
-  (ref, date) => ref.watch(dayRepositoryProvider).getTagsForDate(date),
-);
+final _activeTagsForDateProvider = FutureProvider.autoDispose
+    .family<List<Tag>, String>(
+      (ref, date) => ref.watch(dayRepositoryProvider).getTagsForDate(date),
+    );
 
 /// Inline tag picker shown on the day detail sheet.
 /// Displays all available tags as chips; active ones are highlighted.

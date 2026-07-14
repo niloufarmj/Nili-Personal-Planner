@@ -82,7 +82,9 @@ class NotificationService {
         payload: payload,
       );
     } catch (e, s) {
-      debugPrint('NotificationService: Failed to schedule one-off notification: $e\n$s');
+      debugPrint(
+        'NotificationService: Failed to schedule one-off notification: $e\n$s',
+      );
     }
   }
 

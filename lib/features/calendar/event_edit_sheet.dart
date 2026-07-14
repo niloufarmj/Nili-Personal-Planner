@@ -39,7 +39,7 @@ class _EventEditSheetState extends ConsumerState<EventEditSheet> {
   late String _owner;
   TimeOfDay? _startTime;
   TimeOfDay? _endTime;
-  bool _weeklyRepeat = false;
+  String _repeatPattern = 'none';
   String? _repeatEndDate;
 
   static const _categories = [
@@ -78,7 +78,23 @@ class _EventEditSheetState extends ConsumerState<EventEditSheet> {
         minute: int.parse(parts[1]),
       );
     }
-    _weeklyRepeat = e?.rrule?.contains('FREQ=WEEKLY') ?? false;
+    
+    final rrule = e?.rrule;
+    if (rrule != null && rrule.isNotEmpty) {
+      if (rrule.contains('FREQ=WEEKLY')) {
+        _repeatPattern = 'weekly';
+      } else if (rrule.contains('FREQ=MONTHLY')) {
+        _repeatPattern = 'monthly';
+      } else if (rrule.contains('FREQ=YEARLY')) {
+        _repeatPattern = 'yearly';
+      }
+      
+      final untilIndex = rrule.indexOf('UNTIL=');
+      if (untilIndex != -1) {
+        final untilStr = rrule.substring(untilIndex + 6, untilIndex + 14); // YYYYMMDD
+        _repeatEndDate = '${untilStr.substring(0, 4)}-${untilStr.substring(4, 6)}-${untilStr.substring(6, 8)}';
+      }
+    }
   }
 
   @override
@@ -183,14 +199,29 @@ class _EventEditSheetState extends ConsumerState<EventEditSheet> {
                 }).toList(),
               ),
               const SizedBox(height: 12),
-              // Weekly repeat shortcut
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Repeat weekly'),
-                value: _weeklyRepeat,
-                onChanged: (v) => setState(() => _weeklyRepeat = v),
+              DropdownButtonFormField<String>(
+                value: _repeatPattern,
+                decoration: const InputDecoration(
+                  labelText: 'Repeat Pattern',
+                  border: OutlineInputBorder(),
+                ),
+                dropdownColor: Theme.of(context).brightness == Brightness.dark
+                    ? DesignTokens.surfaceDark
+                    : DesignTokens.surfaceLight,
+                items: const [
+                  DropdownMenuItem(value: 'none', child: Text('Does not repeat')),
+                  DropdownMenuItem(value: 'weekly', child: Text('Repeat weekly')),
+                  DropdownMenuItem(value: 'monthly', child: Text('Repeat monthly')),
+                  DropdownMenuItem(value: 'yearly', child: Text('Repeat yearly')),
+                ],
+                onChanged: (val) {
+                  if (val != null) {
+                    setState(() => _repeatPattern = val);
+                  }
+                },
               ),
-              if (_weeklyRepeat) ...[
+              if (_repeatPattern != 'none') ...[
+                const SizedBox(height: 12),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
                   leading: const Icon(Icons.event_repeat),
@@ -252,9 +283,18 @@ class _EventEditSheetState extends ConsumerState<EventEditSheet> {
   }
 
   String? _buildRrule() {
-    if (!_weeklyRepeat) return null;
-    final dow = ['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'][_date.weekday - 1];
-    final base = 'FREQ=WEEKLY;BYDAY=$dow';
+    if (_repeatPattern == 'none') return null;
+    
+    String base = '';
+    if (_repeatPattern == 'weekly') {
+      final dow = ['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'][_date.weekday - 1];
+      base = 'FREQ=WEEKLY;BYDAY=$dow';
+    } else if (_repeatPattern == 'monthly') {
+      base = 'FREQ=MONTHLY;BYMONTHDAY=${_date.day}';
+    } else if (_repeatPattern == 'yearly') {
+      base = 'FREQ=YEARLY;BYMONTH=${_date.month};BYMONTHDAY=${_date.day}';
+    }
+
     if (_repeatEndDate != null) {
       final until = _repeatEndDate!.replaceAll('-', '');
       return '$base;UNTIL=${until}T000000Z';

@@ -36,15 +36,15 @@ class ShellScaffold extends StatelessWidget {
       body: shell,
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          border: Border(
-            top: BorderSide(color: lineColor, width: 1),
-          ),
+          border: Border(top: BorderSide(color: lineColor, width: 1)),
         ),
         child: BottomNavigationBar(
           currentIndex: shell.currentIndex,
           elevation: 0,
-          onTap: (index) =>
-              shell.goBranch(index, initialLocation: index == shell.currentIndex),
+          onTap: (index) => shell.goBranch(
+            index,
+            initialLocation: index == shell.currentIndex,
+          ),
           items: _tabs
               .map(
                 (t) => BottomNavigationBarItem(
@@ -70,4 +70,3 @@ extension ShellRouteHelper on GoRouter {
     Routes.more,
   ];
 }
-

@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/db/database.dart';
+import '../../core/design/design.dart';
+import '../finance/services/projection_service.dart';
 import 'trip_repository.dart';
 
 /// Modal sheet for creating or editing a trip.
@@ -46,6 +48,7 @@ class _TripEditSheetState extends ConsumerState<TripEditSheet> {
           ? (t!.budgetCents! / 100).toStringAsFixed(2)
           : '',
     );
+    _budget.addListener(() => setState(() {}));
     _status = t?.status ?? 'probable';
     _startDate = t?.startDate != null ? _parseDate(t!.startDate!) : null;
     _endDate = t?.endDate != null ? _parseDate(t!.endDate!) : null;
@@ -123,6 +126,13 @@ class _TripEditSheetState extends ConsumerState<TripEditSheet> {
                 decimal: true,
               ),
             ),
+            if (_startDate != null && _budget.text.trim().isNotEmpty) ...[
+              const SizedBox(height: 8),
+              _SmartForecastWidget(
+                targetDate: _startDate!,
+                plannedCost: double.tryParse(_budget.text.trim()) ?? 0,
+              ),
+            ],
             const SizedBox(height: 20),
             FilledButton(
               onPressed: _save,
@@ -274,6 +284,38 @@ class _DateField extends StatelessWidget {
           style: Theme.of(context).textTheme.bodyMedium,
         ),
       ),
+    );
+  }
+}
+
+class _SmartForecastWidget extends ConsumerWidget {
+  const _SmartForecastWidget({required this.targetDate, required this.plannedCost});
+
+  final DateTime targetDate;
+  final double plannedCost;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final params = SmartForecastParams(targetDate: targetDate, plannedCost: plannedCost);
+    final forecastAsync = ref.watch(smartForecastFamilyProvider(params));
+
+    return forecastAsync.maybeWhen(
+      data: (balance) {
+        final formattedDate = '${targetDate.day}/${targetDate.month}/${targetDate.year}';
+        final formattedBalance = CurrencyFormatter.format(balance.abs().round() * 100);
+        final isNegative = balance < 0;
+        final color = isNegative ? DesignTokens.danger : DesignTokens.success;
+
+        return Text(
+          'If you spend this, your estimated left balance on $formattedDate would be '
+          '${balance >= 0 ? "" : "–"}$formattedBalance',
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: color,
+                fontWeight: FontWeight.w600,
+              ),
+        );
+      },
+      orElse: () => const SizedBox.shrink(),
     );
   }
 }

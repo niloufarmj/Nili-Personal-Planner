@@ -29,7 +29,9 @@ abstract final class AppTheme {
       useMaterial3: true,
       colorScheme: colorScheme,
       brightness: brightness,
-      scaffoldBackgroundColor: isDark ? DesignTokens.paperDark : DesignTokens.paperLight,
+      scaffoldBackgroundColor: isDark
+          ? DesignTokens.paperDark
+          : DesignTokens.paperLight,
       cardTheme: CardThemeData(
         color: isDark ? DesignTokens.surfaceDark : DesignTokens.surfaceLight,
         elevation: 0,
@@ -38,7 +40,9 @@ abstract final class AppTheme {
             color: isDark ? DesignTokens.lineDark : DesignTokens.lineLight,
             width: 1,
           ),
-          borderRadius: const BorderRadius.all(Radius.circular(DesignTokens.radiusCard)),
+          borderRadius: const BorderRadius.all(
+            Radius.circular(DesignTokens.radiusCard),
+          ),
         ),
       ),
       chipTheme: ChipThemeData(
@@ -49,7 +53,9 @@ abstract final class AppTheme {
           color: isDark ? DesignTokens.lineDark : DesignTokens.lineLight,
           width: 1,
         ),
-        backgroundColor: isDark ? DesignTokens.surfaceDark : DesignTokens.surfaceLight,
+        backgroundColor: isDark
+            ? DesignTokens.surfaceDark
+            : DesignTokens.surfaceLight,
         labelStyle: GoogleFonts.nunitoSans(
           fontSize: DesignTokens.fontCaption,
           fontWeight: FontWeight.w600,
@@ -57,9 +63,15 @@ abstract final class AppTheme {
         ),
       ),
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
-        backgroundColor: isDark ? DesignTokens.paperDark : DesignTokens.paperLight,
-        selectedItemColor: isDark ? DesignTokens.accentDark : DesignTokens.accentLight,
-        unselectedItemColor: isDark ? DesignTokens.inkSoftDark : DesignTokens.inkSoftLight,
+        backgroundColor: isDark
+            ? DesignTokens.paperDark
+            : DesignTokens.paperLight,
+        selectedItemColor: isDark
+            ? DesignTokens.accentDark
+            : DesignTokens.accentLight,
+        unselectedItemColor: isDark
+            ? DesignTokens.inkSoftDark
+            : DesignTokens.inkSoftLight,
         type: BottomNavigationBarType.fixed,
         elevation: 0,
         selectedLabelStyle: GoogleFonts.nunitoSans(
@@ -72,7 +84,9 @@ abstract final class AppTheme {
         ),
       ),
       appBarTheme: AppBarTheme(
-        backgroundColor: isDark ? DesignTokens.paperDark : DesignTokens.paperLight,
+        backgroundColor: isDark
+            ? DesignTokens.paperDark
+            : DesignTokens.paperLight,
         foregroundColor: isDark ? DesignTokens.inkDark : DesignTokens.inkLight,
         elevation: 0,
         scrolledUnderElevation: 0,
@@ -89,15 +103,24 @@ abstract final class AppTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: isDark ? DesignTokens.surfaceDark : DesignTokens.surfaceLight,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        fillColor: isDark
+            ? DesignTokens.surfaceDark
+            : DesignTokens.surfaceLight,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 12,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(DesignTokens.radiusInput),
-          borderSide: BorderSide(color: isDark ? DesignTokens.lineDark : DesignTokens.lineLight),
+          borderSide: BorderSide(
+            color: isDark ? DesignTokens.lineDark : DesignTokens.lineLight,
+          ),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(DesignTokens.radiusInput),
-          borderSide: BorderSide(color: isDark ? DesignTokens.lineDark : DesignTokens.lineLight),
+          borderSide: BorderSide(
+            color: isDark ? DesignTokens.lineDark : DesignTokens.lineLight,
+          ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(DesignTokens.radiusInput),
@@ -108,11 +131,15 @@ abstract final class AppTheme {
         ),
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
-        backgroundColor: isDark ? DesignTokens.accentDark : DesignTokens.accentLight,
+        backgroundColor: isDark
+            ? DesignTokens.accentDark
+            : DesignTokens.accentLight,
         foregroundColor: Colors.white,
         elevation: 4,
         shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(DesignTokens.radiusCard)),
+          borderRadius: BorderRadius.all(
+            Radius.circular(DesignTokens.radiusCard),
+          ),
         ),
       ),
       textTheme: _textTheme(isDark),
@@ -121,7 +148,9 @@ abstract final class AppTheme {
 
   static TextTheme _textTheme(bool isDark) {
     final baseColor = isDark ? DesignTokens.inkDark : DesignTokens.inkLight;
-    final secondaryColor = isDark ? DesignTokens.inkSoftDark : DesignTokens.inkSoftLight;
+    final secondaryColor = isDark
+        ? DesignTokens.inkSoftDark
+        : DesignTokens.inkSoftLight;
 
     return TextTheme(
       displayLarge: GoogleFonts.fraunces(
@@ -205,4 +234,3 @@ abstract final class AppTheme {
     );
   }
 }
-

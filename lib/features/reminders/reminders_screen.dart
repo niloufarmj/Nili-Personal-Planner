@@ -30,8 +30,12 @@ class RemindersScreen extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton(
         heroTag: 'reminder_fab',
-        backgroundColor: isDark ? DesignTokens.accentDark : DesignTokens.accentLight,
-        foregroundColor: isDark ? DesignTokens.paperDark : DesignTokens.paperLight,
+        backgroundColor: isDark
+            ? DesignTokens.accentDark
+            : DesignTokens.accentLight,
+        foregroundColor: isDark
+            ? DesignTokens.paperDark
+            : DesignTokens.paperLight,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(DesignTokens.radiusInput),
         ),
@@ -117,7 +121,7 @@ class _ReminderCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
+
     final fmt = DateFormat('d MMM yyyy');
     final startDt = _parse(reminder.windowStart);
     final endDt = reminder.windowEnd != null
@@ -146,7 +150,9 @@ class _ReminderCard extends ConsumerWidget {
                   : 'From ${fmt.format(startDt)}',
               style: theme.textTheme.bodyMedium?.copyWith(
                 fontSize: DesignTokens.fontCaption,
-                color: isDark ? DesignTokens.inkSoftDark : DesignTokens.inkSoftLight,
+                color: isDark
+                    ? DesignTokens.inkSoftDark
+                    : DesignTokens.inkSoftLight,
               ),
             ),
           ),

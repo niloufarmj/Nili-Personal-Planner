@@ -32,8 +32,12 @@ class TravelPlannerScreen extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton(
         heroTag: 'trip_fab',
-        backgroundColor: isDark ? DesignTokens.accentDark : DesignTokens.accentLight,
-        foregroundColor: isDark ? DesignTokens.paperDark : DesignTokens.paperLight,
+        backgroundColor: isDark
+            ? DesignTokens.accentDark
+            : DesignTokens.accentLight,
+        foregroundColor: isDark
+            ? DesignTokens.paperDark
+            : DesignTokens.paperLight,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(DesignTokens.radiusInput),
         ),
@@ -122,7 +126,7 @@ class _TripCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
+
     final fmt = DateFormat('d MMM yyyy');
     String dateRange = '';
     if (trip.startDate != null && trip.endDate != null) {
@@ -133,7 +137,10 @@ class _TripCard extends ConsumerWidget {
       dateRange = 'From ${fmt.format(_parseDate(trip.startDate!))}';
     }
 
-    final badgeBg = DesignTokens.resolvePastelFill(color: DesignTokens.sage, isDark: isDark);
+    final badgeBg = DesignTokens.resolvePastelFill(
+      color: DesignTokens.sage,
+      isDark: isDark,
+    );
     final iconColor = isDark ? DesignTokens.inkDark : DesignTokens.inkLight;
 
     return Padding(
@@ -144,15 +151,8 @@ class _TripCard extends ConsumerWidget {
           leading: Container(
             width: 40,
             height: 40,
-            decoration: BoxDecoration(
-              color: badgeBg,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.flight_takeoff,
-              color: iconColor,
-              size: 20,
-            ),
+            decoration: BoxDecoration(color: badgeBg, shape: BoxShape.circle),
+            child: Icon(Icons.flight_takeoff, color: iconColor, size: 20),
           ),
           title: Text(
             trip.title,
@@ -171,7 +171,9 @@ class _TripCard extends ConsumerWidget {
                   dateRange,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     fontSize: DesignTokens.fontCaption,
-                    color: isDark ? DesignTokens.inkSoftDark : DesignTokens.inkSoftLight,
+                    color: isDark
+                        ? DesignTokens.inkSoftDark
+                        : DesignTokens.inkSoftLight,
                   ),
                 ),
               if (trip.location != null)
@@ -179,7 +181,9 @@ class _TripCard extends ConsumerWidget {
                   trip.location!,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     fontSize: DesignTokens.fontCaption,
-                    color: isDark ? DesignTokens.inkSoftDark : DesignTokens.inkSoftLight,
+                    color: isDark
+                        ? DesignTokens.inkSoftDark
+                        : DesignTokens.inkSoftLight,
                   ),
                 ),
             ],

@@ -12,15 +12,15 @@ class FitnessRepository {
   // ── Measurements ───────────────────────────────────────────────────────────
 
   Stream<List<Measurement>> watchMeasurements() {
-    return (_db.select(_db.measurements)
-          ..orderBy([(m) => OrderingTerm.desc(m.date)]))
-        .watch();
+    return (_db.select(
+      _db.measurements,
+    )..orderBy([(m) => OrderingTerm.desc(m.date)])).watch();
   }
 
   Future<List<Measurement>> getMeasurements() {
-    return (_db.select(_db.measurements)
-          ..orderBy([(m) => OrderingTerm.desc(m.date)]))
-        .get();
+    return (_db.select(
+      _db.measurements,
+    )..orderBy([(m) => OrderingTerm.desc(m.date)])).get();
   }
 
   Future<int> createMeasurement(MeasurementsCompanion companion) async {
@@ -35,9 +35,9 @@ class FitnessRepository {
   }
 
   Future<int> deleteMeasurement(int id) async {
-    final deleted = await (_db.delete(_db.measurements)
-          ..where((m) => m.id.equals(id)))
-        .go();
+    final deleted = await (_db.delete(
+      _db.measurements,
+    )..where((m) => m.id.equals(id))).go();
     await checkGoalAchievements();
     return deleted;
   }
@@ -71,9 +71,9 @@ class FitnessRepository {
 
   /// Scans all open goals and updates achievedDate if a measurement meets the target.
   Future<void> checkGoalAchievements() async {
-    final openGoals = await (_db.select(_db.fitnessGoals)
-          ..where((g) => g.achievedDate.isNull()))
-        .get();
+    final openGoals = await (_db.select(
+      _db.fitnessGoals,
+    )..where((g) => g.achievedDate.isNull())).get();
     if (openGoals.isEmpty) return;
 
     final measurements = await getMeasurements();
@@ -118,7 +118,9 @@ class FitnessRepository {
             : value >= goal.target;
 
         if (isAchieved) {
-          await updateGoal(goal.copyWith(achievedDate: Value(matchingMeasurement.date)));
+          await updateGoal(
+            goal.copyWith(achievedDate: Value(matchingMeasurement.date)),
+          );
         }
       }
     }
@@ -152,7 +154,8 @@ class FitnessRepository {
       id: 242,
       when: nextMonth,
       title: 'Monthly Progress Photos',
-      body: 'Take your progress photos to stay motivated and track visual changes!',
+      body:
+          'Take your progress photos to stay motivated and track visual changes!',
     );
   }
 }

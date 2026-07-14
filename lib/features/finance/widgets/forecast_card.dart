@@ -69,11 +69,19 @@ class _ForecastCardData extends StatelessWidget {
 
     final balance = result.estimatedEndBalanceCents;
     final balanceColor = balance >= 0
-        ? (isDark ? DesignTokens.success.withValues(alpha: 0.9) : DesignTokens.success)
-        : (isDark ? DesignTokens.danger.withValues(alpha: 0.9) : DesignTokens.danger);
+        ? (isDark
+              ? DesignTokens.success.withValues(alpha: 0.9)
+              : DesignTokens.success)
+        : (isDark
+              ? DesignTokens.danger.withValues(alpha: 0.9)
+              : DesignTokens.danger);
 
-    final greenColor = isDark ? DesignTokens.success.withValues(alpha: 0.9) : DesignTokens.success;
-    final redColor = isDark ? DesignTokens.danger.withValues(alpha: 0.9) : DesignTokens.danger;
+    final greenColor = isDark
+        ? DesignTokens.success.withValues(alpha: 0.9)
+        : DesignTokens.success;
+    final redColor = isDark
+        ? DesignTokens.danger.withValues(alpha: 0.9)
+        : DesignTokens.danger;
 
     return AppCard(
       child: Padding(
@@ -87,7 +95,9 @@ class _ForecastCardData extends StatelessWidget {
                   Text(
                     'Est. End-of-Month',
                     style: theme.textTheme.labelSmall?.copyWith(
-                      color: isDark ? DesignTokens.inkSoftDark : DesignTokens.inkSoftLight,
+                      color: isDark
+                          ? DesignTokens.inkSoftDark
+                          : DesignTokens.inkSoftLight,
                       fontWeight: FontWeight.w700,
                       letterSpacing: 1.0,
                     ),
@@ -123,12 +133,16 @@ class _ForecastCardData extends StatelessWidget {
               _Row(
                 label: 'Projected in',
                 value: result.projectedRemainingInCents,
-                color: isDark ? DesignTokens.success.withValues(alpha: 0.6) : DesignTokens.success.withValues(alpha: 0.8),
+                color: isDark
+                    ? DesignTokens.success.withValues(alpha: 0.6)
+                    : DesignTokens.success.withValues(alpha: 0.8),
               ),
               _Row(
                 label: 'Projected out',
                 value: -result.projectedRemainingOutCents,
-                color: isDark ? DesignTokens.danger.withValues(alpha: 0.6) : DesignTokens.danger.withValues(alpha: 0.8),
+                color: isDark
+                    ? DesignTokens.danger.withValues(alpha: 0.6)
+                    : DesignTokens.danger.withValues(alpha: 0.8),
               ),
             ],
             if (result.plannedOutCents > 0 || result.plannedInCents > 0) ...[
@@ -136,12 +150,16 @@ class _ForecastCardData extends StatelessWidget {
               _Row(
                 label: 'Planned in',
                 value: result.plannedInCents,
-                color: isDark ? DesignTokens.dustyBlue.withValues(alpha: 0.8) : DesignTokens.dustyBlue,
+                color: isDark
+                    ? DesignTokens.dustyBlue.withValues(alpha: 0.8)
+                    : DesignTokens.dustyBlue,
               ),
               _Row(
                 label: 'Planned out',
                 value: -result.plannedOutCents,
-                color: isDark ? DesignTokens.peach.withValues(alpha: 0.8) : DesignTokens.peach,
+                color: isDark
+                    ? DesignTokens.peach.withValues(alpha: 0.8)
+                    : DesignTokens.peach,
               ),
             ],
           ],
@@ -171,7 +189,9 @@ class _Row extends StatelessWidget {
           Text(
             label,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: isDark ? DesignTokens.inkSoftDark : DesignTokens.inkSoftLight,
+              color: isDark
+                  ? DesignTokens.inkSoftDark
+                  : DesignTokens.inkSoftLight,
             ),
           ),
           Text(

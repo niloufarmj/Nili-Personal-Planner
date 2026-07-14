@@ -223,9 +223,10 @@ class _WeeklyBarChart extends StatelessWidget {
   }
 }
 
-final _socialLogsForAccountProvider = StreamProvider.autoDispose.family<List<SocialLog>, int>(
-  (ref, id) => ref.watch(socialRepositoryProvider).watchLogsForAccount(id),
-);
+final _socialLogsForAccountProvider = StreamProvider.autoDispose
+    .family<List<SocialLog>, int>(
+      (ref, id) => ref.watch(socialRepositoryProvider).watchLogsForAccount(id),
+    );
 
 // ── Log history ───────────────────────────────────────────────────────────────
 

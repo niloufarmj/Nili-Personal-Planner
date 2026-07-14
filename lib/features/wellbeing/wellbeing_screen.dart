@@ -11,9 +11,10 @@ final _activeActionsProvider = StreamProvider.autoDispose((ref) {
   return ref.watch(wellbeingRepositoryProvider).watchActiveActions();
 });
 
-final _logsForDateProvider = StreamProvider.autoDispose.family<List<WellbeingLog>, String>((ref, dateStr) {
-  return ref.watch(wellbeingRepositoryProvider).watchLogsForDate(dateStr);
-});
+final _logsForDateProvider = StreamProvider.autoDispose
+    .family<List<WellbeingLog>, String>((ref, dateStr) {
+      return ref.watch(wellbeingRepositoryProvider).watchLogsForDate(dateStr);
+    });
 
 final _dailyLogCountsProvider = StreamProvider.autoDispose((ref) {
   return ref.watch(wellbeingRepositoryProvider).watchDailyLogCounts();
@@ -83,7 +84,9 @@ class _WellbeingScreenState extends ConsumerState<WellbeingScreen> {
                             value: isLogged,
                             onChanged: (val) async {
                               HapticFeedback.lightImpact();
-                              final repo = ref.read(wellbeingRepositoryProvider);
+                              final repo = ref.read(
+                                wellbeingRepositoryProvider,
+                              );
                               if (isLogged) {
                                 await repo.unlogAction(action.id, todayStr);
                               } else {
@@ -110,7 +113,10 @@ class _WellbeingScreenState extends ConsumerState<WellbeingScreen> {
           const SectionHeader(title: 'Activity Heatmap'),
           const SizedBox(height: 8),
           countsAsync.when(
-            loading: () => const SizedBox(height: 200, child: Center(child: CircularProgressIndicator())),
+            loading: () => const SizedBox(
+              height: 200,
+              child: Center(child: CircularProgressIndicator()),
+            ),
             error: (e, _) => Text('Error: $e'),
             data: (counts) {
               return AppCard(
@@ -129,9 +135,12 @@ class _WellbeingScreenState extends ConsumerState<WellbeingScreen> {
                       setState(() => _focusedDay = focusedDay);
                     },
                     calendarBuilders: CalendarBuilders(
-                      defaultBuilder: (context, day, _) => _buildHeatCell(day, counts),
-                      todayBuilder: (context, day, _) => _buildHeatCell(day, counts, isToday: true),
-                      outsideBuilder: (context, day, _) => _buildHeatCell(day, counts, isOutside: true),
+                      defaultBuilder: (context, day, _) =>
+                          _buildHeatCell(day, counts),
+                      todayBuilder: (context, day, _) =>
+                          _buildHeatCell(day, counts, isToday: true),
+                      outsideBuilder: (context, day, _) =>
+                          _buildHeatCell(day, counts, isOutside: true),
                     ),
                   ),
                 ),
@@ -144,7 +153,12 @@ class _WellbeingScreenState extends ConsumerState<WellbeingScreen> {
     );
   }
 
-  Widget _buildHeatCell(DateTime day, Map<String, int> counts, {bool isToday = false, bool isOutside = false}) {
+  Widget _buildHeatCell(
+    DateTime day,
+    Map<String, int> counts, {
+    bool isToday = false,
+    bool isOutside = false,
+  }) {
     final dateStr = _fmt(day);
     final count = counts[dateStr] ?? 0;
 
@@ -161,7 +175,10 @@ class _WellbeingScreenState extends ConsumerState<WellbeingScreen> {
         color: color,
         borderRadius: BorderRadius.circular(6),
         border: isToday
-            ? Border.all(color: Theme.of(context).colorScheme.primary, width: 1.5)
+            ? Border.all(
+                color: Theme.of(context).colorScheme.primary,
+                width: 1.5,
+              )
             : null,
       ),
       child: Center(
@@ -182,7 +199,8 @@ class _WellbeingScreenState extends ConsumerState<WellbeingScreen> {
     final confirmed = await ConfirmDialog.show(
       context,
       title: 'Delete Action?',
-      message: 'Remove "${action.name}"? This deletes all completed logs for this action.',
+      message:
+          'Remove "${action.name}"? This deletes all completed logs for this action.',
     );
     if (confirmed == true) {
       await ref.read(wellbeingRepositoryProvider).deleteAction(action.id);
@@ -234,7 +252,10 @@ class _ActionAddSheetState extends ConsumerState<_ActionAddSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text('Add Self-Care Action', style: Theme.of(context).textTheme.titleMedium),
+            Text(
+              'Add Self-Care Action',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
             const SizedBox(height: 12),
             TextFormField(
               controller: _ctrl,
@@ -242,7 +263,8 @@ class _ActionAddSheetState extends ConsumerState<_ActionAddSheet> {
                 labelText: 'Action Name (e.g. read, tea)',
                 border: OutlineInputBorder(),
               ),
-              validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
+              validator: (v) =>
+                  v == null || v.trim().isEmpty ? 'Required' : null,
             ),
             const SizedBox(height: 20),
             FilledButton(onPressed: _submit, child: const Text('Save')),

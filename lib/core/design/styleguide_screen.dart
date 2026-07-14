@@ -8,9 +8,7 @@ class StyleguideScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Styleguide & Tokens QA'),
-      ),
+      appBar: AppBar(title: const Text('Styleguide & Tokens QA')),
       body: ListView(
         padding: const EdgeInsets.all(24),
         children: [
@@ -22,19 +20,34 @@ class StyleguideScreen extends StatelessWidget {
           Text(
             'Calm Pastel Wellness Aesthetic',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: Theme.of(context).colorScheme.primary,
-                ),
+              color: Theme.of(context).colorScheme.primary,
+            ),
           ),
           const Divider(height: 40),
-          _buildThemeSection(context, 'Light Theme', AppTheme.light, Colors.white),
+          _buildThemeSection(
+            context,
+            'Light Theme',
+            AppTheme.light,
+            Colors.white,
+          ),
           const SizedBox(height: 40),
-          _buildThemeSection(context, 'Dark Theme', AppTheme.dark, const Color(0xFF1E1E26)),
+          _buildThemeSection(
+            context,
+            'Dark Theme',
+            AppTheme.dark,
+            const Color(0xFF1E1E26),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildThemeSection(BuildContext context, String title, ThemeData theme, Color background) {
+  Widget _buildThemeSection(
+    BuildContext context,
+    String title,
+    ThemeData theme,
+    Color background,
+  ) {
     return Container(
       decoration: BoxDecoration(
         color: background,
@@ -47,10 +60,7 @@ class StyleguideScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              title,
-              style: theme.textTheme.displaySmall,
-            ),
+            Text(title, style: theme.textTheme.displaySmall),
             const SizedBox(height: 24),
 
             // ── Colors Section ──
@@ -61,16 +71,25 @@ class StyleguideScreen extends StatelessWidget {
               runSpacing: 8,
               children: [
                 _ColorBlock(name: 'Accent', color: theme.colorScheme.primary),
-                _ColorBlock(name: 'Paper', color: theme.scaffoldBackgroundColor),
+                _ColorBlock(
+                  name: 'Paper',
+                  color: theme.scaffoldBackgroundColor,
+                ),
                 _ColorBlock(name: 'Surface', color: theme.colorScheme.surface),
-                _ColorBlock(name: 'Divider', color: theme.dividerTheme.color ?? Colors.grey),
+                _ColorBlock(
+                  name: 'Divider',
+                  color: theme.dividerTheme.color ?? Colors.grey,
+                ),
                 _ColorBlock(name: 'Success', color: DesignTokens.success),
                 _ColorBlock(name: 'Warning', color: DesignTokens.warning),
                 _ColorBlock(name: 'Danger', color: DesignTokens.danger),
               ],
             ),
             const SizedBox(height: 16),
-            Text('Pastel Fills (resolved for theme):', style: theme.textTheme.titleSmall),
+            Text(
+              'Pastel Fills (resolved for theme):',
+              style: theme.textTheme.titleSmall,
+            ),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
@@ -78,31 +97,52 @@ class StyleguideScreen extends StatelessWidget {
               children: [
                 _ColorBlock(
                   name: 'Rose',
-                  color: DesignTokens.resolvePastelFill(color: DesignTokens.rose, isDark: theme.brightness == Brightness.dark),
+                  color: DesignTokens.resolvePastelFill(
+                    color: DesignTokens.rose,
+                    isDark: theme.brightness == Brightness.dark,
+                  ),
                 ),
                 _ColorBlock(
                   name: 'Blush',
-                  color: DesignTokens.resolvePastelFill(color: DesignTokens.blush, isDark: theme.brightness == Brightness.dark),
+                  color: DesignTokens.resolvePastelFill(
+                    color: DesignTokens.blush,
+                    isDark: theme.brightness == Brightness.dark,
+                  ),
                 ),
                 _ColorBlock(
                   name: 'Lavender',
-                  color: DesignTokens.resolvePastelFill(color: DesignTokens.lavender, isDark: theme.brightness == Brightness.dark),
+                  color: DesignTokens.resolvePastelFill(
+                    color: DesignTokens.lavender,
+                    isDark: theme.brightness == Brightness.dark,
+                  ),
                 ),
                 _ColorBlock(
                   name: 'Sage',
-                  color: DesignTokens.resolvePastelFill(color: DesignTokens.sage, isDark: theme.brightness == Brightness.dark),
+                  color: DesignTokens.resolvePastelFill(
+                    color: DesignTokens.sage,
+                    isDark: theme.brightness == Brightness.dark,
+                  ),
                 ),
                 _ColorBlock(
                   name: 'Dusty Blue',
-                  color: DesignTokens.resolvePastelFill(color: DesignTokens.dustyBlue, isDark: theme.brightness == Brightness.dark),
+                  color: DesignTokens.resolvePastelFill(
+                    color: DesignTokens.dustyBlue,
+                    isDark: theme.brightness == Brightness.dark,
+                  ),
                 ),
                 _ColorBlock(
                   name: 'Butter',
-                  color: DesignTokens.resolvePastelFill(color: DesignTokens.butter, isDark: theme.brightness == Brightness.dark),
+                  color: DesignTokens.resolvePastelFill(
+                    color: DesignTokens.butter,
+                    isDark: theme.brightness == Brightness.dark,
+                  ),
                 ),
                 _ColorBlock(
                   name: 'Peach',
-                  color: DesignTokens.resolvePastelFill(color: DesignTokens.peach, isDark: theme.brightness == Brightness.dark),
+                  color: DesignTokens.resolvePastelFill(
+                    color: DesignTokens.peach,
+                    isDark: theme.brightness == Brightness.dark,
+                  ),
                 ),
               ],
             ),
@@ -111,17 +151,31 @@ class StyleguideScreen extends StatelessWidget {
             // ── Typography Section ──
             const SectionHeader(title: 'Typography'),
             const SizedBox(height: 12),
-            Text('Display Text (Fraunces)', style: theme.textTheme.displayMedium),
+            Text(
+              'Display Text (Fraunces)',
+              style: theme.textTheme.displayMedium,
+            ),
             const SizedBox(height: 8),
             Text('Title Large (Fraunces)', style: theme.textTheme.titleLarge),
             const SizedBox(height: 8),
-            Text('Section Heading (Nunito Sans)', style: theme.textTheme.titleMedium),
+            Text(
+              'Section Heading (Nunito Sans)',
+              style: theme.textTheme.titleMedium,
+            ),
             const SizedBox(height: 8),
-            Text('Body Text standard layout (Nunito Sans)', style: theme.textTheme.bodyMedium),
+            Text(
+              'Body Text standard layout (Nunito Sans)',
+              style: theme.textTheme.bodyMedium,
+            ),
             const SizedBox(height: 8),
-            Text('Caption style (Nunito Sans)', style: theme.textTheme.bodySmall),
+            Text(
+              'Caption style (Nunito Sans)',
+              style: theme.textTheme.bodySmall,
+            ),
             const SizedBox(height: 8),
-            const SectionHeader(title: 'Overline Style (Letter-Spaced Small Caps)'),
+            const SectionHeader(
+              title: 'Overline Style (Letter-Spaced Small Caps)',
+            ),
             const SizedBox(height: 32),
 
             // ── DayWash Signature Element ──
@@ -166,9 +220,15 @@ class StyleguideScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('AppCard (Radius 20, soft shadow)', style: theme.textTheme.titleMedium),
+                        Text(
+                          'AppCard (Radius 20, soft shadow)',
+                          style: theme.textTheme.titleMedium,
+                        ),
                         const SizedBox(height: 8),
-                        Text('Custom iOS-style squircle corner cards with 1px border lines.', style: theme.textTheme.bodyMedium),
+                        Text(
+                          'Custom iOS-style squircle corner cards with 1px border lines.',
+                          style: theme.textTheme.bodyMedium,
+                        ),
                       ],
                     ),
                   ),
@@ -263,10 +323,7 @@ class _ColorBlock extends StatelessWidget {
           ),
           Text(
             '#${color.value.toRadixString(16).substring(2).toUpperCase()}',
-            style: const TextStyle(
-              fontSize: 9,
-              color: Colors.black54,
-            ),
+            style: const TextStyle(fontSize: 9, color: Colors.black54),
           ),
         ],
       ),

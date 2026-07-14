@@ -11,42 +11,49 @@ class WellbeingRepository {
   // ── Actions CRUD ───────────────────────────────────────────────────────────
 
   Stream<List<WellbeingAction>> watchActiveActions() {
-    return (_db.select(_db.wellbeingActions)..where((a) => a.active.equals(true))).watch();
+    return (_db.select(
+      _db.wellbeingActions,
+    )..where((a) => a.active.equals(true))).watch();
   }
 
   Future<List<WellbeingAction>> getActiveActions() {
-    return (_db.select(_db.wellbeingActions)..where((a) => a.active.equals(true))).get();
+    return (_db.select(
+      _db.wellbeingActions,
+    )..where((a) => a.active.equals(true))).get();
   }
 
   Future<int> createAction(String name) async {
-    return _db.into(_db.wellbeingActions).insert(
-          WellbeingActionsCompanion.insert(name: name),
-        );
+    return _db
+        .into(_db.wellbeingActions)
+        .insert(WellbeingActionsCompanion.insert(name: name));
   }
 
   Future<int> deleteAction(int id) {
-    return (_db.delete(_db.wellbeingActions)..where((a) => a.id.equals(id))).go();
+    return (_db.delete(
+      _db.wellbeingActions,
+    )..where((a) => a.id.equals(id))).go();
   }
 
   // ── Logging ────────────────────────────────────────────────────────────────
 
   Stream<List<WellbeingLog>> watchLogsForDate(String dateIso) {
-    return (_db.select(_db.wellbeingLogs)..where((l) => l.date.equals(dateIso))).watch();
+    return (_db.select(
+      _db.wellbeingLogs,
+    )..where((l) => l.date.equals(dateIso))).watch();
   }
 
   Future<void> logAction(int actionId, String dateIso) async {
-    await _db.into(_db.wellbeingLogs).insertOnConflictUpdate(
-          WellbeingLogsCompanion.insert(
-            date: dateIso,
-            actionId: actionId,
-          ),
+    await _db
+        .into(_db.wellbeingLogs)
+        .insertOnConflictUpdate(
+          WellbeingLogsCompanion.insert(date: dateIso, actionId: actionId),
         );
   }
 
   Future<void> unlogAction(int actionId, String dateIso) async {
-    await (_db.delete(_db.wellbeingLogs)
-          ..where((l) => l.actionId.equals(actionId) & l.date.equals(dateIso)))
-        .go();
+    await (_db.delete(
+      _db.wellbeingLogs,
+    )..where((l) => l.actionId.equals(actionId) & l.date.equals(dateIso))).go();
   }
 
   // ── Heat Map / Calendar counts ──────────────────────────────────────────────
@@ -70,9 +77,9 @@ class WellbeingRepository {
 
     final defaults = ['meditation', 'talk to a friend', 'listen to music'];
     for (final name in defaults) {
-      await _db.into(_db.wellbeingActions).insert(
-            WellbeingActionsCompanion.insert(name: name),
-          );
+      await _db
+          .into(_db.wellbeingActions)
+          .insert(WellbeingActionsCompanion.insert(name: name));
     }
   }
 }

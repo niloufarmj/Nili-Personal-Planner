@@ -66,6 +66,13 @@ class _RecurringTile extends ConsumerWidget {
 
     return AppCard(
       child: ListTile(
+        onTap: () {
+          showModalBottomSheet<void>(
+            context: context,
+            isScrollControlled: true,
+            builder: (_) => _RecurringAddSheet(existing: item),
+          );
+        },
         leading: CircleAvatar(
           backgroundColor: (isIn ? Colors.green : Colors.red).withAlpha(30),
           child: Icon(
@@ -107,7 +114,8 @@ class _RecurringTile extends ConsumerWidget {
 // ── Add sheet ─────────────────────────────────────────────────────────────────
 
 class _RecurringAddSheet extends ConsumerStatefulWidget {
-  const _RecurringAddSheet();
+  const _RecurringAddSheet({this.existing});
+  final RecurringTransaction? existing;
 
   @override
   ConsumerState<_RecurringAddSheet> createState() => _RecurringAddSheetState();
@@ -121,6 +129,19 @@ class _RecurringAddSheetState extends ConsumerState<_RecurringAddSheet> {
 
   String _direction = 'out';
   String _category = _categories.first;
+
+  @override
+  void initState() {
+    super.initState();
+    final ext = widget.existing;
+    if (ext != null) {
+      _nameCtrl.text = ext.name;
+      _amountCtrl.text = (ext.amountCents / 100.0).toStringAsFixed(2);
+      _dayCtrl.text = ext.dayOfMonth.toString();
+      _direction = ext.direction;
+      _category = ext.category;
+    }
+  }
 
   @override
   void dispose() {
@@ -143,7 +164,7 @@ class _RecurringAddSheetState extends ConsumerState<_RecurringAddSheet> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'Add Recurring',
+              widget.existing != null ? 'Edit Recurring' : 'Add Recurring',
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 12),
@@ -226,7 +247,10 @@ class _RecurringAddSheetState extends ConsumerState<_RecurringAddSheet> {
               ),
             ),
             const SizedBox(height: 20),
-            FilledButton(onPressed: _submit, child: const Text('Add')),
+            FilledButton(
+              onPressed: _submit,
+              child: Text(widget.existing != null ? 'Save' : 'Add'),
+            ),
           ],
         ),
       ),
@@ -240,18 +264,31 @@ class _RecurringAddSheetState extends ConsumerState<_RecurringAddSheet> {
         '${now.year.toString().padLeft(4, '0')}-'
         '${now.month.toString().padLeft(2, '0')}';
 
-    await ref
-        .read(recurringRepositoryProvider)
-        .create(
-          RecurringTransactionsCompanion.insert(
-            name: _nameCtrl.text.trim(),
-            amountCents: CurrencyFormatter.parseToCents(_amountCtrl.text)!,
-            direction: _direction,
-            dayOfMonth: int.parse(_dayCtrl.text),
-            startMonth: monthStr,
-            category: _category,
-          ),
-        );
+    final repo = ref.read(recurringRepositoryProvider);
+    final amountCents = CurrencyFormatter.parseToCents(_amountCtrl.text)!;
+    final day = int.parse(_dayCtrl.text);
+
+    if (widget.existing != null) {
+      final updated = widget.existing!.copyWith(
+        name: _nameCtrl.text.trim(),
+        amountCents: amountCents,
+        direction: _direction,
+        dayOfMonth: day,
+        category: _category,
+      );
+      await repo.update(updated);
+    } else {
+      await repo.create(
+        RecurringTransactionsCompanion.insert(
+          name: _nameCtrl.text.trim(),
+          amountCents: amountCents,
+          direction: _direction,
+          dayOfMonth: day,
+          startMonth: monthStr,
+          category: _category,
+        ),
+      );
+    }
     if (mounted) Navigator.of(context).pop();
   }
 }

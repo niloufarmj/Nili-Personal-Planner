@@ -21,6 +21,9 @@ import '../habits/habit_repository.dart';
 import '../meals/meal_slot_repository.dart';
 import '../meals/recipe_repository.dart';
 import '../../core/services/backup_service.dart';
+import '../period/services/period_service.dart';
+import '../badges/badge_service.dart';
+import 'next_7_days_screen.dart';
 
 // ── Provider: today's aggregated data ─────────────────────────────────────────
 
@@ -56,7 +59,9 @@ String _fmtDate(DateTime d) =>
     '${d.month.toString().padLeft(2, '0')}-'
     '${d.day.toString().padLeft(2, '0')}';
 
-final _backupNudgeDismissedProvider = StateProvider.autoDispose<bool>((ref) => false);
+final _backupNudgeDismissedProvider = StateProvider.autoDispose<bool>(
+  (ref) => false,
+);
 
 // ── Screen ─────────────────────────────────────────────────────────────────────
 
@@ -96,7 +101,10 @@ class TodayScreen extends ConsumerWidget {
               children: [
                 _TodayHeader(todayStr: todayStr, today: today),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 16,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
@@ -105,7 +113,9 @@ class TodayScreen extends ConsumerWidget {
                         _BackupNudgeCard(
                           onBackup: () async {
                             try {
-                              await ref.read(backupServiceProvider).exportAndShare();
+                              await ref
+                                  .read(backupServiceProvider)
+                                  .exportAndShare();
                               ref.invalidate(shouldNudgeProvider);
                             } catch (e) {
                               if (context.mounted) {
@@ -116,10 +126,18 @@ class TodayScreen extends ConsumerWidget {
                             }
                           },
                           onDismiss: () =>
-                              ref.read(_backupNudgeDismissedProvider.notifier).state = true,
+                              ref
+                                      .read(
+                                        _backupNudgeDismissedProvider.notifier,
+                                      )
+                                      .state =
+                                  true,
                         ),
                         const SizedBox(height: 20),
                       ],
+                      // ── Period banner ──────────────────────────────────────
+                      const _TodayPeriodBanner(),
+
                       // ── Day overview strip ─────────────────────────────────
                       _DayOverviewStrip(todayStr: todayStr),
                       const SizedBox(height: 12),
@@ -128,6 +146,13 @@ class TodayScreen extends ConsumerWidget {
                       const SectionHeader(title: "Today's Events"),
                       _EventsList(todayStr: todayStr),
                       const SizedBox(height: 20),
+
+                      // ── Next 7 Days Plans ──────────────────────────────────
+                      const _Next7DaysPreview(),
+                      const SizedBox(height: 20),
+
+                      // ── Achievements ───────────────────────────────────────
+                      const _AchievementsPreview(),
 
                       // ── Conflict feed ──────────────────────────────────────
                       const SectionHeader(title: 'Conflicts & Reminders'),
@@ -161,7 +186,9 @@ class TodayScreen extends ConsumerWidget {
     showModalBottomSheet<void>(
       context: context,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(DesignTokens.radiusSheet)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(DesignTokens.radiusSheet),
+        ),
       ),
       builder: (_) => SafeArea(
         child: Padding(
@@ -215,20 +242,29 @@ class _TodayHeader extends ConsumerWidget {
     final tagsAsync = ref.watch(todayTagsProvider);
 
     return tagsAsync.when(
-      loading: () => const SizedBox(height: 220, child: Center(child: CircularProgressIndicator())),
+      loading: () => const SizedBox(
+        height: 220,
+        child: Center(child: CircularProgressIndicator()),
+      ),
       error: (_, __) => const SizedBox(height: 220),
       data: (tags) {
-        final washColors = tags.map((t) => AppColors.forTagName(t.name)).toList();
+        final washColors = tags
+            .map((t) => AppColors.forTagName(t.name))
+            .toList();
         final inkColor = isDark ? DesignTokens.inkDark : DesignTokens.inkLight;
-        final inkSoftColor = isDark ? DesignTokens.inkSoftDark : DesignTokens.inkSoftLight;
+        final inkSoftColor = isDark
+            ? DesignTokens.inkSoftDark
+            : DesignTokens.inkSoftLight;
 
         return Container(
           width: double.infinity,
-          decoration: DayWashDecoration(
-            tagColors: washColors,
-            isDark: isDark,
+          decoration: DayWashDecoration(tagColors: washColors, isDark: isDark),
+          padding: EdgeInsets.fromLTRB(
+            24,
+            MediaQuery.paddingOf(context).top + 20,
+            24,
+            32,
           ),
-          padding: EdgeInsets.fromLTRB(24, MediaQuery.paddingOf(context).top + 20, 24, 32),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -243,9 +279,7 @@ class _TodayHeader extends ConsumerWidget {
               const SizedBox(height: 8),
               Text(
                 formattedDate,
-                style: theme.textTheme.displayMedium?.copyWith(
-                  color: inkColor,
-                ),
+                style: theme.textTheme.displayMedium?.copyWith(color: inkColor),
               ),
               if (tags.isNotEmpty) ...[
                 const SizedBox(height: 16),
@@ -254,14 +288,24 @@ class _TodayHeader extends ConsumerWidget {
                   runSpacing: 4,
                   children: tags.map((tag) {
                     final baseColor = AppColors.forTagName(tag.name);
-                    final bg = DesignTokens.resolvePastelFill(color: baseColor, isDark: isDark);
+                    final bg = DesignTokens.resolvePastelFill(
+                      color: baseColor,
+                      isDark: isDark,
+                    );
                     return Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: bg,
-                        borderRadius: BorderRadius.circular(DesignTokens.radiusInput),
+                        borderRadius: BorderRadius.circular(
+                          DesignTokens.radiusInput,
+                        ),
                         border: Border.all(
-                          color: isDark ? DesignTokens.lineDark : DesignTokens.lineLight,
+                          color: isDark
+                              ? DesignTokens.lineDark
+                              : DesignTokens.lineLight,
                         ),
                       ),
                       child: Text(
@@ -298,22 +342,52 @@ class _DayOverviewStrip extends ConsumerWidget {
     return dataAsync.when(
       loading: () => const SizedBox(
         height: 40,
-        child: Center(child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))),
+        child: Center(
+          child: SizedBox(
+            width: 20,
+            height: 20,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
+        ),
       ),
       error: (_, _) => const SizedBox.shrink(),
       data: (data) {
         final chips = <Widget>[];
         if (data.gymSession != null) {
-          chips.add(const _OverviewChip(Icons.fitness_center, 'Gym', DesignTokens.dustyBlue));
+          chips.add(
+            const _OverviewChip(
+              Icons.fitness_center,
+              'Gym',
+              DesignTokens.dustyBlue,
+            ),
+          );
         }
         if (data.mealDots > 0) {
-          chips.add(_OverviewChip(Icons.restaurant, '${data.mealDots} meals', DesignTokens.peach));
+          chips.add(
+            _OverviewChip(
+              Icons.restaurant,
+              '${data.mealDots} meals',
+              DesignTokens.peach,
+            ),
+          );
         }
         if (data.dueDots > 0) {
-          chips.add(_OverviewChip(Icons.task_alt, '${data.dueDots} due', DesignTokens.lavender));
+          chips.add(
+            _OverviewChip(
+              Icons.task_alt,
+              '${data.dueDots} due',
+              DesignTokens.lavender,
+            ),
+          );
         }
         if (data.tripBars.isNotEmpty) {
-          chips.add(const _OverviewChip(Icons.flight_takeoff, 'Travel', DesignTokens.sage));
+          chips.add(
+            const _OverviewChip(
+              Icons.flight_takeoff,
+              'Travel',
+              DesignTokens.sage,
+            ),
+          );
         }
         if (chips.isEmpty) return const SizedBox.shrink();
         return Wrap(spacing: 8, runSpacing: 8, children: chips);
@@ -340,7 +414,9 @@ class _OverviewChip extends StatelessWidget {
       decoration: BoxDecoration(
         color: bg,
         borderRadius: BorderRadius.circular(DesignTokens.radiusInput),
-        border: Border.all(color: isDark ? DesignTokens.lineDark : DesignTokens.lineLight),
+        border: Border.all(
+          color: isDark ? DesignTokens.lineDark : DesignTokens.lineLight,
+        ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -375,7 +451,13 @@ class _EventsList extends ConsumerWidget {
     return occsAsync.when(
       loading: () => const SizedBox(
         height: 50,
-        child: Center(child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))),
+        child: Center(
+          child: SizedBox(
+            width: 20,
+            height: 20,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
+        ),
       ),
       error: (e, _) => Text('Error: $e'),
       data: (occs) {
@@ -394,7 +476,10 @@ class _EventsList extends ConsumerWidget {
                 : null;
 
             final catColor = AppColors.forTagName(e.category);
-            final badgeBg = DesignTokens.resolvePastelFill(color: catColor, isDark: isDark);
+            final badgeBg = DesignTokens.resolvePastelFill(
+              color: catColor,
+              isDark: isDark,
+            );
             final badgeFg = isDark ? DesignTokens.inkDark : catColor;
 
             return Padding(
@@ -409,7 +494,11 @@ class _EventsList extends ConsumerWidget {
                       color: badgeBg,
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(_categoryIcon(e.category), color: badgeFg, size: 20),
+                    child: Icon(
+                      _categoryIcon(e.category),
+                      color: badgeFg,
+                      size: 20,
+                    ),
                   ),
                   title: Text(
                     e.title,
@@ -418,21 +507,25 @@ class _EventsList extends ConsumerWidget {
                     ),
                   ),
                   subtitle: timeStr != null
-                      ? Text(
-                          timeStr,
-                          style: theme.textTheme.bodySmall,
-                        )
+                      ? Text(timeStr, style: theme.textTheme.bodySmall)
                       : null,
                   trailing: e.location != null
                       ? Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
-                            color: isDark ? DesignTokens.lineDark : DesignTokens.lineLight,
+                            color: isDark
+                                ? DesignTokens.lineDark
+                                : DesignTokens.lineLight,
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
                             e.location!,
-                            style: theme.textTheme.bodySmall?.copyWith(fontSize: 11),
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              fontSize: 11,
+                            ),
                           ),
                         )
                       : null,
@@ -523,7 +616,9 @@ class _ConflictCard extends StatelessWidget {
                     item.message,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w600,
-                      color: isDark ? DesignTokens.inkDark : DesignTokens.inkLight,
+                      color: isDark
+                          ? DesignTokens.inkDark
+                          : DesignTokens.inkLight,
                     ),
                   ),
                 ),
@@ -538,12 +633,19 @@ class _ConflictCard extends StatelessWidget {
                       (a) => OutlinedButton(
                         onPressed: a.onTap,
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: isDark ? DesignTokens.inkDark : DesignTokens.inkLight,
+                          foregroundColor: isDark
+                              ? DesignTokens.inkDark
+                              : DesignTokens.inkLight,
                           side: BorderSide(color: color.withAlpha(120)),
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
                           visualDensity: VisualDensity.compact,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(DesignTokens.radiusInput),
+                            borderRadius: BorderRadius.circular(
+                              DesignTokens.radiusInput,
+                            ),
                           ),
                         ),
                         child: Text(a.label),
@@ -609,7 +711,10 @@ class _MealSlotChip extends ConsumerWidget {
     final name = recipeAsync.valueOrNull;
 
     final mealColor = DesignTokens.peach;
-    final badgeBg = DesignTokens.resolvePastelFill(color: mealColor, isDark: isDark);
+    final badgeBg = DesignTokens.resolvePastelFill(
+      color: mealColor,
+      isDark: isDark,
+    );
     final badgeFg = isDark ? DesignTokens.inkDark : mealColor;
 
     return Padding(
@@ -620,15 +725,14 @@ class _MealSlotChip extends ConsumerWidget {
           leading: Container(
             width: 40,
             height: 40,
-            decoration: BoxDecoration(
-              color: badgeBg,
-              shape: BoxShape.circle,
-            ),
+            decoration: BoxDecoration(color: badgeBg, shape: BoxShape.circle),
             child: Icon(_slotIcon(slot.slot), color: badgeFg, size: 20),
           ),
           title: Text(
             name ?? slot.slot,
-            style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
+            style: theme.textTheme.bodyLarge?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
           ),
           subtitle: Text(_capitalize(slot.slot)),
           trailing: _statusChip(slot.status, theme),
@@ -662,9 +766,10 @@ final _todayActiveHabitsProvider = StreamProvider.autoDispose((ref) {
   return ref.watch(habitRepositoryProvider).watchActiveHabits();
 });
 
-final _todayHabitLogsProvider = StreamProvider.autoDispose.family<List<HabitLog>, String>((ref, dateStr) {
-  return ref.watch(habitRepositoryProvider).watchLogsForDate(dateStr);
-});
+final _todayHabitLogsProvider = StreamProvider.autoDispose
+    .family<List<HabitLog>, String>((ref, dateStr) {
+      return ref.watch(habitRepositoryProvider).watchLogsForDate(dateStr);
+    });
 
 // ── Today habits section ──────────────────────────────────────────────────────
 
@@ -678,7 +783,10 @@ class _TodayHabits extends ConsumerWidget {
     final logsAsync = ref.watch(_todayHabitLogsProvider(todayStr));
 
     return habitsAsync.when(
-      loading: () => const SizedBox(height: 50, child: Center(child: CircularProgressIndicator())),
+      loading: () => const SizedBox(
+        height: 50,
+        child: Center(child: CircularProgressIndicator()),
+      ),
       error: (e, _) => Text('Error: $e'),
       data: (habits) {
         if (habits.isEmpty) {
@@ -707,7 +815,8 @@ class _TodayHabits extends ConsumerWidget {
                   final target = habit.targetPerDay;
 
                   // Map water drop or checkmark, resolve colors
-                  final Color habitColor = habit.name.toLowerCase().contains('water')
+                  final Color habitColor =
+                      habit.name.toLowerCase().contains('water')
                       ? DesignTokens.dustyBlue
                       : DesignTokens.rose;
 
@@ -718,11 +827,15 @@ class _TodayHabits extends ConsumerWidget {
                     color: habitColor,
                     onTap: () {
                       HapticFeedback.lightImpact();
-                      ref.read(habitRepositoryProvider).incrementCount(habit.id, todayStr);
+                      ref
+                          .read(habitRepositoryProvider)
+                          .incrementCount(habit.id, todayStr);
                     },
                     onLongPress: () {
                       HapticFeedback.mediumImpact();
-                      ref.read(habitRepositoryProvider).decrementCount(habit.id, todayStr);
+                      ref
+                          .read(habitRepositoryProvider)
+                          .decrementCount(habit.id, todayStr);
                     },
                   );
                 }).toList(),
@@ -759,7 +872,8 @@ class HabitPillChip extends StatefulWidget {
   State<HabitPillChip> createState() => _HabitPillChipState();
 }
 
-class _HabitPillChipState extends State<HabitPillChip> with SingleTickerProviderStateMixin {
+class _HabitPillChipState extends State<HabitPillChip>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation<double> _scaleAnimation;
 
@@ -770,9 +884,10 @@ class _HabitPillChipState extends State<HabitPillChip> with SingleTickerProvider
       vsync: this,
       duration: const Duration(milliseconds: 150),
     );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.93).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
-    );
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 0.93,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
   }
 
   @override
@@ -789,11 +904,25 @@ class _HabitPillChipState extends State<HabitPillChip> with SingleTickerProvider
 
     final baseColor = widget.color;
     final bgResolved = completed
-        ? DesignTokens.resolvePastelFill(color: baseColor, isDark: isDark, customOpacity: 0.40)
-        : DesignTokens.resolvePastelFill(color: baseColor, isDark: isDark, customOpacity: 0.12);
+        ? DesignTokens.resolvePastelFill(
+            color: baseColor,
+            isDark: isDark,
+            customOpacity: 0.40,
+          )
+        : DesignTokens.resolvePastelFill(
+            color: baseColor,
+            isDark: isDark,
+            customOpacity: 0.12,
+          );
     final borderColor = completed
-        ? DesignTokens.resolvePastelFill(color: baseColor, isDark: isDark, customOpacity: 0.80)
-        : isDark ? DesignTokens.lineDark : DesignTokens.lineLight;
+        ? DesignTokens.resolvePastelFill(
+            color: baseColor,
+            isDark: isDark,
+            customOpacity: 0.80,
+          )
+        : isDark
+        ? DesignTokens.lineDark
+        : DesignTokens.lineLight;
     final fgResolved = isDark ? DesignTokens.inkDark : DesignTokens.inkLight;
 
     return ScaleTransition(
@@ -818,14 +947,25 @@ class _HabitPillChipState extends State<HabitPillChip> with SingleTickerProvider
                 width: 18,
                 height: 18,
                 child: completed
-                    ? Icon(Icons.check_circle, size: 18, color: isDark ? DesignTokens.inkDark : baseColor)
+                    ? Icon(
+                        Icons.check_circle,
+                        size: 18,
+                        color: isDark ? DesignTokens.inkDark : baseColor,
+                      )
                     : Stack(
                         alignment: Alignment.center,
                         children: [
                           CircularProgressIndicator(
-                            value: (widget.count / widget.target).clamp(0.0, 1.0),
+                            value: (widget.count / widget.target).clamp(
+                              0.0,
+                              1.0,
+                            ),
                             strokeWidth: 2.0,
-                            backgroundColor: (isDark ? DesignTokens.lineDark : DesignTokens.lineLight).withAlpha(100),
+                            backgroundColor:
+                                (isDark
+                                        ? DesignTokens.lineDark
+                                        : DesignTokens.lineLight)
+                                    .withAlpha(100),
                             color: isDark ? DesignTokens.inkDark : baseColor,
                           ),
                           Text(
@@ -876,7 +1016,10 @@ class _TodayGymQuickDone extends ConsumerWidget {
         }
 
         final gymColor = DesignTokens.dustyBlue;
-        final badgeBg = DesignTokens.resolvePastelFill(color: gymColor, isDark: isDark);
+        final badgeBg = DesignTokens.resolvePastelFill(
+          color: gymColor,
+          isDark: isDark,
+        );
         final badgeFg = isDark ? DesignTokens.inkDark : gymColor;
 
         return Padding(
@@ -895,7 +1038,9 @@ class _TodayGymQuickDone extends ConsumerWidget {
               ),
               title: Text(
                 'Gym Session Scheduled',
-                style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
               ),
               subtitle: const Text('Tap Done to log completion'),
               trailing: FilledButton.icon(
@@ -903,7 +1048,9 @@ class _TodayGymQuickDone extends ConsumerWidget {
                 label: const Text('Done'),
                 onPressed: () async {
                   HapticFeedback.mediumImpact();
-                  await ref.read(gymRepositoryProvider).logDone(
+                  await ref
+                      .read(gymRepositoryProvider)
+                      .logDone(
                         date: _fmtDate(DateTime.now()),
                         planId: session.planId,
                         durationMin: 45,
@@ -942,7 +1089,9 @@ class _TodayFabState extends State<TodayFab> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final accentColor = isDark ? DesignTokens.accentDark : DesignTokens.accentLight;
+    final accentColor = isDark
+        ? DesignTokens.accentDark
+        : DesignTokens.accentLight;
 
     return Stack(
       children: [
@@ -950,9 +1099,7 @@ class _TodayFabState extends State<TodayFab> {
           Positioned.fill(
             child: GestureDetector(
               onTap: _toggle,
-              child: Container(
-                color: Colors.black.withValues(alpha: 0.35),
-              ),
+              child: Container(color: Colors.black.withValues(alpha: 0.35)),
             ),
           ),
         Positioned(
@@ -964,54 +1111,72 @@ class _TodayFabState extends State<TodayFab> {
             children: [
               if (_isOpen) ...[
                 _buildOption(
-                  icon: Icons.event,
-                  label: 'Event',
-                  color: DesignTokens.rose,
-                  onTap: () {
-                    _toggle();
-                    EventEditSheet.show(context, initialDate: widget.todayStr);
-                  },
-                ).animate().fade(duration: 150.ms).slideY(begin: 0.3, end: 0, curve: Curves.easeOut),
+                      icon: Icons.event,
+                      label: 'Event',
+                      color: DesignTokens.rose,
+                      onTap: () {
+                        _toggle();
+                        EventEditSheet.show(
+                          context,
+                          initialDate: widget.todayStr,
+                        );
+                      },
+                    )
+                    .animate()
+                    .fade(duration: 150.ms)
+                    .slideY(begin: 0.3, end: 0, curve: Curves.easeOut),
                 const SizedBox(height: 10),
                 _buildOption(
-                  icon: Icons.attach_money,
-                  label: 'Expense',
-                  color: DesignTokens.sage,
-                  onTap: () {
-                    _toggle();
-                    context.push('/finance');
-                  },
-                ).animate(delay: 40.ms).fade(duration: 150.ms).slideY(begin: 0.3, end: 0, curve: Curves.easeOut),
+                      icon: Icons.attach_money,
+                      label: 'Expense',
+                      color: DesignTokens.sage,
+                      onTap: () {
+                        _toggle();
+                        context.push('/finance');
+                      },
+                    )
+                    .animate(delay: 40.ms)
+                    .fade(duration: 150.ms)
+                    .slideY(begin: 0.3, end: 0, curve: Curves.easeOut),
                 const SizedBox(height: 10),
                 _buildOption(
-                  icon: Icons.check_box_outlined,
-                  label: 'Task',
-                  color: DesignTokens.lavender,
-                  onTap: () {
-                    _toggle();
-                    context.push('/lists');
-                  },
-                ).animate(delay: 80.ms).fade(duration: 150.ms).slideY(begin: 0.3, end: 0, curve: Curves.easeOut),
+                      icon: Icons.check_box_outlined,
+                      label: 'Task',
+                      color: DesignTokens.lavender,
+                      onTap: () {
+                        _toggle();
+                        context.push('/lists');
+                      },
+                    )
+                    .animate(delay: 80.ms)
+                    .fade(duration: 150.ms)
+                    .slideY(begin: 0.3, end: 0, curve: Curves.easeOut),
                 const SizedBox(height: 10),
                 _buildOption(
-                  icon: Icons.flight,
-                  label: 'Trip',
-                  color: DesignTokens.dustyBlue,
-                  onTap: () {
-                    _toggle();
-                    context.push('/trips');
-                  },
-                ).animate(delay: 120.ms).fade(duration: 150.ms).slideY(begin: 0.3, end: 0, curve: Curves.easeOut),
+                      icon: Icons.flight,
+                      label: 'Trip',
+                      color: DesignTokens.dustyBlue,
+                      onTap: () {
+                        _toggle();
+                        context.push('/trips');
+                      },
+                    )
+                    .animate(delay: 120.ms)
+                    .fade(duration: 150.ms)
+                    .slideY(begin: 0.3, end: 0, curve: Curves.easeOut),
                 const SizedBox(height: 10),
                 _buildOption(
-                  icon: Icons.sticky_note_2_outlined,
-                  label: 'Note',
-                  color: DesignTokens.peach,
-                  onTap: () {
-                    _toggle();
-                    context.push('/lists');
-                  },
-                ).animate(delay: 160.ms).fade(duration: 150.ms).slideY(begin: 0.3, end: 0, curve: Curves.easeOut),
+                      icon: Icons.sticky_note_2_outlined,
+                      label: 'Note',
+                      color: DesignTokens.peach,
+                      onTap: () {
+                        _toggle();
+                        context.push('/lists');
+                      },
+                    )
+                    .animate(delay: 160.ms)
+                    .fade(duration: 150.ms)
+                    .slideY(begin: 0.3, end: 0, curve: Curves.easeOut),
                 const SizedBox(height: 16),
               ],
               FloatingActionButton(
@@ -1060,8 +1225,12 @@ class _TodayFabState extends State<TodayFab> {
             decoration: BoxDecoration(
               color: isDark ? DesignTokens.surfaceDark : Colors.white,
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: isDark ? DesignTokens.lineDark : DesignTokens.lineLight),
-              boxShadow: DesignTokens.shadow(isDark ? DesignTokens.inkDark : DesignTokens.inkLight),
+              border: Border.all(
+                color: isDark ? DesignTokens.lineDark : DesignTokens.lineLight,
+              ),
+              boxShadow: DesignTokens.shadow(
+                isDark ? DesignTokens.inkDark : DesignTokens.inkLight,
+              ),
             ),
             child: Text(
               label,
@@ -1079,14 +1248,17 @@ class _TodayFabState extends State<TodayFab> {
               color: bg,
               shape: SmoothRectangleBorder(
                 borderRadius: const SmoothBorderRadius.all(
-                  SmoothRadius(
-                    cornerRadius: 12,
-                    cornerSmoothing: 1.0,
-                  ),
+                  SmoothRadius(cornerRadius: 12, cornerSmoothing: 1.0),
                 ),
-                side: BorderSide(color: isDark ? DesignTokens.lineDark : DesignTokens.lineLight),
+                side: BorderSide(
+                  color: isDark
+                      ? DesignTokens.lineDark
+                      : DesignTokens.lineLight,
+                ),
               ),
-              shadows: DesignTokens.shadow(isDark ? DesignTokens.inkDark : DesignTokens.inkLight),
+              shadows: DesignTokens.shadow(
+                isDark ? DesignTokens.inkDark : DesignTokens.inkLight,
+              ),
             ),
             child: Icon(icon, color: fg, size: 18),
           ),
@@ -1115,7 +1287,9 @@ class _BackupNudgeCard extends StatelessWidget {
       isDark: isDark,
       customOpacity: isDark ? 0.18 : 0.15,
     );
-    final borderColor = isDark ? warningColor.withAlpha(100) : warningColor.withAlpha(150);
+    final borderColor = isDark
+        ? warningColor.withAlpha(100)
+        : warningColor.withAlpha(150);
 
     return Container(
       decoration: ShapeDecoration(
@@ -1143,7 +1317,9 @@ class _BackupNudgeCard extends StatelessWidget {
                   'Backup Recommended',
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: isDark ? DesignTokens.inkDark : DesignTokens.inkLight,
+                    color: isDark
+                        ? DesignTokens.inkDark
+                        : DesignTokens.inkLight,
                   ),
                 ),
               ),
@@ -1168,9 +1344,19 @@ class _BackupNudgeCard extends StatelessWidget {
               OutlinedButton(
                 onPressed: onDismiss,
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: isDark ? DesignTokens.inkDark : DesignTokens.inkLight,
-                  side: BorderSide(color: isDark ? DesignTokens.lineDark : DesignTokens.lineLight),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(DesignTokens.radiusInput)),
+                  foregroundColor: isDark
+                      ? DesignTokens.inkDark
+                      : DesignTokens.inkLight,
+                  side: BorderSide(
+                    color: isDark
+                        ? DesignTokens.lineDark
+                        : DesignTokens.lineLight,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(
+                      DesignTokens.radiusInput,
+                    ),
+                  ),
                 ),
                 child: const Text('Later'),
               ),
@@ -1180,15 +1366,290 @@ class _BackupNudgeCard extends StatelessWidget {
                 icon: const Icon(Icons.share, size: 16),
                 label: const Text('Back Up Now'),
                 style: FilledButton.styleFrom(
-                  backgroundColor: isDark ? DesignTokens.accentDark : DesignTokens.accentLight,
+                  backgroundColor: isDark
+                      ? DesignTokens.accentDark
+                      : DesignTokens.accentLight,
                   foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(DesignTokens.radiusInput)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(
+                      DesignTokens.radiusInput,
+                    ),
+                  ),
                 ),
               ),
             ],
           ),
         ],
       ),
+    );
+  }
+}
+
+// ── Period tracker banner ──────────────────────────────────────────────────
+
+class _TodayPeriodBanner extends ConsumerWidget {
+  const _TodayPeriodBanner();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    final service = ref.watch(periodServiceProvider);
+
+    return FutureBuilder<Map<String, dynamic>>(
+      future: service.getCycleState(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) return const SizedBox.shrink();
+
+        final state = snapshot.data!;
+        final isOnPeriod = state['isOnPeriod'] as bool;
+        final daysUntilNext = state['daysUntilNext'] as int;
+
+        final bool showBanner = isOnPeriod || daysUntilNext <= 3;
+        if (!showBanner) return const SizedBox.shrink();
+
+        String title = '';
+        Color color = DesignTokens.rose;
+        IconData icon = Icons.favorite;
+
+        if (isOnPeriod) {
+          title = 'Period Active';
+          icon = Icons.water_drop;
+        } else if (daysUntilNext < 0) {
+          title = 'Period is ${daysUntilNext.abs()} days late!';
+          color = DesignTokens.warning;
+          icon = Icons.warning_amber_outlined;
+        } else {
+          title = 'Period starting in $daysUntilNext days';
+          color = DesignTokens.roseSoft;
+          icon = Icons.calendar_today_outlined;
+        }
+
+        final bg = DesignTokens.resolvePastelFill(color: color, isDark: isDark);
+
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 16),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: bg,
+              borderRadius: BorderRadius.circular(DesignTokens.radiusCard),
+              border: Border.all(color: color.withValues(alpha: 0.3)),
+            ),
+            child: Row(
+              children: [
+                Icon(icon, color: color, size: 20),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: isDark ? DesignTokens.inkDark : DesignTokens.inkLight,
+                    ),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () => context.push('/period'),
+                  child: const Text('Log'),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+// ── Next 7 Days Preview Card ───────────────────────────────────────────────
+
+class _Next7DaysPreview extends ConsumerWidget {
+  const _Next7DaysPreview();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final plansAsync = ref.watch(next7DaysDataProvider);
+
+    return plansAsync.when(
+      loading: () => const SizedBox(height: 50, child: Center(child: CircularProgressIndicator())),
+      error: (_, __) => const SizedBox.shrink(),
+      data: (data) {
+        final days = data.days;
+        final planById = data.planById;
+        final List<Widget> previews = [];
+        int count = 0;
+
+        for (int i = 1; i < days.length; i++) {
+          if (count >= 3) break;
+          final day = days[i];
+          final dateStr = DateFormat('EEE, MMM d').format(day.date);
+
+          for (final gym in day.gymSessions) {
+            if (count >= 3) break;
+            final planName = planById[gym.planId]?.name ?? '';
+            previews.add(_PreviewRow(
+              dateStr: dateStr,
+              title: planName.isNotEmpty ? 'Gym - Plan $planName' : 'Gym Workout',
+              icon: Icons.fitness_center,
+              color: DesignTokens.dustyBlue,
+            ));
+            count++;
+          }
+          for (final ev in day.events) {
+            if (count >= 3) break;
+            previews.add(_PreviewRow(
+              dateStr: dateStr,
+              title: ev.event.title,
+              icon: Icons.event,
+              color: DesignTokens.rose,
+            ));
+            count++;
+          }
+          for (final t in day.tasks) {
+            if (count >= 3) break;
+            previews.add(_PreviewRow(
+              dateStr: dateStr,
+              title: t.title,
+              icon: Icons.check_circle_outline,
+              color: DesignTokens.lavender,
+            ));
+            count++;
+          }
+        }
+
+        return AppCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Next 7 Days Plans',
+                    style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                  TextButton(
+                    onPressed: () => context.push('/next-7-days'),
+                    child: const Text('See All'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              if (previews.isEmpty)
+                Text(
+                  'No upcoming plans for next week.',
+                  style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey),
+                )
+              else
+                Column(children: previews),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _PreviewRow extends StatelessWidget {
+  const _PreviewRow({
+    required this.dateStr,
+    required this.title,
+    required this.icon,
+    required this.color,
+  });
+
+  final String dateStr;
+  final String title;
+  final IconData icon;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6.0),
+      child: Row(
+        children: [
+          Icon(icon, color: color, size: 14),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              title,
+              style: theme.textTheme.bodyMedium?.copyWith(fontSize: 13),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          Text(
+            dateStr,
+            style: theme.textTheme.bodySmall?.copyWith(
+              fontSize: 11,
+              color: isDark ? DesignTokens.inkSoftDark : DesignTokens.inkSoftLight,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Achievements Preview Card ──────────────────────────────────────────────
+
+class _AchievementsPreview extends ConsumerWidget {
+  const _AchievementsPreview();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final badgesAsync = ref.watch(earnedBadgesProvider);
+
+    return badgesAsync.when(
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
+      data: (badges) {
+        final unlockedCount = badges.where((b) => b.isUnlocked).length;
+        if (unlockedCount == 0) return const SizedBox.shrink();
+
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 20),
+          child: AppCard(
+            child: InkWell(
+              onTap: () => context.push('/badges'),
+              child: Row(
+                children: [
+                  const Icon(Icons.emoji_events, color: DesignTokens.butter, size: 24),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Achievements & Badges',
+                          style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'You have unlocked $unlockedCount / ${badges.length} badges!',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: isDark ? DesignTokens.inkSoftDark : DesignTokens.inkSoftLight,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Icon(Icons.chevron_right, color: Colors.grey),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

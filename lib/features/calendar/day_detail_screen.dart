@@ -40,9 +40,7 @@ class DayDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Scaffold fallback for direct link routing
-    return Scaffold(
-      body: _DayDetailSheetContent(date: date),
-    );
+    return Scaffold(body: _DayDetailSheetContent(date: date));
   }
 }
 
@@ -84,13 +82,21 @@ class _DayDetailSheetContent extends ConsumerWidget {
           children: [
             // ── DayWash Header + Drag Handle ──
             tagsAsync.when(
-              loading: () => const SizedBox(height: 140, child: Center(child: CircularProgressIndicator())),
+              loading: () => const SizedBox(
+                height: 140,
+                child: Center(child: CircularProgressIndicator()),
+              ),
               error: (_, __) => const SizedBox(height: 140),
               data: (tags) {
-                final washColors = tags.map((t) => AppColors.forTagName(t.name)).toList();
+                final washColors = tags
+                    .map((t) => AppColors.forTagName(t.name))
+                    .toList();
                 return Container(
                   width: double.infinity,
-                  decoration: DayWashDecoration(tagColors: washColors, isDark: isDark),
+                  decoration: DayWashDecoration(
+                    tagColors: washColors,
+                    isDark: isDark,
+                  ),
                   padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
                   child: Column(
                     children: [
@@ -117,9 +123,12 @@ class _DayDetailSheetContent extends ConsumerWidget {
                           ),
                           FloatingActionButton.small(
                             heroTag: 'day_detail_fab_$date',
-                            backgroundColor: isDark ? DesignTokens.accentDark : DesignTokens.accentLight,
+                            backgroundColor: isDark
+                                ? DesignTokens.accentDark
+                                : DesignTokens.accentLight,
                             foregroundColor: Colors.white,
-                            onPressed: () => EventEditSheet.show(context, initialDate: date),
+                            onPressed: () =>
+                                EventEditSheet.show(context, initialDate: date),
                             child: const Icon(Icons.add),
                           ),
                         ],
@@ -176,9 +185,10 @@ class _DayDetailSheetContent extends ConsumerWidget {
 }
 
 // ── Day Tags Future Provider ──
-final dayTagsFutureProvider = FutureProvider.autoDispose.family<List<Tag>, String>((ref, date) {
-  return ref.watch(dayRepositoryProvider).getTagsForDate(date);
-});
+final dayTagsFutureProvider = FutureProvider.autoDispose
+    .family<List<Tag>, String>((ref, date) {
+      return ref.watch(dayRepositoryProvider).getTagsForDate(date);
+    });
 
 // ── Custom Flat List Tile Widget (Left Category-Colored Bar) ──────────────────
 
@@ -237,9 +247,11 @@ class FlatListTile extends StatelessWidget {
 
 // ── Events section ─────────────────────────────────────────────────────────────
 
-final _eventsForDateFutureProvider = FutureProvider.autoDispose.family<List<EventOccurrence>, DateTime>(
-  (ref, day) => ref.watch(eventRepositoryProvider).expandOccurrences(day, day),
-);
+final _eventsForDateFutureProvider = FutureProvider.autoDispose
+    .family<List<EventOccurrence>, DateTime>(
+      (ref, day) =>
+          ref.watch(eventRepositoryProvider).expandOccurrences(day, day),
+    );
 
 class _EventsSection extends ConsumerWidget {
   const _EventsSection({required this.date});
@@ -254,7 +266,10 @@ class _EventsSection extends ConsumerWidget {
     final occAsync = ref.watch(_eventsForDateFutureProvider(day));
 
     return occAsync.when(
-      loading: () => const SizedBox(height: 20, child: LinearProgressIndicator(minHeight: 2)),
+      loading: () => const SizedBox(
+        height: 20,
+        child: LinearProgressIndicator(minHeight: 2),
+      ),
       error: (e, _) => Text('Error loading events: $e'),
       data: (occs) {
         if (occs.isEmpty) {
@@ -279,7 +294,9 @@ class _EventsSection extends ConsumerWidget {
               categoryColor: catColor,
               title: Text(
                 e.title,
-                style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
               ),
               subtitle: timeStr != null ? Text(timeStr) : null,
               trailing: Row(
@@ -288,7 +305,9 @@ class _EventsSection extends ConsumerWidget {
                   Text(
                     e.category.toUpperCase(),
                     style: theme.textTheme.labelSmall?.copyWith(
-                      color: isDark ? DesignTokens.inkSoftDark : DesignTokens.inkSoftLight,
+                      color: isDark
+                          ? DesignTokens.inkSoftDark
+                          : DesignTokens.inkSoftLight,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -325,7 +344,10 @@ class _FinanceSection extends ConsumerWidget {
     final isDark = theme.brightness == Brightness.dark;
 
     return txAsync.when(
-      loading: () => const SizedBox(height: 20, child: LinearProgressIndicator(minHeight: 2)),
+      loading: () => const SizedBox(
+        height: 20,
+        child: LinearProgressIndicator(minHeight: 2),
+      ),
       error: (e, _) => Text('Error: $e'),
       data: (txs) {
         if (txs.isEmpty) {
@@ -341,13 +363,17 @@ class _FinanceSection extends ConsumerWidget {
           children: txs.map((tx) {
             final formattedAmount = CurrencyFormatter.format(tx.amountCents);
             final sign = tx.direction == 'in' ? '+' : '–';
-            final color = tx.direction == 'in' ? DesignTokens.success : DesignTokens.danger;
+            final color = tx.direction == 'in'
+                ? DesignTokens.success
+                : DesignTokens.danger;
 
             return FlatListTile(
               categoryColor: DesignTokens.sage,
               title: Text(
                 tx.note ?? tx.category,
-                style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
               ),
               subtitle: Text(tx.category),
               trailing: Text(
@@ -378,7 +404,10 @@ class _MealsSection extends ConsumerWidget {
     final isDark = theme.brightness == Brightness.dark;
 
     return mealSlotsAsync.when(
-      loading: () => const SizedBox(height: 20, child: LinearProgressIndicator(minHeight: 2)),
+      loading: () => const SizedBox(
+        height: 20,
+        child: LinearProgressIndicator(minHeight: 2),
+      ),
       error: (e, _) => Text('Error: $e'),
       data: (slots) {
         if (slots.isEmpty) {
@@ -392,21 +421,28 @@ class _MealsSection extends ConsumerWidget {
         }
 
         return FutureBuilder<List<Recipe>>(
-          future: ref.read(appDatabaseProvider).select(ref.read(appDatabaseProvider).recipes).get(),
+          future: ref
+              .read(appDatabaseProvider)
+              .select(ref.read(appDatabaseProvider).recipes)
+              .get(),
           builder: (context, snapshot) {
             final recipes = snapshot.data ?? [];
             final recipeMap = {for (final r in recipes) r.id: r};
 
             return Column(
               children: slots.map((slot) {
-                final recipe = slot.recipeId != null ? recipeMap[slot.recipeId] : null;
+                final recipe = slot.recipeId != null
+                    ? recipeMap[slot.recipeId]
+                    : null;
                 final recipeName = recipe?.name ?? 'No recipe selected';
 
                 return FlatListTile(
                   categoryColor: DesignTokens.peach,
                   title: Text(
                     recipeName,
-                    style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   subtitle: Text('${slot.slot.toUpperCase()} · ${slot.status}'),
                   trailing: slot.status == 'accepted'
@@ -439,7 +475,10 @@ class _DueItemsSection extends ConsumerWidget {
     final theme = Theme.of(context);
 
     return itemsAsync.when(
-      loading: () => const SizedBox(height: 20, child: LinearProgressIndicator(minHeight: 2)),
+      loading: () => const SizedBox(
+        height: 20,
+        child: LinearProgressIndicator(minHeight: 2),
+      ),
       error: (e, _) => Text('Error: $e'),
       data: (items) {
         if (items.isEmpty) {
@@ -459,7 +498,9 @@ class _DueItemsSection extends ConsumerWidget {
               leading: Checkbox(
                 value: isCompleted,
                 onChanged: (val) {
-                  ref.read(itemRepositoryProvider).toggleItemStatus(
+                  ref
+                      .read(itemRepositoryProvider)
+                      .toggleItemStatus(
                         item.id,
                         doneStatus: 'done',
                         openStatus: 'open',
@@ -476,7 +517,8 @@ class _DueItemsSection extends ConsumerWidget {
               subtitle: Text('Priority: ${item.priority ?? 'normal'}'),
               trailing: IconButton(
                 icon: const Icon(Icons.chevron_right),
-                onPressed: () => context.push('/collection/${item.collectionId}'),
+                onPressed: () =>
+                    context.push('/collection/${item.collectionId}'),
               ),
             );
           }).toList(),
@@ -486,21 +528,23 @@ class _DueItemsSection extends ConsumerWidget {
   }
 }
 
-final _transactionsForDateFutureProvider = FutureProvider.autoDispose.family<List<Transaction>, String>(
-  (ref, date) => ref.watch(transactionRepositoryProvider).getByDate(date),
-);
+final _transactionsForDateFutureProvider = FutureProvider.autoDispose
+    .family<List<Transaction>, String>(
+      (ref, date) => ref.watch(transactionRepositoryProvider).getByDate(date),
+    );
 
-final _mealsForDateStreamProvider = StreamProvider.autoDispose.family<List<MealSlot>, String>(
-  (ref, date) {
-    final db = ref.watch(appDatabaseProvider);
-    return (db.select(db.mealSlots)..where((s) => s.date.equals(date))).watch();
-  },
-);
+final _mealsForDateStreamProvider = StreamProvider.autoDispose
+    .family<List<MealSlot>, String>((ref, date) {
+      final db = ref.watch(appDatabaseProvider);
+      return (db.select(
+        db.mealSlots,
+      )..where((s) => s.date.equals(date))).watch();
+    });
 
-final _itemsForDateStreamProvider = StreamProvider.autoDispose.family<List<Item>, String>(
-  (ref, date) {
-    final db = ref.watch(appDatabaseProvider);
-    return (db.select(db.items)..where((i) => i.dueDate.equals(date))).watch();
-  },
-);
-
+final _itemsForDateStreamProvider = StreamProvider.autoDispose
+    .family<List<Item>, String>((ref, date) {
+      final db = ref.watch(appDatabaseProvider);
+      return (db.select(
+        db.items,
+      )..where((i) => i.dueDate.equals(date))).watch();
+    });

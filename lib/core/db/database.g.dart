@@ -9742,6 +9742,260 @@ class WellbeingLogsCompanion extends UpdateCompanion<WellbeingLog> {
   }
 }
 
+class $PeriodLogsTable extends PeriodLogs
+    with TableInfo<$PeriodLogsTable, PeriodLog> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PeriodLogsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _startDateMeta = const VerificationMeta(
+    'startDate',
+  );
+  @override
+  late final GeneratedColumn<String> startDate = GeneratedColumn<String>(
+    'start_date',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _durationDaysMeta = const VerificationMeta(
+    'durationDays',
+  );
+  @override
+  late final GeneratedColumn<int> durationDays = GeneratedColumn<int>(
+    'duration_days',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(5),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, startDate, durationDays];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'period_logs';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<PeriodLog> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('start_date')) {
+      context.handle(
+        _startDateMeta,
+        startDate.isAcceptableOrUnknown(data['start_date']!, _startDateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_startDateMeta);
+    }
+    if (data.containsKey('duration_days')) {
+      context.handle(
+        _durationDaysMeta,
+        durationDays.isAcceptableOrUnknown(
+          data['duration_days']!,
+          _durationDaysMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  PeriodLog map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PeriodLog(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      startDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}start_date'],
+      )!,
+      durationDays: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}duration_days'],
+      )!,
+    );
+  }
+
+  @override
+  $PeriodLogsTable createAlias(String alias) {
+    return $PeriodLogsTable(attachedDatabase, alias);
+  }
+}
+
+class PeriodLog extends DataClass implements Insertable<PeriodLog> {
+  final int id;
+  final String startDate;
+  final int durationDays;
+  const PeriodLog({
+    required this.id,
+    required this.startDate,
+    required this.durationDays,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['start_date'] = Variable<String>(startDate);
+    map['duration_days'] = Variable<int>(durationDays);
+    return map;
+  }
+
+  PeriodLogsCompanion toCompanion(bool nullToAbsent) {
+    return PeriodLogsCompanion(
+      id: Value(id),
+      startDate: Value(startDate),
+      durationDays: Value(durationDays),
+    );
+  }
+
+  factory PeriodLog.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PeriodLog(
+      id: serializer.fromJson<int>(json['id']),
+      startDate: serializer.fromJson<String>(json['startDate']),
+      durationDays: serializer.fromJson<int>(json['durationDays']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'startDate': serializer.toJson<String>(startDate),
+      'durationDays': serializer.toJson<int>(durationDays),
+    };
+  }
+
+  PeriodLog copyWith({int? id, String? startDate, int? durationDays}) =>
+      PeriodLog(
+        id: id ?? this.id,
+        startDate: startDate ?? this.startDate,
+        durationDays: durationDays ?? this.durationDays,
+      );
+  PeriodLog copyWithCompanion(PeriodLogsCompanion data) {
+    return PeriodLog(
+      id: data.id.present ? data.id.value : this.id,
+      startDate: data.startDate.present ? data.startDate.value : this.startDate,
+      durationDays: data.durationDays.present
+          ? data.durationDays.value
+          : this.durationDays,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PeriodLog(')
+          ..write('id: $id, ')
+          ..write('startDate: $startDate, ')
+          ..write('durationDays: $durationDays')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, startDate, durationDays);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PeriodLog &&
+          other.id == this.id &&
+          other.startDate == this.startDate &&
+          other.durationDays == this.durationDays);
+}
+
+class PeriodLogsCompanion extends UpdateCompanion<PeriodLog> {
+  final Value<int> id;
+  final Value<String> startDate;
+  final Value<int> durationDays;
+  const PeriodLogsCompanion({
+    this.id = const Value.absent(),
+    this.startDate = const Value.absent(),
+    this.durationDays = const Value.absent(),
+  });
+  PeriodLogsCompanion.insert({
+    this.id = const Value.absent(),
+    required String startDate,
+    this.durationDays = const Value.absent(),
+  }) : startDate = Value(startDate);
+  static Insertable<PeriodLog> custom({
+    Expression<int>? id,
+    Expression<String>? startDate,
+    Expression<int>? durationDays,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (startDate != null) 'start_date': startDate,
+      if (durationDays != null) 'duration_days': durationDays,
+    });
+  }
+
+  PeriodLogsCompanion copyWith({
+    Value<int>? id,
+    Value<String>? startDate,
+    Value<int>? durationDays,
+  }) {
+    return PeriodLogsCompanion(
+      id: id ?? this.id,
+      startDate: startDate ?? this.startDate,
+      durationDays: durationDays ?? this.durationDays,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (startDate.present) {
+      map['start_date'] = Variable<String>(startDate.value);
+    }
+    if (durationDays.present) {
+      map['duration_days'] = Variable<int>(durationDays.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PeriodLogsCompanion(')
+          ..write('id: $id, ')
+          ..write('startDate: $startDate, ')
+          ..write('durationDays: $durationDays')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $WorkContextsTable extends WorkContexts
     with TableInfo<$WorkContextsTable, WorkContext> {
   @override
@@ -11281,6 +11535,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     this,
   );
   late final $WellbeingLogsTable wellbeingLogs = $WellbeingLogsTable(this);
+  late final $PeriodLogsTable periodLogs = $PeriodLogsTable(this);
   late final $WorkContextsTable workContexts = $WorkContextsTable(this);
   late final $TimeEntriesTable timeEntries = $TimeEntriesTable(this);
   late final $SocialAccountsTable socialAccounts = $SocialAccountsTable(this);
@@ -11315,6 +11570,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     habitLogs,
     wellbeingActions,
     wellbeingLogs,
+    periodLogs,
     workContexts,
     timeEntries,
     socialAccounts,
@@ -19313,6 +19569,161 @@ typedef $$WellbeingLogsTableProcessedTableManager =
       WellbeingLog,
       PrefetchHooks Function({bool actionId})
     >;
+typedef $$PeriodLogsTableCreateCompanionBuilder =
+    PeriodLogsCompanion Function({
+      Value<int> id,
+      required String startDate,
+      Value<int> durationDays,
+    });
+typedef $$PeriodLogsTableUpdateCompanionBuilder =
+    PeriodLogsCompanion Function({
+      Value<int> id,
+      Value<String> startDate,
+      Value<int> durationDays,
+    });
+
+class $$PeriodLogsTableFilterComposer
+    extends Composer<_$AppDatabase, $PeriodLogsTable> {
+  $$PeriodLogsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get startDate => $composableBuilder(
+    column: $table.startDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get durationDays => $composableBuilder(
+    column: $table.durationDays,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$PeriodLogsTableOrderingComposer
+    extends Composer<_$AppDatabase, $PeriodLogsTable> {
+  $$PeriodLogsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get startDate => $composableBuilder(
+    column: $table.startDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get durationDays => $composableBuilder(
+    column: $table.durationDays,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$PeriodLogsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PeriodLogsTable> {
+  $$PeriodLogsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get startDate =>
+      $composableBuilder(column: $table.startDate, builder: (column) => column);
+
+  GeneratedColumn<int> get durationDays => $composableBuilder(
+    column: $table.durationDays,
+    builder: (column) => column,
+  );
+}
+
+class $$PeriodLogsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $PeriodLogsTable,
+          PeriodLog,
+          $$PeriodLogsTableFilterComposer,
+          $$PeriodLogsTableOrderingComposer,
+          $$PeriodLogsTableAnnotationComposer,
+          $$PeriodLogsTableCreateCompanionBuilder,
+          $$PeriodLogsTableUpdateCompanionBuilder,
+          (
+            PeriodLog,
+            BaseReferences<_$AppDatabase, $PeriodLogsTable, PeriodLog>,
+          ),
+          PeriodLog,
+          PrefetchHooks Function()
+        > {
+  $$PeriodLogsTableTableManager(_$AppDatabase db, $PeriodLogsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PeriodLogsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PeriodLogsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$PeriodLogsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> startDate = const Value.absent(),
+                Value<int> durationDays = const Value.absent(),
+              }) => PeriodLogsCompanion(
+                id: id,
+                startDate: startDate,
+                durationDays: durationDays,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String startDate,
+                Value<int> durationDays = const Value.absent(),
+              }) => PeriodLogsCompanion.insert(
+                id: id,
+                startDate: startDate,
+                durationDays: durationDays,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$PeriodLogsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $PeriodLogsTable,
+      PeriodLog,
+      $$PeriodLogsTableFilterComposer,
+      $$PeriodLogsTableOrderingComposer,
+      $$PeriodLogsTableAnnotationComposer,
+      $$PeriodLogsTableCreateCompanionBuilder,
+      $$PeriodLogsTableUpdateCompanionBuilder,
+      (PeriodLog, BaseReferences<_$AppDatabase, $PeriodLogsTable, PeriodLog>),
+      PeriodLog,
+      PrefetchHooks Function()
+    >;
 typedef $$WorkContextsTableCreateCompanionBuilder =
     WorkContextsCompanion Function({
       Value<int> id,
@@ -20778,6 +21189,8 @@ class $AppDatabaseManager {
       $$WellbeingActionsTableTableManager(_db, _db.wellbeingActions);
   $$WellbeingLogsTableTableManager get wellbeingLogs =>
       $$WellbeingLogsTableTableManager(_db, _db.wellbeingLogs);
+  $$PeriodLogsTableTableManager get periodLogs =>
+      $$PeriodLogsTableTableManager(_db, _db.periodLogs);
   $$WorkContextsTableTableManager get workContexts =>
       $$WorkContextsTableTableManager(_db, _db.workContexts);
   $$TimeEntriesTableTableManager get timeEntries =>

@@ -40,21 +40,18 @@ class StatusChip extends StatelessWidget {
     );
   }
 
-  static (String, Color) _resolve(String status) => switch (status.toLowerCase()) {
-    'done' => ('Done', DesignTokens.success),
-    'blocked' => ('Blocked', DesignTokens.danger),
-    'planned' || 'suggested' => (
-      status[0].toUpperCase() + status.substring(1),
-      DesignTokens.dustyBlue,
-    ),
-    'in_progress' || 'in-progress' => (
-      'In Progress',
-      DesignTokens.butter,
-    ),
-    _ => (
-      status[0].toUpperCase() + status.substring(1),
-      DesignTokens.inkSoftLight,
-    ),
-  };
+  static (String, Color) _resolve(String status) =>
+      switch (status.toLowerCase()) {
+        'done' => ('Done', DesignTokens.success),
+        'blocked' => ('Blocked', DesignTokens.danger),
+        'planned' || 'suggested' => (
+          status[0].toUpperCase() + status.substring(1),
+          DesignTokens.dustyBlue,
+        ),
+        'in_progress' || 'in-progress' => ('In Progress', DesignTokens.butter),
+        _ => (
+          status[0].toUpperCase() + status.substring(1),
+          DesignTokens.inkSoftLight,
+        ),
+      };
 }
-

@@ -5,22 +5,30 @@ import 'package:flutter/material.dart';
 /// All colors, font properties, shapes, and shadows must originate here.
 abstract final class DesignTokens {
   // ── Neutrals (Light Mode) ───────────────────────────────────────
-  static const Color paperLight = Color(0xFFFBF7F4);   // app background - warm off-white
+  static const Color paperLight = Color(
+    0xFFFBF7F4,
+  ); // app background - warm off-white
   static const Color surfaceLight = Color(0xFFFFFFFF); // card background
-  static const Color inkLight = Color(0xFF4A3F45);     // primary text (warm plum-charcoal)
+  static const Color inkLight = Color(
+    0xFF4A3F45,
+  ); // primary text (warm plum-charcoal)
   static const Color inkSoftLight = Color(0xFF8A7B82); // secondary text
-  static const Color lineLight = Color(0xFFEFE6E4);    // hairline dividers/borders
+  static const Color lineLight = Color(0xFFEFE6E4); // hairline dividers/borders
 
   // ── Neutrals (Dark Mode) ────────────────────────────────────────
-  static const Color paperDark = Color(0xFF2A2430);    // app background - warm plum-black
-  static const Color surfaceDark = Color(0xFF352E3C);  // card background
-  static const Color inkDark = Color(0xFFF2EAEE);      // primary text
-  static const Color inkSoftDark = Color(0xFFA599A0);  // secondary text
-  static const Color lineDark = Color(0xFF473F4F);     // hairline dividers/borders
+  static const Color paperDark = Color(
+    0xFF2A2430,
+  ); // app background - warm plum-black
+  static const Color surfaceDark = Color(0xFF352E3C); // card background
+  static const Color inkDark = Color(0xFFF2EAEE); // primary text
+  static const Color inkSoftDark = Color(0xFFA599A0); // secondary text
+  static const Color lineDark = Color(0xFF473F4F); // hairline dividers/borders
 
   // ── Accent (Only saturated color) ──────────────────────────────
-  static const Color accentLight = Color(0xFFC76B82);  // deep dusty rose
-  static const Color accentDark = Color(0xFFD38B9B);   // desaturated/dimmed accent
+  static const Color accentLight = Color(0xFFC76B82); // deep dusty rose
+  static const Color accentDark = Color(
+    0xFFD38B9B,
+  ); // desaturated/dimmed accent
 
   // ── Pastel Family (Light Mode) ──────────────────────────────────
   static const Color rose = Color(0xFFE7A6B7);
@@ -50,12 +58,12 @@ abstract final class DesignTokens {
 
   /// Soft ambient shadow for cards
   static List<BoxShadow> shadow(Color inkColor) => [
-        BoxShadow(
-          color: inkColor.withValues(alpha: 0.06),
-          blurRadius: 24,
-          offset: const Offset(0, 8),
-        ),
-      ];
+    BoxShadow(
+      color: inkColor.withValues(alpha: 0.06),
+      blurRadius: 24,
+      offset: const Offset(0, 8),
+    ),
+  ];
 
   // ── Helper functions for Dark Mode conversion ───────────────────
   /// Desaturate by 20% and dim by 15%
@@ -97,10 +105,7 @@ abstract final class DesignTokens {
 /// A custom decoration that creates a soft diagonal gradient wash
 /// to represent day activity/location tags without visual clutter.
 class DayWashDecoration extends Decoration {
-  const DayWashDecoration({
-    required this.tagColors,
-    required this.isDark,
-  });
+  const DayWashDecoration({required this.tagColors, required this.isDark});
 
   final List<Color> tagColors;
   final bool isDark;
@@ -160,8 +165,7 @@ class _DayWashPainter extends BoxPainter {
       colors: gradientColors,
     );
 
-    final paint = Paint()
-      ..shader = gradient.createShader(rect);
+    final paint = Paint()..shader = gradient.createShader(rect);
 
     canvas.drawRect(rect, paint);
   }
