@@ -17,4 +17,8 @@ class TimeEntries extends Table {
   TextColumn get date => text()(); // YYYY-MM-DD
   IntColumn get minutes => integer()();
   TextColumn get note => text().nullable()();
+  TextColumn get startTime => text().nullable()(); // HH:mm
+  TextColumn get endTime => text().nullable()();   // HH:mm
+  TextColumn get location => text().nullable()();  // Where worked
 }
+

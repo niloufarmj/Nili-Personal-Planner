@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import '../../../core/db/database.dart';
 
@@ -32,6 +33,22 @@ class WorktimeRepository {
   Future<int> deleteContext(int id) =>
       (_db.delete(_db.workContexts)..where((c) => c.id.equals(id))).go();
 
+  Future<int> getEntryCountForContext(int contextId) async {
+    final countExpr = _db.timeEntries.id.count();
+    final query = _db.selectOnly(_db.timeEntries)
+      ..addColumns([countExpr])
+      ..where(_db.timeEntries.contextId.equals(contextId));
+    final row = await query.getSingle();
+    return row.read(countExpr) ?? 0;
+  }
+
+  Future<void> deleteContextAndEntries(int contextId) async {
+    await _db.transaction(() async {
+      await (_db.delete(_db.timeEntries)..where((e) => e.contextId.equals(contextId))).go();
+      await (_db.delete(_db.workContexts)..where((c) => c.id.equals(contextId))).go();
+    });
+  }
+
   /// Seeds the three default contexts if the table is empty.
   Future<void> seedDefaultContextsIfNeeded() async {
     final existing = await _db.select(_db.workContexts).get();
@@ -49,6 +66,10 @@ class WorktimeRepository {
   Stream<List<TimeEntry>> watchEntriesForDate(String date) =>
       (_db.select(_db.timeEntries)..where((e) => e.date.equals(date))).watch();
 
+  Stream<List<TimeEntry>> watchAllEntries() => (_db.select(_db.timeEntries)
+        ..orderBy([(e) => OrderingTerm(expression: e.date, mode: OrderingMode.desc)]))
+      .watch();
+
   Future<List<TimeEntry>> getEntriesForDate(String date) =>
       (_db.select(_db.timeEntries)..where((e) => e.date.equals(date))).get();
 
@@ -57,15 +78,15 @@ class WorktimeRepository {
 
   // ── Timer helper ───────────────────────────────────────────────────────────
 
-  /// Computes elapsed minutes from [startedAt] using the injected clock,
-  /// then inserts a TimeEntry. Returns the new entry id.
+  /// Computes elapsed minutes, then inserts a TimeEntry with exact start/end times and location.
   Future<int> stopTimer({
     required int contextId,
     required DateTime startedAt,
+    required DateTime endedAt,
+    String? location,
     String? note,
   }) {
-    final end = _clock();
-    final minutes = end.difference(startedAt).inMinutes.clamp(1, 1440);
+    final minutes = endedAt.difference(startedAt).inMinutes.clamp(1, 1440);
     final dateStr = _fmt(startedAt);
     return createEntry(
       TimeEntriesCompanion.insert(
@@ -73,6 +94,9 @@ class WorktimeRepository {
         date: dateStr,
         minutes: minutes,
         note: Value(note),
+        startTime: Value(DateFormat('HH:mm').format(startedAt)),
+        endTime: Value(DateFormat('HH:mm').format(endedAt)),
+        location: Value(location),
       ),
     );
   }
@@ -145,3 +169,11 @@ class WorktimeRepository {
 final worktimeRepositoryProvider = Provider<WorktimeRepository>(
   (ref) => WorktimeRepository(ref.watch(appDatabaseProvider)),
 );
+
+final workContextsProvider = StreamProvider.autoDispose<List<WorkContext>>((ref) {
+  return ref.watch(worktimeRepositoryProvider).watchContexts();
+});
+
+final workEntriesProvider = StreamProvider.autoDispose<List<TimeEntry>>((ref) {
+  return ref.watch(worktimeRepositoryProvider).watchAllEntries();
+});

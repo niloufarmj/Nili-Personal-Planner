@@ -179,7 +179,11 @@ void main() {
 
       final injectedRepo = WorktimeRepository(db, clock: () => fakeNow);
 
-      await injectedRepo.stopTimer(contextId: ctxId, startedAt: fakeStart);
+      await injectedRepo.stopTimer(
+        contextId: ctxId,
+        startedAt: fakeStart,
+        endedAt: fakeNow,
+      );
 
       final entries = await repo.getEntriesForDate('2026-06-11');
       expect(entries.length, 1);

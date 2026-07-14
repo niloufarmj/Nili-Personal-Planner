@@ -1,21 +1,19 @@
 import 'dart:async';
-import 'dart:ui'; // for FontFeature
-import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:collection/collection.dart';
 
 import '../../core/db/database.dart';
 import '../../core/design/design.dart';
 import 'repositories/worktime_repository.dart';
 import 'services/rollup_service.dart';
-
-final _workContextsProvider = StreamProvider.autoDispose((ref) {
-  return ref.watch(worktimeRepositoryProvider).watchContexts();
-});
+import 'worktime_charts_screen.dart';
+import 'worktime_log_sheet.dart';
+import 'worktime_settings_sheet.dart';
 
 final _workEntriesForDateProvider = StreamProvider.autoDispose
     .family<List<TimeEntry>, String>((ref, dateStr) {
@@ -73,16 +71,33 @@ class _WorktimeScreenState extends ConsumerState<WorktimeScreen> {
 
   Future<void> _stopTimer() async {
     if (_timerContextId == null || _timerStartedAt == null) return;
-    await ref
-        .read(worktimeRepositoryProvider)
-        .stopTimer(contextId: _timerContextId!, startedAt: _timerStartedAt!);
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_timerContextKey);
-    await prefs.remove(_timerStartKey);
-    setState(() {
-      _timerContextId = null;
-      _timerStartedAt = null;
-    });
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    final result = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: isDark
+          ? DesignTokens.paperDark
+          : DesignTokens.paperLight,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(DesignTokens.radiusSheet),
+        ),
+      ),
+      builder: (_) => WorktimeLogSheet(
+        timerContextId: _timerContextId,
+        timerStartedAt: _timerStartedAt,
+      ),
+    );
+
+    if (result != null) {
+      // Completed or discarded
+      setState(() {
+        _timerContextId = null;
+        _timerStartedAt = null;
+      });
+    }
   }
 
   @override
@@ -100,6 +115,22 @@ class _WorktimeScreenState extends ConsumerState<WorktimeScreen> {
             color: isDark ? DesignTokens.inkDark : DesignTokens.inkLight,
           ),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.bar_chart_outlined),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const WorktimeChartsScreen()),
+              );
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.settings_outlined),
+            onPressed: () => _showSettings(context),
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         heroTag: 'worktime_fab',
@@ -146,7 +177,26 @@ class _WorktimeScreenState extends ConsumerState<WorktimeScreen> {
           top: Radius.circular(DesignTokens.radiusSheet),
         ),
       ),
-      builder: (_) => const _QuickAddSheet(),
+      builder: (_) => const WorktimeLogSheet(),
+    );
+  }
+
+  Future<void> _showSettings(BuildContext context) async {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: isDark
+          ? DesignTokens.paperDark
+          : DesignTokens.paperLight,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(DesignTokens.radiusSheet),
+        ),
+      ),
+      builder: (_) => const WorktimeSettingsSheet(),
     );
   }
 
@@ -235,7 +285,7 @@ class _TimerCardState extends ConsumerState<_TimerCard> {
 
   @override
   Widget build(BuildContext context) {
-    final ctxAsync = ref.watch(_workContextsProvider);
+    final ctxAsync = ref.watch(workContextsProvider);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final isRunning = widget.timerContextId != null;
@@ -589,6 +639,7 @@ class _TodayLog extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final entriesAsync = ref.watch(_workEntriesForDateProvider(date));
+    final contextsAsync = ref.watch(workContextsProvider);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
@@ -610,208 +661,105 @@ class _TodayLog extends ConsumerWidget {
             ),
           );
         }
-        return Column(
-          children: entries
-              .map(
-                (e) => AppCard(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  child: ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: Container(
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        color: isDark
-                            ? DesignTokens.surfaceDark
-                            : DesignTokens.resolvePastelFill(
-                                color: DesignTokens.lavender,
-                                isDark: false,
-                              ),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.access_time,
-                        color: isDark
-                            ? DesignTokens.inkDark
-                            : DesignTokens.lavender,
-                        size: 18,
-                      ),
-                    ),
-                    title: Text(
-                      e.note ?? 'Work session',
-                      style: theme.textTheme.bodyLarge?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: inkColor,
-                      ),
-                    ),
-                    subtitle: Text(
-                      'Session #${e.id}',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: isDark
-                            ? DesignTokens.inkSoftDark
-                            : DesignTokens.inkSoftLight,
-                      ),
-                    ),
-                    trailing: Text(
-                      RollupService.formatMinutes(e.minutes),
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: inkColor,
-                      ),
-                    ),
-                    onLongPress: () async {
-                      final confirmed = await ConfirmDialog.show(
-                        context,
-                        title: 'Delete entry?',
-                        message: 'Remove this time entry?',
-                      );
-                      if (confirmed == true) {
-                        await ref
-                            .read(worktimeRepositoryProvider)
-                            .deleteEntry(e.id);
+        return contextsAsync.when(
+          loading: () => const ShimmerSkeleton(width: double.infinity, height: 80),
+          error: (e, _) => Text('$e'),
+          data: (contexts) {
+            return Column(
+              children: entries
+                  .map(
+                    (e) {
+                      final ctxName = contexts.firstWhereOrNull((c) => c.id == e.contextId)?.name ?? 'Work';
+                      final timeRange = (e.startTime != null && e.endTime != null) ? '${e.startTime} – ${e.endTime}' : null;
+                      final loc = (e.location != null && e.location!.isNotEmpty) ? '@ ${e.location}' : null;
+
+                      final subtitleParts = <String>[];
+                      if (e.note != null && e.note!.isNotEmpty) {
+                        subtitleParts.add(ctxName);
                       }
+                      if (timeRange != null) {
+                        subtitleParts.add(timeRange);
+                      }
+                      if (loc != null) {
+                        subtitleParts.add(loc);
+                      }
+                      if (subtitleParts.isEmpty) {
+                        subtitleParts.add('Session #${e.id}');
+                      }
+
+                      final titleText = (e.note != null && e.note!.isNotEmpty) ? e.note! : ctxName;
+                      final subtitleText = subtitleParts.join('  •  ');
+
+                      return AppCard(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        child: ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          leading: Container(
+                            width: 36,
+                            height: 36,
+                            decoration: BoxDecoration(
+                              color: isDark
+                                  ? DesignTokens.surfaceDark
+                                  : DesignTokens.resolvePastelFill(
+                                      color: DesignTokens.lavender,
+                                      isDark: false,
+                                    ),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.access_time,
+                              color: isDark
+                                  ? DesignTokens.inkDark
+                                  : DesignTokens.lavender,
+                              size: 18,
+                            ),
+                          ),
+                          title: Text(
+                            titleText,
+                            style: theme.textTheme.bodyLarge?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: inkColor,
+                            ),
+                          ),
+                          subtitle: Text(
+                            subtitleText,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: isDark
+                                  ? DesignTokens.inkSoftDark
+                                  : DesignTokens.inkSoftLight,
+                            ),
+                          ),
+                          trailing: Text(
+                            RollupService.formatMinutes(e.minutes),
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: inkColor,
+                            ),
+                          ),
+                          onLongPress: () async {
+                            final confirmed = await ConfirmDialog.show(
+                              context,
+                              title: 'Delete entry?',
+                              message: 'Remove this time entry?',
+                            );
+                            if (confirmed == true) {
+                              await ref
+                                  .read(worktimeRepositoryProvider)
+                                  .deleteEntry(e.id);
+                            }
+                          },
+                        ),
+                      );
                     },
-                  ),
-                ),
-              )
-              .toList(),
+                  )
+                  .toList(),
+            );
+          },
         );
       },
     );
-  }
-}
-
-// ── Quick-add sheet ───────────────────────────────────────────────────────────
-
-class _QuickAddSheet extends ConsumerStatefulWidget {
-  const _QuickAddSheet();
-
-  @override
-  ConsumerState<_QuickAddSheet> createState() => _QuickAddSheetState();
-}
-
-class _QuickAddSheetState extends ConsumerState<_QuickAddSheet> {
-  final _formKey = GlobalKey<FormState>();
-  final _minutesCtrl = TextEditingController();
-  final _noteCtrl = TextEditingController();
-  int? _contextId;
-
-  @override
-  void dispose() {
-    _minutesCtrl.dispose();
-    _noteCtrl.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final insets = MediaQuery.viewInsetsOf(context);
-    final ctxAsync = ref.watch(_workContextsProvider);
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
-    return Padding(
-      padding: EdgeInsets.fromLTRB(24, 20, 24, 24 + insets.bottom),
-      child: Form(
-        key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              'Log Time',
-              style: theme.textTheme.headlineSmall?.copyWith(
-                fontFamily: GoogleFonts.fraunces().fontFamily,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 16),
-            ctxAsync.when(
-              loading: () => const Padding(
-                padding: EdgeInsets.symmetric(vertical: 8),
-                child: ShimmerSkeleton(width: double.infinity, height: 48),
-              ),
-              error: (e, _) => Text('$e'),
-              data: (contexts) => DropdownButtonFormField<int>(
-                hint: const Text('Context'),
-                items: contexts
-                    .map(
-                      (c) => DropdownMenuItem(value: c.id, child: Text(c.name)),
-                    )
-                    .toList(),
-                onChanged: (v) => setState(() => _contextId = v),
-                decoration: const InputDecoration(
-                  labelText: 'Work Context',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (v) => v == null ? 'Required' : null,
-              ),
-            ),
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: _minutesCtrl,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: 'Minutes',
-                border: OutlineInputBorder(),
-              ),
-              validator: (v) {
-                final n = int.tryParse(v ?? '');
-                if (n == null || n <= 0) return 'Enter positive minutes';
-                return null;
-              },
-            ),
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: _noteCtrl,
-              decoration: const InputDecoration(
-                labelText: 'Note (optional)',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 20),
-            FilledButton(
-              style: FilledButton.styleFrom(
-                backgroundColor: isDark
-                    ? DesignTokens.accentDark
-                    : DesignTokens.accentLight,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(DesignTokens.radiusInput),
-                ),
-              ),
-              onPressed: _submit,
-              child: const Text('Log'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Future<void> _submit() async {
-    if (!_formKey.currentState!.validate()) return;
-    final now = DateTime.now();
-    final dateStr =
-        '${now.year.toString().padLeft(4, '0')}-'
-        '${now.month.toString().padLeft(2, '0')}-'
-        '${now.day.toString().padLeft(2, '0')}';
-    await ref
-        .read(worktimeRepositoryProvider)
-        .createEntry(
-          TimeEntriesCompanion.insert(
-            contextId: _contextId!,
-            date: dateStr,
-            minutes: int.parse(_minutesCtrl.text),
-            note: Value(
-              _noteCtrl.text.trim().isEmpty ? null : _noteCtrl.text.trim(),
-            ),
-          ),
-        );
-    if (mounted) Navigator.of(context).pop();
   }
 }
