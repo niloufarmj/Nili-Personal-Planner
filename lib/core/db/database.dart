@@ -44,6 +44,7 @@ part 'database.g.dart';
     // Fitness
     WorkoutPlans,
     GymSessions,
+    SportActivities,
     Measurements,
     FitnessGoals,
     Habits,
@@ -67,7 +68,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? e]) : super(e ?? connect());
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -86,6 +87,9 @@ class AppDatabase extends _$AppDatabase {
         await m.addColumn(timeEntries, timeEntries.startTime);
         await m.addColumn(timeEntries, timeEntries.endTime);
         await m.addColumn(timeEntries, timeEntries.location);
+      }
+      if (from < 6) {
+        await m.createTable(sportActivities);
       }
     },
   );

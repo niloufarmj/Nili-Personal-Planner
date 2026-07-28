@@ -70,7 +70,7 @@ class GymRepository {
 
   /// Creates or replaces a 'planned' session for the given date.
   /// Does not overwrite a 'done' session.
-  Future<void> planSession({required String date, required int planId}) async {
+  Future<void> planSession({required String date, int? planId, String? notes}) async {
     final existing = await sessionForDate(date);
     if (existing != null && existing.status == 'done') return;
     if (existing != null) {
@@ -80,6 +80,7 @@ class GymRepository {
         GymSessionsCompanion(
           planId: Value(planId),
           status: const Value('planned'),
+          notes: Value(notes),
         ),
       );
     } else {
@@ -90,6 +91,7 @@ class GymRepository {
               date: date,
               planId: Value(planId),
               status: 'planned',
+              notes: Value(notes),
             ),
           );
     }
@@ -103,6 +105,7 @@ class GymRepository {
     int? durationMin,
     String? notes,
   }) async {
+    final dur = durationMin ?? 60;
     final existing = await sessionForDate(date);
     if (existing != null) {
       await (_db.update(
@@ -133,6 +136,21 @@ class GymRepository {
               notes: Value(notes),
             ),
           );
+    }
+
+    // Auto-sync into SportActivities for unified Sport & Gym Analytics
+    final existingSport = await (_db.select(_db.sportActivities)
+      ..where((s) => s.date.equals(date) & s.activityType.equals('Gym'))).getSingleOrNull();
+    if (existingSport == null) {
+      await _db.into(_db.sportActivities).insert(
+        SportActivitiesCompanion.insert(
+          date: date,
+          activityType: 'Gym',
+          durationMin: dur,
+          gymPlanId: Value(planId),
+          notes: Value(notes),
+        ),
+      );
     }
   }
 

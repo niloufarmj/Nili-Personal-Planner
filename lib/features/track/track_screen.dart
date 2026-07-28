@@ -164,8 +164,8 @@ class TrackScreen extends ConsumerWidget {
           const SizedBox(height: 16),
           _TrackEntry(
             icon: Icons.fitness_center,
-            title: 'Gym',
-            subtitle: 'Sessions, plans & attendance',
+            title: 'Gym & Sports',
+            subtitle: 'Gym, swimming, biking, plans & analytics',
             route: '/gym',
             color: DesignTokens.dustyBlue,
             trailing: gymCountAsync.maybeWhen(

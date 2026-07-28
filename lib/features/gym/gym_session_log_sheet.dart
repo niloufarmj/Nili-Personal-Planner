@@ -5,6 +5,8 @@ import '../../core/db/database.dart';
 import '../../core/design/design.dart';
 import 'gym_repository.dart';
 
+import 'sport_repository.dart';
+
 // Top-level provider — stable identity, no rebuild loop.
 final _allPlansProvider = StreamProvider.autoDispose<List<WorkoutPlan>>(
   (ref) => ref.watch(workoutPlanRepositoryProvider).watchAll(),
@@ -36,9 +38,24 @@ class GymSessionLogSheet extends ConsumerStatefulWidget {
 }
 
 class _GymSessionLogSheetState extends ConsumerState<GymSessionLogSheet> {
+  String _activityType = 'Gym';
   int? _selectedPlanId;
   int _durationMin = 60;
+  int? _calories;
   final _notesCtrl = TextEditingController();
+  final _caloriesCtrl = TextEditingController();
+
+  static const _activities = [
+    {'type': 'Gym', 'icon': Icons.fitness_center},
+    {'type': 'Swimming', 'icon': Icons.pool},
+    {'type': 'Tennis', 'icon': Icons.sports_tennis},
+    {'type': 'Biking', 'icon': Icons.directions_bike},
+    {'type': 'Running', 'icon': Icons.directions_run},
+    {'type': 'Walking', 'icon': Icons.directions_walk},
+    {'type': 'Yoga', 'icon': Icons.self_improvement},
+    {'type': 'Pilates', 'icon': Icons.accessibility_new},
+    {'type': 'Other', 'icon': Icons.sports_soccer},
+  ];
 
   @override
   void initState() {
@@ -49,11 +66,15 @@ class _GymSessionLogSheetState extends ConsumerState<GymSessionLogSheet> {
   @override
   void dispose() {
     _notesCtrl.dispose();
+    _caloriesCtrl.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final inkColor = isDark ? DesignTokens.inkDark : DesignTokens.inkLight;
     final plansAsync = ref.watch(_allPlansProvider);
 
     return Padding(
@@ -75,26 +96,73 @@ class _GymSessionLogSheetState extends ConsumerState<GymSessionLogSheet> {
           Text(widget.date, style: Theme.of(context).textTheme.bodySmall),
           const SizedBox(height: 16),
 
-          // Plan picker
-          plansAsync.when(
-            loading: () => const LinearProgressIndicator(minHeight: 2),
-            error: (_, _) => const SizedBox.shrink(),
-            data: (plans) => DropdownButtonFormField<int?>(
-              decoration: const InputDecoration(labelText: 'Plan (optional)'),
-              initialValue: _selectedPlanId,
-              items: [
-                const DropdownMenuItem(value: null, child: Text('No plan')),
-                ...plans.map(
-                  (p) => DropdownMenuItem(
-                    value: p.id,
-                    child: Text('Plan ${p.name}'),
-                  ),
-                ),
-              ],
-              onChanged: (v) => setState(() => _selectedPlanId = v),
+          // Activity Type Chips Selector
+          Text(
+            'Activity Type',
+            style: theme.textTheme.bodySmall?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: isDark ? DesignTokens.inkSoftDark : DesignTokens.inkSoftLight,
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
+          SizedBox(
+            height: 40,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: _activities.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 6),
+              itemBuilder: (context, idx) {
+                final act = _activities[idx];
+                final typeStr = act['type'] as String;
+                final isSelected = typeStr == _activityType;
+                return ChoiceChip(
+                  selected: isSelected,
+                  showCheckmark: false,
+                  avatar: Icon(
+                    act['icon'] as IconData,
+                    size: 16,
+                    color: isSelected ? Colors.white : inkColor,
+                  ),
+                  label: Text(typeStr),
+                  selectedColor: isDark ? DesignTokens.accentDark : DesignTokens.accentLight,
+                  labelStyle: TextStyle(
+                    color: isSelected ? Colors.white : inkColor,
+                    fontSize: 12,
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  ),
+                  onSelected: (_) {
+                    setState(() {
+                      _activityType = typeStr;
+                    });
+                  },
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Plan picker (only for Gym)
+          if (_activityType == 'Gym') ...[
+            plansAsync.when(
+              loading: () => const LinearProgressIndicator(minHeight: 2),
+              error: (_, _) => const SizedBox.shrink(),
+              data: (plans) => DropdownButtonFormField<int?>(
+                decoration: const InputDecoration(labelText: 'Plan (optional)'),
+                initialValue: _selectedPlanId,
+                items: [
+                  const DropdownMenuItem(value: null, child: Text('No plan')),
+                  ...plans.map(
+                    (p) => DropdownMenuItem(
+                      value: p.id,
+                      child: Text('Plan ${p.name}'),
+                    ),
+                  ),
+                ],
+                onChanged: (v) => setState(() => _selectedPlanId = v),
+              ),
+            ),
+            const SizedBox(height: 12),
+          ],
 
           // Duration
           Row(
@@ -116,6 +184,17 @@ class _GymSessionLogSheetState extends ConsumerState<GymSessionLogSheet> {
                 onPressed: () => setState(() => _durationMin += 15),
               ),
             ],
+          ),
+          const SizedBox(height: 8),
+
+          // Calories (optional)
+          TextField(
+            controller: _caloriesCtrl,
+            keyboardType: TextInputType.number,
+            decoration: const InputDecoration(
+              labelText: 'Calories burned (optional)',
+              hintText: 'e.g. 350',
+            ),
           ),
           const SizedBox(height: 8),
 
@@ -141,13 +220,31 @@ class _GymSessionLogSheetState extends ConsumerState<GymSessionLogSheet> {
   }
 
   Future<void> _save() async {
-    final repo = ref.read(gymRepositoryProvider);
-    await repo.logDone(
+    final notes = _notesCtrl.text.trim().isEmpty ? null : _notesCtrl.text.trim();
+    final calories = int.tryParse(_caloriesCtrl.text.trim());
+
+    // 1. Log in SportActivities for analytics
+    final sportRepo = ref.read(sportRepositoryProvider);
+    await sportRepo.logActivity(
       date: widget.date,
-      planId: _selectedPlanId,
+      activityType: _activityType,
       durationMin: _durationMin,
-      notes: _notesCtrl.text.trim().isEmpty ? null : _notesCtrl.text.trim(),
+      calories: calories,
+      notes: notes,
+      gymPlanId: _activityType == 'Gym' ? _selectedPlanId : null,
     );
+
+    // 2. If activity is Gym, also log in GymSessions for attendance
+    if (_activityType == 'Gym') {
+      final gymRepo = ref.read(gymRepositoryProvider);
+      await gymRepo.logDone(
+        date: widget.date,
+        planId: _selectedPlanId,
+        durationMin: _durationMin,
+        notes: notes,
+      );
+    }
+
     if (mounted) Navigator.of(context).pop();
   }
 }

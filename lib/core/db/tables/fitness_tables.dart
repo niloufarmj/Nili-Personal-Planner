@@ -65,3 +65,15 @@ class HabitLogs extends Table {
   @override
   Set<Column<Object>> get primaryKey => {habitId, date};
 }
+
+/// Log of sport and fitness activities (Gym, Swimming, Tennis, Biking, Running, etc.).
+class SportActivities extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get date => text()(); // YYYY-MM-DD
+  TextColumn get activityType => text()(); // 'Gym'|'Swimming'|'Tennis'|'Biking'|'Running'|'Walking'|'Yoga'|'Pilates'|'Other'
+  IntColumn get durationMin => integer()();
+  IntColumn get calories => integer().nullable()();
+  TextColumn get intensity => text().nullable()(); // 'Low'|'Moderate'|'High'
+  TextColumn get notes => text().nullable()();
+  IntColumn get gymPlanId => integer().nullable().references(WorkoutPlans, #id)();
+}

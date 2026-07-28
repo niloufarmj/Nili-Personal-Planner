@@ -481,7 +481,8 @@ class _RollupCard extends ConsumerWidget {
 
     final now = DateTime.now();
     final todayStr = _fmt(now);
-    final weekStart = now.subtract(Duration(days: now.weekday - 1));
+    final today = DateTime(now.year, now.month, now.day);
+    final weekStart = today.subtract(Duration(days: today.weekday - 1));
 
     final inkColor = isDark ? DesignTokens.inkDark : DesignTokens.inkLight;
 

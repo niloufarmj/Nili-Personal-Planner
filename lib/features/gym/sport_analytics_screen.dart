@@ -7,24 +7,24 @@ import 'package:collection/collection.dart';
 
 import '../../core/db/database.dart';
 import '../../core/design/design.dart';
-import 'repositories/worktime_repository.dart';
+import 'sport_repository.dart';
 
-enum ChartScope { day, week, month }
+enum SportChartScope { day, week, month }
 
-class WorktimeChartsScreen extends ConsumerStatefulWidget {
-  const WorktimeChartsScreen({super.key});
+class SportAnalyticsScreen extends ConsumerStatefulWidget {
+  const SportAnalyticsScreen({super.key});
 
   @override
-  ConsumerState<WorktimeChartsScreen> createState() => _WorktimeChartsScreenState();
+  ConsumerState<SportAnalyticsScreen> createState() => _SportAnalyticsScreenState();
 }
 
-class _WorktimeChartsScreenState extends ConsumerState<WorktimeChartsScreen> {
-  int? _selectedContextId; // null means 'All Positions'
-  ChartScope _scope = ChartScope.day;
+class _SportAnalyticsScreenState extends ConsumerState<SportAnalyticsScreen> {
+  String? _selectedActivityType; // null means 'All Sports'
+  SportChartScope _scope = SportChartScope.day;
 
   // Navigation states
-  late DateTime _currentWeekStart; // Monday of target week
-  late DateTime _currentYearStart;  // January 1st of target year
+  late DateTime _currentWeekStart; // Monday of target week (date-only)
+  late DateTime _currentYearStart; // January 1st of target year
 
   @override
   void initState() {
@@ -37,9 +37,9 @@ class _WorktimeChartsScreenState extends ConsumerState<WorktimeChartsScreen> {
 
   void _next() {
     setState(() {
-      if (_scope == ChartScope.day) {
+      if (_scope == SportChartScope.day) {
         _currentWeekStart = _currentWeekStart.add(const Duration(days: 7));
-      } else if (_scope == ChartScope.month) {
+      } else if (_scope == SportChartScope.month) {
         _currentYearStart = DateTime(_currentYearStart.year + 1);
       }
     });
@@ -47,24 +47,41 @@ class _WorktimeChartsScreenState extends ConsumerState<WorktimeChartsScreen> {
 
   void _prev() {
     setState(() {
-      if (_scope == ChartScope.day) {
+      if (_scope == SportChartScope.day) {
         _currentWeekStart = _currentWeekStart.subtract(const Duration(days: 7));
-      } else if (_scope == ChartScope.month) {
+      } else if (_scope == SportChartScope.month) {
         _currentYearStart = DateTime(_currentYearStart.year - 1);
       }
     });
   }
 
   String _getRangeText() {
-    if (_scope == ChartScope.day) {
+    if (_scope == SportChartScope.day) {
       final end = _currentWeekStart.add(const Duration(days: 6));
       final fmt = DateFormat('MMM d');
       return '${fmt.format(_currentWeekStart)} – ${fmt.format(end)}, ${_currentWeekStart.year}';
-    } else if (_scope == ChartScope.week) {
+    } else if (_scope == SportChartScope.week) {
       return 'Last 6 Weeks';
     } else {
       return 'Year ${_currentYearStart.year}';
     }
+  }
+
+  static const Map<String, Color> _activityColors = {
+    'Gym': DesignTokens.dustyBlue,
+    'Swimming': DesignTokens.sage,
+    'Tennis': DesignTokens.butter,
+    'Biking': DesignTokens.blush,
+    'Running': DesignTokens.rose,
+    'Walking': DesignTokens.peach,
+    'Yoga': DesignTokens.lavender,
+    'Pilates': DesignTokens.accentLight,
+    'Other': Colors.grey,
+  };
+
+  Color _getActivityColor(String type, bool isDark) {
+    final raw = _activityColors[type] ?? Colors.grey;
+    return isDark ? DesignTokens.adjustColorForDark(raw) : raw;
   }
 
   @override
@@ -73,13 +90,12 @@ class _WorktimeChartsScreenState extends ConsumerState<WorktimeChartsScreen> {
     final isDark = theme.brightness == Brightness.dark;
     final inkColor = isDark ? DesignTokens.inkDark : DesignTokens.inkLight;
 
-    final contextsAsync = ref.watch(workContextsProvider);
-    final entriesAsync = ref.watch(workEntriesProvider);
+    final activitiesAsync = ref.watch(sportActivitiesProvider);
 
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Work Analytics',
+          'Sport & Fitness Analytics',
           style: GoogleFonts.fraunces(
             fontSize: DesignTokens.fontTitle,
             fontWeight: FontWeight.w600,
@@ -87,39 +103,37 @@ class _WorktimeChartsScreenState extends ConsumerState<WorktimeChartsScreen> {
           ),
         ),
       ),
-      body: entriesAsync.when(
+      body: activitiesAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, _) => Center(child: Text('Error: $err')),
-        data: (entries) => contextsAsync.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (err, _) => Center(child: Text('Error: $err')),
-          data: (contexts) {
-            return ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              children: [
-                // Filters Card
-                _buildFiltersCard(contexts),
-                const SizedBox(height: 16),
+        data: (activities) {
+          return ListView(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            children: [
+              // Filters Card
+              _buildFiltersCard(activities, isDark, theme),
+              const SizedBox(height: 16),
 
-                // Chart Container Card
-                _buildChartCard(entries, contexts),
-                const SizedBox(height: 16),
+              // Chart Card
+              _buildChartCard(activities, isDark, theme),
+              const SizedBox(height: 16),
 
-                // Summary Stats Card
-                _buildStatsCard(entries, contexts),
-                const SizedBox(height: 40),
-              ],
-            );
-          },
-        ),
+              // Stats Card
+              _buildStatsCard(activities, isDark, theme),
+              const SizedBox(height: 40),
+            ],
+          );
+        },
       ),
     );
   }
 
-  Widget _buildFiltersCard(List<WorkContext> contexts) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+  Widget _buildFiltersCard(List<SportActivity> activities, bool isDark, ThemeData theme) {
     final inkColor = isDark ? DesignTokens.inkDark : DesignTokens.inkLight;
+    final availableTypes = activities.map((a) => a.activityType).toSet().toList();
+    if (!availableTypes.contains('Gym')) availableTypes.add('Gym');
+    if (!availableTypes.contains('Swimming')) availableTypes.add('Swimming');
+    if (!availableTypes.contains('Running')) availableTypes.add('Running');
 
     return AppCard(
       child: Column(
@@ -132,7 +146,7 @@ class _WorktimeChartsScreenState extends ConsumerState<WorktimeChartsScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Position / Job',
+                      'Activity Filter',
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: isDark ? DesignTokens.inkSoftDark : DesignTokens.inkSoftLight,
                         fontWeight: FontWeight.bold,
@@ -140,24 +154,24 @@ class _WorktimeChartsScreenState extends ConsumerState<WorktimeChartsScreen> {
                     ),
                     const SizedBox(height: 4),
                     DropdownButtonHideUnderline(
-                      child: DropdownButton<int?>(
-                        value: _selectedContextId,
+                      child: DropdownButton<String?>(
+                        value: _selectedActivityType,
                         isExpanded: true,
                         dropdownColor: isDark ? DesignTokens.surfaceDark : Colors.white,
                         style: theme.textTheme.bodyMedium?.copyWith(color: inkColor),
                         items: [
                           const DropdownMenuItem(
                             value: null,
-                            child: Text('All Positions'),
+                            child: Text('All Sports'),
                           ),
-                          ...contexts.map((c) => DropdownMenuItem(
-                                value: c.id,
-                                child: Text(c.name),
+                          ...availableTypes.map((t) => DropdownMenuItem(
+                                value: t,
+                                child: Text(t),
                               )),
                         ],
                         onChanged: (val) {
                           setState(() {
-                            _selectedContextId = val;
+                            _selectedActivityType = val;
                           });
                         },
                       ),
@@ -172,7 +186,7 @@ class _WorktimeChartsScreenState extends ConsumerState<WorktimeChartsScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'View',
+                'View Scope',
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: isDark ? DesignTokens.inkSoftDark : DesignTokens.inkSoftLight,
                   fontWeight: FontWeight.bold,
@@ -181,11 +195,11 @@ class _WorktimeChartsScreenState extends ConsumerState<WorktimeChartsScreen> {
               const SizedBox(height: 8),
               SizedBox(
                 width: double.infinity,
-                child: SegmentedButton<ChartScope>(
+                child: SegmentedButton<SportChartScope>(
                   segments: const [
-                    ButtonSegment(value: ChartScope.day, label: Text('Daily')),
-                    ButtonSegment(value: ChartScope.week, label: Text('Weekly')),
-                    ButtonSegment(value: ChartScope.month, label: Text('Monthly')),
+                    ButtonSegment(value: SportChartScope.day, label: Text('Daily')),
+                    ButtonSegment(value: SportChartScope.week, label: Text('Weekly')),
+                    ButtonSegment(value: SportChartScope.month, label: Text('Monthly')),
                   ],
                   selected: {_scope},
                   onSelectionChanged: (newSelection) {
@@ -208,64 +222,38 @@ class _WorktimeChartsScreenState extends ConsumerState<WorktimeChartsScreen> {
     );
   }
 
-  Widget _buildChartCard(List<TimeEntry> entries, List<WorkContext> contexts) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+  Widget _buildChartCard(List<SportActivity> activities, bool isDark, ThemeData theme) {
     final inkColor = isDark ? DesignTokens.inkDark : DesignTokens.inkLight;
 
-    // Filter by position
-    var filtered = entries;
-    if (_selectedContextId != null) {
-      filtered = entries.where((e) => e.contextId == _selectedContextId).toList();
+    var filtered = activities;
+    if (_selectedActivityType != null) {
+      filtered = activities.where((a) => a.activityType == _selectedActivityType).toList();
     }
 
-    // Palette colors for stacked contexts
-    final palette = [
-      DesignTokens.rose,
-      DesignTokens.sage,
-      DesignTokens.peach,
-      DesignTokens.lavender,
-      DesignTokens.dustyBlue,
-      DesignTokens.butter,
-      DesignTokens.blush,
-    ];
-
-    Color getContextColor(int contextId) {
-      final ctx = contexts.firstWhereOrNull((c) => c.id == contextId);
-      if (ctx?.color != null) {
-        final parsedColor = int.tryParse(ctx!.color!);
-        if (parsedColor != null) return Color(parsedColor);
-      }
-      final index = contexts.indexWhere((c) => c.id == contextId);
-      final raw = palette[index >= 0 ? index % palette.length : 0];
-      return isDark ? DesignTokens.adjustColorForDark(raw) : raw;
-    }
-
-    // Two-pass aggregation to ensure correct background rod sizing
-    final List<_ChartDataPoint> dataPoints = [];
-    double maxVal = 8.0;
+    final List<_SportChartDataPoint> dataPoints = [];
+    double maxVal = 2.0; // hours
     double rodWidth = 16.0;
 
-    if (_scope == ChartScope.day) {
-      maxVal = 8.0;
+    if (_scope == SportChartScope.day) {
+      maxVal = 2.0;
       rodWidth = 16.0;
       for (int i = 0; i < 7; i++) {
         final day = _currentWeekStart.add(Duration(days: i));
         final dayStr = DateFormat('yyyy-MM-dd').format(day);
-        final dayEntries = filtered.where((e) => e.date == dayStr).toList();
+        final dayEntries = filtered.where((a) => a.date == dayStr).toList();
 
         double accumulated = 0.0;
         final List<BarChartRodStackItem> stackItems = [];
-        final groupedByCtx = groupBy(dayEntries, (TimeEntry e) => e.contextId);
+        final groupedByType = groupBy(dayEntries, (SportActivity a) => a.activityType);
 
-        groupedByCtx.forEach((ctxId, ctxEntries) {
-          final hours = ctxEntries.fold<int>(0, (sum, e) => sum + e.minutes) / 60.0;
+        groupedByType.forEach((type, typeEntries) {
+          final hours = typeEntries.fold<int>(0, (sum, a) => sum + a.durationMin) / 60.0;
           if (hours > 0) {
             stackItems.add(
               BarChartRodStackItem(
                 accumulated,
                 accumulated + hours,
-                getContextColor(ctxId),
+                _getActivityColor(type, isDark),
               ),
             );
             accumulated += hours;
@@ -273,10 +261,10 @@ class _WorktimeChartsScreenState extends ConsumerState<WorktimeChartsScreen> {
         });
 
         if (accumulated > maxVal) maxVal = accumulated;
-        dataPoints.add(_ChartDataPoint(i, accumulated, stackItems));
+        dataPoints.add(_SportChartDataPoint(i, accumulated, stackItems));
       }
-    } else if (_scope == ChartScope.week) {
-      maxVal = 40.0;
+    } else if (_scope == SportChartScope.week) {
+      maxVal = 8.0;
       rodWidth = 22.0;
       final now = DateTime.now();
       final today = DateTime(now.year, now.month, now.day);
@@ -287,8 +275,8 @@ class _WorktimeChartsScreenState extends ConsumerState<WorktimeChartsScreen> {
         final wStart = weekStarts[i];
         final wEnd = wStart.add(const Duration(days: 6));
 
-        final wEntries = filtered.where((e) {
-          final date = DateTime.tryParse(e.date);
+        final wEntries = filtered.where((a) {
+          final date = DateTime.tryParse(a.date);
           if (date == null) return false;
           final dateDayOnly = DateTime(date.year, date.month, date.day);
           return (dateDayOnly.isAtSameMomentAs(wStart) || dateDayOnly.isAfter(wStart)) &&
@@ -297,16 +285,16 @@ class _WorktimeChartsScreenState extends ConsumerState<WorktimeChartsScreen> {
 
         double accumulated = 0.0;
         final List<BarChartRodStackItem> stackItems = [];
-        final groupedByCtx = groupBy(wEntries, (TimeEntry e) => e.contextId);
+        final groupedByType = groupBy(wEntries, (SportActivity a) => a.activityType);
 
-        groupedByCtx.forEach((ctxId, ctxEntries) {
-          final hours = ctxEntries.fold<int>(0, (sum, e) => sum + e.minutes) / 60.0;
+        groupedByType.forEach((type, typeEntries) {
+          final hours = typeEntries.fold<int>(0, (sum, a) => sum + a.durationMin) / 60.0;
           if (hours > 0) {
             stackItems.add(
               BarChartRodStackItem(
                 accumulated,
                 accumulated + hours,
-                getContextColor(ctxId),
+                _getActivityColor(type, isDark),
               ),
             );
             accumulated += hours;
@@ -314,28 +302,28 @@ class _WorktimeChartsScreenState extends ConsumerState<WorktimeChartsScreen> {
         });
 
         if (accumulated > maxVal) maxVal = accumulated;
-        dataPoints.add(_ChartDataPoint(i, accumulated, stackItems));
+        dataPoints.add(_SportChartDataPoint(i, accumulated, stackItems));
       }
     } else {
-      maxVal = 160.0;
+      maxVal = 20.0;
       rodWidth = 14.0;
       final yearStr = '${_currentYearStart.year}-';
       for (int i = 0; i < 12; i++) {
         final prefix = '$yearStr${(i + 1).toString().padLeft(2, '0')}-';
-        final mEntries = filtered.where((e) => e.date.startsWith(prefix)).toList();
+        final mEntries = filtered.where((a) => a.date.startsWith(prefix)).toList();
 
         double accumulated = 0.0;
         final List<BarChartRodStackItem> stackItems = [];
-        final groupedByCtx = groupBy(mEntries, (TimeEntry e) => e.contextId);
+        final groupedByType = groupBy(mEntries, (SportActivity a) => a.activityType);
 
-        groupedByCtx.forEach((ctxId, ctxEntries) {
-          final hours = ctxEntries.fold<int>(0, (sum, e) => sum + e.minutes) / 60.0;
+        groupedByType.forEach((type, typeEntries) {
+          final hours = typeEntries.fold<int>(0, (sum, a) => sum + a.durationMin) / 60.0;
           if (hours > 0) {
             stackItems.add(
               BarChartRodStackItem(
                 accumulated,
                 accumulated + hours,
-                getContextColor(ctxId),
+                _getActivityColor(type, isDark),
               ),
             );
             accumulated += hours;
@@ -343,7 +331,7 @@ class _WorktimeChartsScreenState extends ConsumerState<WorktimeChartsScreen> {
         });
 
         if (accumulated > maxVal) maxVal = accumulated;
-        dataPoints.add(_ChartDataPoint(i, accumulated, stackItems));
+        dataPoints.add(_SportChartDataPoint(i, accumulated, stackItems));
       }
     }
 
@@ -373,7 +361,7 @@ class _WorktimeChartsScreenState extends ConsumerState<WorktimeChartsScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              if (_scope != ChartScope.week)
+              if (_scope != SportChartScope.week)
                 IconButton(
                   icon: const Icon(Icons.chevron_left),
                   onPressed: _prev,
@@ -391,7 +379,7 @@ class _WorktimeChartsScreenState extends ConsumerState<WorktimeChartsScreen> {
                   ),
                 ),
               ),
-              if (_scope != ChartScope.week)
+              if (_scope != SportChartScope.week)
                 IconButton(
                   icon: const Icon(Icons.chevron_right),
                   onPressed: _next,
@@ -426,7 +414,7 @@ class _WorktimeChartsScreenState extends ConsumerState<WorktimeChartsScreen> {
                       reservedSize: 32,
                       getTitlesWidget: (val, meta) {
                         return Text(
-                          '${val.toInt()}h',
+                          '${val.toStringAsFixed(1)}h',
                           style: TextStyle(
                             color: isDark ? DesignTokens.inkSoftDark : DesignTokens.inkSoftLight,
                             fontSize: 10,
@@ -446,7 +434,7 @@ class _WorktimeChartsScreenState extends ConsumerState<WorktimeChartsScreen> {
                           fontWeight: FontWeight.bold,
                           fontSize: 11,
                         );
-                        if (_scope == ChartScope.day) {
+                        if (_scope == SportChartScope.day) {
                           const weekdayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
                           if (val >= 0 && val < 7) {
                             return SideTitleWidget(
@@ -454,7 +442,7 @@ class _WorktimeChartsScreenState extends ConsumerState<WorktimeChartsScreen> {
                               child: Text(weekdayNames[val.toInt()], style: style),
                             );
                           }
-                        } else if (_scope == ChartScope.week) {
+                        } else if (_scope == SportChartScope.week) {
                           final now = DateTime.now();
                           final today = DateTime(now.year, now.month, now.day);
                           final currentMon = today.subtract(Duration(days: today.weekday - 1));
@@ -478,98 +466,17 @@ class _WorktimeChartsScreenState extends ConsumerState<WorktimeChartsScreen> {
                     ),
                   ),
                 ),
-                barTouchData: BarTouchData(
-                  touchTooltipData: BarTouchTooltipData(
-                    getTooltipColor: (_) => isDark ? Colors.grey.shade800 : Colors.white,
-                    getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                      String title = '';
-                      if (_scope == ChartScope.day) {
-                        final date = _currentWeekStart.add(Duration(days: group.x));
-                        title = DateFormat('EEEE, MMM d').format(date);
-                      } else if (_scope == ChartScope.week) {
-                        final now = DateTime.now();
-                        final today = DateTime(now.year, now.month, now.day);
-                        final currentMon = today.subtract(Duration(days: today.weekday - 1));
-                        final wStart = currentMon.subtract(Duration(days: (5 - group.x) * 7));
-                        title = 'Week of ${DateFormat('MMM d').format(wStart)}';
-                      } else {
-                        title = DateFormat('MMMM yyyy').format(DateTime(_currentYearStart.year, group.x + 1));
-                      }
-
-                      // Breakdown of hours per position in tooltip
-                      final total = rod.toY;
-                      if (total == 0) return null;
-
-                      final List<TextSpan> spans = [
-                        TextSpan(
-                          text: '$title\n',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: inkColor,
-                          ),
-                        ),
-                      ];
-
-                      // Fetch actual entries to show breakdowns in tooltip
-                      // Since we are rebuilding list, it's easier to list positions from stackItems
-                      if (rod.rodStackItems.isNotEmpty) {
-                        for (final item in rod.rodStackItems) {
-                          final hours = item.toY - item.fromY;
-                          if (hours > 0) {
-                            // Find corresponding context name
-                            final matchingColor = item.color;
-                            final ctx = contexts.firstWhereOrNull((c) {
-                              return matchingColor != null && getContextColor(c.id) == matchingColor;
-                            });
-                            final ctxName = ctx?.name ?? 'Job';
-                            spans.add(
-                              TextSpan(
-                                text: '• $ctxName: ${hours.toStringAsFixed(1)}h\n',
-                                style: TextStyle(color: inkColor, fontSize: 12),
-                              ),
-                            );
-                          }
-                        }
-                      } else {
-                        final activeCtx = contexts.firstWhereOrNull((c) => c.id == _selectedContextId);
-                        final name = activeCtx?.name ?? 'Work';
-                        spans.add(
-                          TextSpan(
-                            text: '• $name: ${total.toStringAsFixed(1)}h\n',
-                            style: TextStyle(color: inkColor, fontSize: 12),
-                          ),
-                        );
-                      }
-
-                      spans.add(
-                        TextSpan(
-                          text: 'Total: ${total.toStringAsFixed(1)}h',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: isDark ? DesignTokens.accentDark : DesignTokens.accentLight,
-                          ),
-                        ),
-                      );
-
-                      return BarTooltipItem(
-                        '',
-                        theme.textTheme.bodyMedium!,
-                        children: spans,
-                      );
-                    },
-                  ),
-                ),
               ),
             ),
           ),
           const SizedBox(height: 16),
 
           // Custom Legend
-          if (_selectedContextId == null)
+          if (_selectedActivityType == null)
             Wrap(
               spacing: 12,
               runSpacing: 8,
-              children: contexts.map((c) {
+              children: _activityColors.keys.map((type) {
                 return Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -577,13 +484,13 @@ class _WorktimeChartsScreenState extends ConsumerState<WorktimeChartsScreen> {
                       width: 12,
                       height: 12,
                       decoration: BoxDecoration(
-                        color: getContextColor(c.id),
+                        color: _getActivityColor(type, isDark),
                         shape: BoxShape.circle,
                       ),
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      c.name,
+                      type,
                       style: theme.textTheme.bodySmall?.copyWith(color: inkColor),
                     ),
                   ],
@@ -595,60 +502,55 @@ class _WorktimeChartsScreenState extends ConsumerState<WorktimeChartsScreen> {
     );
   }
 
-  Widget _buildStatsCard(List<TimeEntry> entries, List<WorkContext> contexts) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final inkColor = isDark ? DesignTokens.inkDark : DesignTokens.inkLight;
-
-    // Filter logs
-    var filtered = entries;
-    if (_selectedContextId != null) {
-      filtered = entries.where((e) => e.contextId == _selectedContextId).toList();
+  Widget _buildStatsCard(List<SportActivity> activities, bool isDark, ThemeData theme) {
+    var filtered = activities;
+    if (_selectedActivityType != null) {
+      filtered = activities.where((a) => a.activityType == _selectedActivityType).toList();
     }
 
     double totalHours = 0.0;
-    double averageHours = 0.0;
-    String averageLabel = '';
+    int totalSessions = filtered.length;
+    double avgDurationMin = 0.0;
 
-    if (_scope == ChartScope.day) {
-      // Calculate total in target week
+    if (_scope == SportChartScope.day) {
       final end = _currentWeekStart.add(const Duration(days: 6));
-      final weekEntries = filtered.where((e) {
-        final date = DateTime.tryParse(e.date);
+      final weekEntries = filtered.where((a) {
+        final date = DateTime.tryParse(a.date);
         if (date == null) return false;
         final dateDayOnly = DateTime(date.year, date.month, date.day);
         return (dateDayOnly.isAtSameMomentAs(_currentWeekStart) || dateDayOnly.isAfter(_currentWeekStart)) &&
             (dateDayOnly.isAtSameMomentAs(end) || dateDayOnly.isBefore(end));
       }).toList();
 
-      totalHours = weekEntries.fold<int>(0, (sum, e) => sum + e.minutes) / 60.0;
-      averageHours = totalHours / 7.0;
-      averageLabel = 'Daily Average';
-    } else if (_scope == ChartScope.week) {
-      // Calculate total in last 6 weeks
+      final totalMin = weekEntries.fold<int>(0, (sum, a) => sum + a.durationMin);
+      totalHours = totalMin / 60.0;
+      totalSessions = weekEntries.length;
+      avgDurationMin = totalSessions > 0 ? totalMin / totalSessions : 0.0;
+    } else if (_scope == SportChartScope.week) {
       final now = DateTime.now();
       final today = DateTime(now.year, now.month, now.day);
       final currentMon = today.subtract(Duration(days: today.weekday - 1));
       final startLimit = currentMon.subtract(const Duration(days: 5 * 7));
       final endLimit = currentMon.add(const Duration(days: 6));
 
-      final activeEntries = filtered.where((e) {
-        final date = DateTime.tryParse(e.date);
+      final activeEntries = filtered.where((a) {
+        final date = DateTime.tryParse(a.date);
         if (date == null) return false;
         final dateDayOnly = DateTime(date.year, date.month, date.day);
         return (dateDayOnly.isAtSameMomentAs(startLimit) || dateDayOnly.isAfter(startLimit)) &&
             (dateDayOnly.isAtSameMomentAs(endLimit) || dateDayOnly.isBefore(endLimit));
       }).toList();
 
-      totalHours = activeEntries.fold<int>(0, (sum, e) => sum + e.minutes) / 60.0;
-      averageHours = totalHours / 6.0;
-      averageLabel = 'Weekly Average';
+      final totalMin = activeEntries.fold<int>(0, (sum, a) => sum + a.durationMin);
+      totalHours = totalMin / 60.0;
+      totalSessions = activeEntries.length;
+      avgDurationMin = totalSessions > 0 ? totalMin / totalSessions : 0.0;
     } else {
-      // Calculate total in current year
-      final yearEntries = filtered.where((e) => e.date.startsWith('${_currentYearStart.year}-')).toList();
-      totalHours = yearEntries.fold<int>(0, (sum, e) => sum + e.minutes) / 60.0;
-      averageHours = totalHours / 12.0;
-      averageLabel = 'Monthly Average';
+      final yearEntries = filtered.where((a) => a.date.startsWith('${_currentYearStart.year}-')).toList();
+      final totalMin = yearEntries.fold<int>(0, (sum, a) => sum + a.durationMin);
+      totalHours = totalMin / 60.0;
+      totalSessions = yearEntries.length;
+      avgDurationMin = totalSessions > 0 ? totalMin / totalSessions : 0.0;
     }
 
     return AppCard(
@@ -659,19 +561,14 @@ class _WorktimeChartsScreenState extends ConsumerState<WorktimeChartsScreen> {
             'Summary Stats',
             style: theme.textTheme.titleSmall?.copyWith(
               fontWeight: FontWeight.bold,
-              color: inkColor,
+              color: isDark ? DesignTokens.inkDark : DesignTokens.inkLight,
             ),
           ),
           const SizedBox(height: 16),
           Row(
             children: [
               Expanded(
-                child: _buildStatItem(
-                  'Total Hours',
-                  '${totalHours.toStringAsFixed(1)}h',
-                  theme,
-                  isDark,
-                ),
+                child: _buildStatItem('Total Sport Hours', '${totalHours.toStringAsFixed(1)}h', theme, isDark),
               ),
               Container(
                 height: 40,
@@ -679,12 +576,15 @@ class _WorktimeChartsScreenState extends ConsumerState<WorktimeChartsScreen> {
                 color: isDark ? DesignTokens.lineDark : Colors.grey.shade200,
               ),
               Expanded(
-                child: _buildStatItem(
-                  averageLabel,
-                  '${averageHours.toStringAsFixed(1)}h',
-                  theme,
-                  isDark,
-                ),
+                child: _buildStatItem('Sessions', '$totalSessions', theme, isDark),
+              ),
+              Container(
+                height: 40,
+                width: 1,
+                color: isDark ? DesignTokens.lineDark : Colors.grey.shade200,
+              ),
+              Expanded(
+                child: _buildStatItem('Avg Duration', '${avgDurationMin.toStringAsFixed(0)} min', theme, isDark),
               ),
             ],
           ),
@@ -699,7 +599,7 @@ class _WorktimeChartsScreenState extends ConsumerState<WorktimeChartsScreen> {
         Text(
           value,
           style: GoogleFonts.fraunces(
-            fontSize: 28,
+            fontSize: 22,
             fontWeight: FontWeight.w600,
             color: isDark ? DesignTokens.inkDark : DesignTokens.inkLight,
           ),
@@ -707,7 +607,9 @@ class _WorktimeChartsScreenState extends ConsumerState<WorktimeChartsScreen> {
         const SizedBox(height: 4),
         Text(
           label,
+          textAlign: TextAlign.center,
           style: theme.textTheme.bodySmall?.copyWith(
+            fontSize: 11,
             color: isDark ? DesignTokens.inkSoftDark : DesignTokens.inkSoftLight,
           ),
         ),
@@ -716,8 +618,8 @@ class _WorktimeChartsScreenState extends ConsumerState<WorktimeChartsScreen> {
   }
 }
 
-class _ChartDataPoint {
-  _ChartDataPoint(this.x, this.total, this.stackItems);
+class _SportChartDataPoint {
+  _SportChartDataPoint(this.x, this.total, this.stackItems);
   final int x;
   final double total;
   final List<BarChartRodStackItem> stackItems;

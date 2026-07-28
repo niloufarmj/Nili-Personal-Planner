@@ -7,7 +7,11 @@ import '../../core/db/repositories/day_repository.dart';
 import '../../core/design/design.dart';
 import 'gym_repository.dart';
 import 'gym_session_log_sheet.dart';
-import 'workout_plan_screen.dart';
+import 'gym_program_guide_screen.dart';
+import 'log_sport_activity_sheet.dart';
+import 'plan_sport_session_sheet.dart';
+import 'sport_analytics_screen.dart';
+import 'sport_repository.dart';
 
 // ── Providers ──────────────────────────────────────────────────────────────────
 
@@ -34,23 +38,38 @@ final _tagsForDateProvider = FutureProvider.autoDispose
       (ref, date) => ref.watch(dayRepositoryProvider).getTagsForDate(date),
     );
 
-// ── Screen ─────────────────────────────────────────────────────────────────────
-
 class GymScreen extends ConsumerWidget {
   const GymScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Gym'),
+        title: const Text('Gym & Sport Tracker'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.fitness_center),
-            tooltip: 'Workout plans',
+            icon: const Icon(Icons.event_available),
+            tooltip: 'Plan Session',
+            onPressed: () => PlanSportSessionSheet.show(context),
+          ),
+          IconButton(
+            icon: const Icon(Icons.bar_chart),
+            tooltip: 'Sport Analytics',
             onPressed: () => Navigator.of(context).push(
               MaterialPageRoute<void>(
-                builder: (_) => const WorkoutPlansScreen(),
+                builder: (_) => const SportAnalyticsScreen(),
+              ),
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.fitness_center),
+            tooltip: 'Gym Program Guide',
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const GymProgramGuideScreen(),
               ),
             ),
           ),
@@ -65,9 +84,62 @@ class GymScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 88),
         children: [
+          // Action Quick Cards (Plan, Guide, Analytics)
+          Row(
+            children: [
+              Expanded(
+                child: _buildQuickActionCard(
+                  context,
+                  title: 'Plan Session',
+                  subtitle: 'Schedule upcoming',
+                  icon: Icons.event_available,
+                  color: DesignTokens.peach,
+                  onTap: () => PlanSportSessionSheet.show(context),
+                  isDark: isDark,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _buildQuickActionCard(
+                  context,
+                  title: 'Gym Program',
+                  subtitle: 'Month 3+ Plans A/B/C',
+                  icon: Icons.assignment_outlined,
+                  color: DesignTokens.dustyBlue,
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const GymProgramGuideScreen(),
+                    ),
+                  ),
+                  isDark: isDark,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _buildQuickActionCard(
+                  context,
+                  title: 'Analytics',
+                  subtitle: 'Daily/Weekly',
+                  icon: Icons.show_chart,
+                  color: DesignTokens.sage,
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const SportAnalyticsScreen(),
+                    ),
+                  ),
+                  isDark: isDark,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
           _WeekStatCard(),
           const SizedBox(height: 20),
-          const SectionHeader(title: 'Upcoming sessions'),
+          const SectionHeader(title: 'Recent Sport Activities'),
+          const SizedBox(height: 8),
+          _RecentSportActivitiesList(),
+          const SizedBox(height: 20),
+          const SectionHeader(title: 'Upcoming Gym Sessions'),
           const SizedBox(height: 8),
           _UpcomingList(),
           const SizedBox(height: 20),
@@ -76,6 +148,162 @@ class GymScreen extends ConsumerWidget {
           _HistoryList(),
         ],
       ),
+    );
+  }
+
+  Widget _buildQuickActionCard(
+    BuildContext context, {
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onTap,
+    required bool isDark,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: AppCard(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.2),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: isDark ? DesignTokens.adjustColorForDark(color) : color, size: 22),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              title,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              subtitle,
+              style: TextStyle(
+                fontSize: 11,
+                color: isDark ? DesignTokens.inkSoftDark : DesignTokens.inkSoftLight,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _RecentSportActivitiesList extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final asyncData = ref.watch(sportActivitiesProvider);
+
+    return asyncData.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (_, __) => const SizedBox.shrink(),
+      data: (activities) {
+        if (activities.isEmpty) {
+          return AppCard(
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text(
+                  'No sport activities logged yet.\nTap "Done today" below to start!',
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: isDark ? DesignTokens.inkSoftDark : DesignTokens.inkSoftLight,
+                  ),
+                ),
+              ),
+            ),
+          );
+        }
+
+        final recent = activities.take(5).toList();
+
+        return Column(
+          children: recent.map((act) {
+            IconData icon = Icons.fitness_center;
+            Color color = DesignTokens.dustyBlue;
+            switch (act.activityType) {
+              case 'Swimming':
+                icon = Icons.pool;
+                color = DesignTokens.sage;
+                break;
+              case 'Tennis':
+                icon = Icons.sports_tennis;
+                color = DesignTokens.butter;
+                break;
+              case 'Biking':
+                icon = Icons.directions_bike;
+                color = DesignTokens.blush;
+                break;
+              case 'Running':
+                icon = Icons.directions_run;
+                color = DesignTokens.rose;
+                break;
+              case 'Walking':
+                icon = Icons.directions_walk;
+                color = DesignTokens.peach;
+                break;
+              case 'Yoga':
+                icon = Icons.self_improvement;
+                color = DesignTokens.lavender;
+                break;
+            }
+
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: AppCard(
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: color.withOpacity(0.2),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(icon, color: isDark ? DesignTokens.adjustColorForDark(color) : color, size: 20),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            act.activityType,
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                          ),
+                          Text(
+                            '${act.date} • ${act.durationMin} min${act.calories != null ? ' • ${act.calories} kcal' : ''}',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: isDark ? DesignTokens.inkSoftDark : DesignTokens.inkSoftLight,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (act.notes != null && act.notes!.isNotEmpty)
+                      Text(
+                        act.notes!,
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontStyle: FontStyle.italic,
+                          color: isDark ? DesignTokens.inkSoftDark : DesignTokens.inkSoftLight,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            );
+          }).toList(),
+        );
+      },
     );
   }
 }
@@ -133,10 +361,13 @@ class _UpcomingList extends ConsumerWidget {
       error: (e, _) => Text('Error: $e'),
       data: (sessions) {
         if (sessions.isEmpty) {
-          return const EmptyState(
-            icon: Icons.event_available,
-            message: 'No upcoming sessions',
-            hint: 'Tap + Done today or plan a session for a specific date.',
+          return InkWell(
+            onTap: () => PlanSportSessionSheet.show(context),
+            child: const EmptyState(
+              icon: Icons.event_available,
+              message: 'No upcoming sessions',
+              hint: 'Tap here or tap "Plan Session" above to schedule a workout!',
+            ),
           );
         }
         return Column(
@@ -185,7 +416,6 @@ class _SessionTile extends ConsumerWidget {
     final isDone = session.status == 'done';
     final isMissed = session.status == 'missed';
     final isPlanned = session.status == 'planned';
-    final isToday = session.date == _todayStr();
 
     final statusColor = isDone
         ? Colors.green
@@ -237,7 +467,7 @@ class _SessionTile extends ConsumerWidget {
           ],
         ),
         subtitle: _buildSubtitle(context),
-        trailing: isPlanned && isToday
+        trailing: isPlanned
             ? FilledButton.tonal(
                 onPressed: () => GymSessionLogSheet.show(
                   context,

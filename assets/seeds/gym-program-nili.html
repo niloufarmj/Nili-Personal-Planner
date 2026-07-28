@@ -1,0 +1,1246 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>برنامه بدنسازی نیلی</title>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --rose: #e8435a;
+    --rose-light: #f47e8f;
+    --rose-dark: #c0293f;
+    --cream: #fdf6f0;
+    --warm: #f5ede4;
+    --dark: #1a1218;
+    --mid: #3d2535;
+    --text: #2d1f28;
+    --accent: #d4a373;
+    --accent2: #a8785a;
+    --green: #6b9e7e;
+    --purple: #8b6b9e;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Vazirmatn', sans-serif;
+    background: var(--cream);
+    color: var(--text);
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* HERO */
+  .hero {
+    background: linear-gradient(135deg, var(--dark) 0%, var(--mid) 60%, #5c2a40 100%);
+    color: white;
+    padding: 60px 40px 80px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -20%;
+    width: 60%;
+    height: 200%;
+    background: radial-gradient(ellipse, rgba(232,67,90,0.15) 0%, transparent 70%);
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: -30px;
+    left: 0; right: 0;
+    height: 60px;
+    background: var(--cream);
+    border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+  }
+  .hero-tag {
+    display: inline-block;
+    background: rgba(232,67,90,0.2);
+    border: 1px solid rgba(232,67,90,0.4);
+    color: var(--rose-light);
+    padding: 6px 20px;
+    border-radius: 30px;
+    font-size: 13px;
+    letter-spacing: 2px;
+    margin-bottom: 20px;
+  }
+  .hero h1 {
+    font-size: clamp(28px, 5vw, 48px);
+    font-weight: 800;
+    margin-bottom: 12px;
+    line-height: 1.3;
+  }
+  .hero h1 span { color: var(--rose-light); }
+  .hero p {
+    font-size: 15px;
+    color: rgba(255,255,255,0.65);
+    max-width: 500px;
+    margin: 0 auto 30px;
+  }
+  .hero-stats {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 1;
+    margin-top: 10px;
+  }
+  .stat {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 16px;
+    padding: 16px 24px;
+    text-align: center;
+    backdrop-filter: blur(10px);
+  }
+  .stat-num { font-size: 22px; font-weight: 800; color: var(--rose-light); }
+  .stat-label { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 2px; }
+
+  /* GOALS */
+  .section { padding: 50px 24px; max-width: 900px; margin: 0 auto; }
+  .section-title {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--dark);
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 2px;
+    background: linear-gradient(to left, transparent, var(--rose));
+    opacity: 0.3;
+  }
+
+  .goals-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+  }
+  .goal-card {
+    background: white;
+    border-radius: 20px;
+    padding: 24px 20px;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    border-top: 3px solid var(--rose);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .goal-card:hover { transform: translateY(-4px); box-shadow: 0 8px 30px rgba(0,0,0,0.1); }
+  .goal-icon { font-size: 32px; margin-bottom: 10px; }
+  .goal-card h3 { font-size: 14px; font-weight: 700; color: var(--dark); }
+  .goal-card p { font-size: 12px; color: #888; margin-top: 4px; }
+
+  /* TIPS */
+  .tips-box {
+    background: linear-gradient(135deg, var(--mid), var(--dark));
+    color: white;
+    border-radius: 24px;
+    padding: 32px;
+    margin-bottom: 20px;
+  }
+  .tips-box h3 { font-size: 16px; font-weight: 700; margin-bottom: 16px; color: var(--rose-light); }
+  .tips-box ul { list-style: none; }
+  .tips-box ul li {
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    font-size: 14px;
+    color: rgba(255,255,255,0.8);
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .tips-box ul li:last-child { border-bottom: none; }
+  .tips-box ul li::before { content: '◆'; color: var(--rose-light); font-size: 10px; margin-top: 4px; flex-shrink: 0; }
+
+  /* MONTH TABS */
+  .month-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 32px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+  .month-tab {
+    flex-shrink: 0;
+    padding: 12px 28px;
+    border-radius: 50px;
+    border: 2px solid rgba(232,67,90,0.25);
+    background: white;
+    color: var(--text);
+    font-family: 'Vazirmatn', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s;
+  }
+  .month-tab.active {
+    background: var(--rose);
+    border-color: var(--rose);
+    color: white;
+    box-shadow: 0 4px 20px rgba(232,67,90,0.35);
+  }
+  .month-tab:hover:not(.active) { border-color: var(--rose); color: var(--rose); }
+
+  /* MONTH CONTENT */
+  .month-content { display: none; }
+  .month-content.active { display: block; }
+
+  .month-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--warm);
+    border: 1px solid rgba(212,163,115,0.3);
+    border-radius: 12px;
+    padding: 10px 20px;
+    font-size: 13px;
+    color: var(--accent2);
+    font-weight: 600;
+    margin-bottom: 24px;
+  }
+
+  /* PROGRAM CARDS */
+  .programs-grid { display: grid; gap: 24px; }
+
+  .program-card {
+    background: white;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+  }
+  .program-header {
+    padding: 22px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .program-header.p1 { background: linear-gradient(135deg, #e8435a, #f47e8f); }
+  .program-header.p2 { background: linear-gradient(135deg, #6b9e7e, #8ec4a0); }
+  .program-header.p3 { background: linear-gradient(135deg, #8b6b9e, #b08ec4); }
+
+  .program-title { color: white; }
+  .program-title h2 { font-size: 18px; font-weight: 800; }
+  .program-title p { font-size: 12px; opacity: 0.85; margin-top: 2px; }
+  .program-num {
+    width: 48px; height: 48px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; font-weight: 900; color: white;
+    backdrop-filter: blur(10px);
+  }
+
+  .program-body { padding: 24px 28px; }
+
+  .exercise-group { margin-bottom: 20px; }
+  .group-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #aaa;
+    margin-bottom: 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px dashed #eee;
+  }
+
+  .exercise-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto auto;
+    gap: 8px;
+    align-items: center;
+    padding: 10px 14px;
+    border-radius: 12px;
+    margin-bottom: 6px;
+    background: var(--warm);
+    font-size: 13.5px;
+  }
+  .exercise-row:nth-child(even) { background: #f9f9f9; }
+  .ex-name { font-weight: 600; color: var(--dark); }
+  .ex-chip {
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .chip-sets { background: rgba(232,67,90,0.1); color: var(--rose-dark); }
+  .chip-reps { background: rgba(107,158,126,0.12); color: #3d7a59; }
+  .chip-rest { background: rgba(139,107,158,0.1); color: #6b4a8a; }
+
+  .ex-note {
+    grid-column: 1 / -1;
+    font-size: 11px;
+    color: #999;
+    padding-top: 2px;
+    padding-right: 4px;
+  }
+
+  .cardio-box {
+    background: linear-gradient(135deg, var(--warm), #fff);
+    border: 1px solid rgba(212,163,115,0.3);
+    border-radius: 16px;
+    padding: 16px 20px;
+    margin-top: 16px;
+    font-size: 13px;
+    color: var(--accent2);
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .cardio-box span { font-size: 20px; }
+
+  /* NUTRITION */
+  .nutrition-section {
+    background: linear-gradient(135deg, #1a2a1e, #0d1f14);
+    color: white;
+    border-radius: 24px;
+    padding: 32px;
+    margin-top: 20px;
+  }
+  .nutrition-section h3 { font-size: 18px; font-weight: 800; margin-bottom: 20px; color: #8ec4a0; }
+  .nutrition-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+  .nut-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    padding: 20px;
+  }
+  .nut-card h4 { font-size: 13px; color: #8ec4a0; margin-bottom: 10px; font-weight: 700; }
+  .nut-card ul { list-style: none; }
+  .nut-card ul li { font-size: 13px; color: rgba(255,255,255,0.75); padding: 4px 0; display: flex; align-items: flex-start; gap: 8px; }
+  .nut-card ul li::before { content: '›'; color: #6b9e7e; font-size: 16px; line-height: 1.4; }
+
+  .shake-card {
+    background: linear-gradient(135deg, rgba(232,67,90,0.15), rgba(139,107,158,0.15));
+    border: 1px solid rgba(232,67,90,0.2);
+    border-radius: 20px;
+    padding: 24px;
+    margin-top: 16px;
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .shake-emoji { font-size: 40px; }
+  .shake-info h4 { font-size: 15px; font-weight: 700; color: var(--rose-light); margin-bottom: 8px; }
+  .shake-info p { font-size: 13px; color: rgba(255,255,255,0.7); line-height: 1.8; }
+
+  /* PROGRESS */
+  .progress-section { background: white; border-radius: 24px; padding: 28px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
+  .progress-section h3 { font-size: 17px; font-weight: 800; margin-bottom: 20px; }
+  .timeline { position: relative; padding-right: 20px; }
+  .timeline::before { content: ''; position: absolute; right: 6px; top: 0; bottom: 0; width: 2px; background: linear-gradient(to bottom, var(--rose), var(--purple)); opacity: 0.3; }
+  .tl-item { display: flex; gap: 20px; margin-bottom: 24px; position: relative; }
+  .tl-dot { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; position: relative; right: -6px; }
+  .tl-dot.m1 { background: var(--rose); }
+  .tl-dot.m2 { background: var(--green); }
+  .tl-dot.m3 { background: var(--purple); }
+  .tl-content { flex: 1; }
+  .tl-content h4 { font-size: 15px; font-weight: 700; }
+  .tl-content p { font-size: 13px; color: #777; margin-top: 4px; }
+
+  /* FOOTER */
+  .footer {
+    text-align: center;
+    padding: 40px 24px;
+    background: var(--dark);
+    color: rgba(255,255,255,0.4);
+    font-size: 13px;
+  }
+  .footer span { color: var(--rose-light); }
+
+  /* WARMUP BOX */
+  .warmup-box {
+    background: linear-gradient(135deg, #fff8e1, #fff3cd);
+    border-right: 4px solid #f4a437;
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 18px;
+    font-size: 13px;
+    color: #7a5500;
+  }
+  .warmup-box strong { display: block; margin-bottom: 6px; font-size: 13px; }
+
+  @media (max-width: 600px) {
+    .hero { padding: 40px 20px 70px; }
+    .section { padding: 40px 16px; }
+    .program-body { padding: 20px 16px; }
+    .exercise-row { grid-template-columns: 1fr; gap: 4px; }
+    .ex-chip { display: inline-block; margin-left: 4px; }
+    .program-header { padding: 18px 20px; }
+    .hero-stats { gap: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-tag">🏋️ برنامه شخصی‌سازی‌شده</div>
+  <h1>برنامه بدنسازی <span>نیلی</span></h1>
+  <p>سه ماه برنامه‌ریزی‌شده برای رسیدن به هیکل ایده‌آل — با تمرکز بر باسن، پاسچر، و چربی‌سوزی</p>
+  <div class="hero-stats">
+    <div class="stat">
+      <div class="stat-num">۶۵ → ۵۷</div>
+      <div class="stat-label">هدف وزنی (کیلو)</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">۳–۴</div>
+      <div class="stat-label">روز تمرین در هفته</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">۳ ماه</div>
+      <div class="stat-label">برنامه کامل</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">۴+ کیلو</div>
+      <div class="stat-label">هدف ماهانه</div>
+    </div>
+  </div>
+</div>
+
+<!-- GOALS -->
+<div class="section">
+  <div class="section-title">اهداف تمرینی</div>
+  <div class="goals-grid">
+    <div class="goal-card">
+      <div class="goal-icon">🔥</div>
+      <h3>آب شدن شکم</h3>
+      <p>کاهش چربی احشایی با ترکیب کاردیو و کور</p>
+    </div>
+    <div class="goal-card">
+      <div class="goal-icon">🍑</div>
+      <h3>فرم و حجم باسن</h3>
+      <p>تمرکز ویژه روی گلوت با ایزولیشن و کامپاند</p>
+    </div>
+    <div class="goal-card">
+      <div class="goal-icon">💪</div>
+      <h3>کاهش چربی پشت</h3>
+      <p>تقویت عضلات پشت و چربی‌سوزی موضعی</p>
+    </div>
+    <div class="goal-card">
+      <div class="goal-icon">🧘</div>
+      <h3>پاسچر و قوز</h3>
+      <p>تقویت اکستنسورهای ستون فقرات و کشش سینه</p>
+    </div>
+  </div>
+</div>
+
+<!-- GENERAL TIPS -->
+<div class="section" style="padding-top:0">
+  <div class="tips-box">
+    <h3>⚡ نکات کلی مهم</h3>
+    <ul>
+      <li>قبل از هر جلسه ۵–۱۰ دقیقه گرم کن (تردمیل یا بایسیکل با شدت پایین) + حرکات پویا</li>
+      <li>بین ست‌ها ۶۰–۹۰ ثانیه استراحت (حرکات بزرگ ۹۰–۱۲۰ ثانیه)</li>
+      <li>اگه ۳ روز در هفته تمرین می‌کنی: برنامه ۱، ۲، ۳. اگه ۴ روز: ۱، ۲، ۳، ۱ و هفته بعد ۲، ۳، ۱، ۲ و چرخشی</li>
+      <li>وزن رو طوری انتخاب کن که ست آخر سخت باشه ولی فرم خراب نشه</li>
+      <li>پیشرفت تدریجی: هر ۱–۲ هفته سعی کن وزن یا تکرار رو کمی بالا ببری</li>
+      <li>حداقل ۷–۸ ساعت خواب — عضله‌سازی و چربی‌سوزی در خواب اتفاق می‌افته</li>
+    </ul>
+  </div>
+</div>
+
+<!-- MAIN PROGRAMS -->
+<div class="section" style="padding-top:0">
+  <div class="section-title">برنامه‌های تمرینی</div>
+  <div class="month-tabs">
+    <button class="month-tab active" onclick="showMonth('m1')">ماه اول</button>
+    <button class="month-tab" onclick="showMonth('m2')">ماه دوم</button>
+    <button class="month-tab" onclick="showMonth('m3')">ماه سوم به بعد</button>
+  </div>
+
+  <!-- MONTH 1 -->
+  <div id="m1" class="month-content active">
+    <div class="month-badge">🌱 فاز استارتر — آشنایی مجدد با بدن | ماه اول</div>
+    <div class="programs-grid">
+
+      <!-- PROGRAM A -->
+      <div class="program-card">
+        <div class="program-header p1">
+          <div class="program-title">
+            <h2>برنامه A — پایین تنه + کور</h2>
+            <p>تمرکز اصلی: باسن، پا، شکم</p>
+          </div>
+          <div class="program-num">A</div>
+        </div>
+        <div class="program-body">
+          <div class="warmup-box">
+            <strong>🔆 گرم کردن (۸ دقیقه)</strong>
+            تردمیل سبک ۵ دقیقه + ۱۵ باز و بست پا ایستاده + ۱۰ Hip Circle هر طرف + ۱۰ Glute Bridge بدون وزنه
+          </div>
+          <div class="exercise-group">
+            <div class="group-label">حرکات اصلی</div>
+            <div class="exercise-row">
+              <span class="ex-name">اسکوات اسمیت مشین</span>
+              <span class="ex-chip chip-sets">۴ ست</span>
+              <span class="ex-chip chip-reps">۱۲–۱۵ تکرار</span>
+              <span class="ex-chip chip-rest">۹۰ ثانیه</span>
+              <span class="ex-note">پای پهن‌تر از عرض شانه، پنجه کمی بیرون — روی پاشنه بشین</span>
+            </div>
+            <div class="exercise-row">
+              <span class="ex-name">لگ پرس افقی</span>
+              <span class="ex-chip chip-sets">۳ ست</span>
+              <span class="ex-chip chip-reps">۱۵ تکرار</span>
+              <span class="ex-chip chip-rest">۹۰ ثانیه</span>
+              <span class="ex-note">پا بالای دستگاه — روی باسن تمرکز کن</span>
+            </div>
+            <div class="exercise-row">
+              <span class="ex-name">Glute Bridge با هالتر/دامبل</span>
+              <span class="ex-chip chip-sets">۴ ست</span>
+              <span class="ex-chip chip-reps">۱۵–۲۰ تکرار</span>
+              <span class="ex-chip chip-rest">۶۰ ثانیه</span>
+              <span class="ex-note">در اوج حرکت باسن رو فشار بده و ۲ ثانیه نگه دار</span>
+            </div>
+            <div class="exercise-row">
+              <span class="ex-name">لانج جا به جا (Alternating Lunge)</span>
+              <span class="ex-chip chip-sets">۳ ست</span>
+              <span class="ex-chip chip-reps">۱۲ هر پا</span>
+              <span class="ex-chip chip-rest">۶۰ ثانیه</span>
+            </div>
+          </div>
+          <div class="exercise-group">
+            <div class="group-label">حرکات ایزولیشن باسن</div>
+            <div class="exercise-row">
+              <span class="ex-name">کیبل کیک‌بک (Cable Kickback)</span>
+              <span class="ex-chip chip-sets">۳ ست</span>
+              <span class="ex-chip chip-reps">۱۵ هر پا</span>
+              <span class="ex-chip chip-rest">۶۰ ثانیه</span>
+            </div>
+            <div class="exercise-row">
+              <span class="ex-name">Abductor دستگاه</span>
+              <span class="ex-chip chip-sets">۳ ست</span>
+              <span class="ex-chip chip-reps">۲۰ تکرار</span>
+              <span class="ex-chip chip-rest">۴۵ ثانیه</span>
+            </div>
+          </div>
+          <div class="exercise-group">
+            <div class="group-label">کور</div>
+            <div class="exercise-row">
+              <span class="ex-name">پلانک</span>
+              <span class="ex-chip chip-sets">۳ ست</span>
+              <span class="ex-chip chip-reps">۳۰ ثانیه</span>
+              <span class="ex-chip chip-rest">۴۵ ثانیه</span>
+            </div>
+            <div class="exercise-row">
+              <span class="ex-name">Bicycle Crunch</span>
+              <span class="ex-chip chip-sets">۳ ست</span>
+              <span class="ex-chip chip-reps">۲۰ تکرار</span>
+              <span class="ex-chip chip-rest">۴۵ ثانیه</span>
+            </div>
+          </div>
+          <div class="cardio-box">
+            <span>🚲</span>
+            <div><strong>کاردیو پایان جلسه:</strong> ۱۵ دقیقه بایسیکل ثابت با شدت متوسط یا ۱۰ دقیقه HIIT (۳۰ ثانیه سریع / ۳۰ ثانیه آروم)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PROGRAM B -->
+      <div class="program-card">
+        <div class="program-header p2">
+          <div class="program-title">
+            <h2>برنامه B — پشت + شانه + پاسچر</h2>
+            <p>تمرکز اصلی: کمر، پشت، شانه، پاسچر</p>
+          </div>
+          <div class="program-num">B</div>
+        </div>
+        <div class="program-body">
+          <div class="warmup-box">
+            <strong>🔆 گرم کردن (۸ دقیقه)</strong>
+            رویینگ دستگاه ۵ دقیقه سبک + ۱۰ Arm Circle هر طرف + ۱۰ Band Pull Apart + ۱۰ Cat-Cow
+          </div>
+          <div class="exercise-group">
+            <div class="group-label">پشت (چربی‌سوز پشت + پاسچر)</div>
+            <div class="exercise-row">
+              <span class="ex-name">لت پول‌داون (Lat Pulldown) — گریپ پهن</span>
+              <span class="ex-chip chip-sets">۴ ست</span>
+              <span class="ex-chip chip-reps">۱۲–۱۵ تکرار</span>
+              <span class="ex-chip chip-rest">۹۰ ثانیه</span>
+            </div>
+            <div class="exercise-row">
+              <span class="ex-name">کابل رو (Seated Cable Row)</span>
+              <span class="ex-chip chip-sets">۳ ست</span>
+              <span class="ex-chip chip-reps">۱۲ تکرار</span>
+              <span class="ex-chip chip-rest">۹۰ ثانیه</span>
+              <span class="ex-note">آرنج‌ها نزدیک بدن — سینه رو به جلو باز نگه دار</span>
+            </div>
+            <div class="exercise-row">
+              <span class="ex-name">Reverse Fly دستگاه / پک‌دک معکوس</span>
+              <span class="ex-chip chip-sets">۳ ست</span>
+              <span class="ex-chip chip-reps">۱۵ تکرار</span>
+              <span class="ex-chip chip-rest">۶۰ ثانیه</span>
+              <span class="ex-note">مهم برای پاسچر و چربی پشت سینه</span>
+            </div>
+            <div class="exercise-row">
+              <span class="ex-name">بک اکستنشن (Hyperextension)</span>
+              <span class="ex-chip chip-sets">۳ ست</span>
+              <span class="ex-chip chip-reps">۱۵ تکرار</span>
+              <span class="ex-chip chip-rest">۶۰ ثانیه</span>
+            </div>
+          </div>
+          <div class="exercise-group">
+            <div class="group-label">شانه</div>
+            <div class="exercise-row">
+              <span class="ex-name">پرس سرشانه دمبل نشسته</span>
+              <span class="ex-chip chip-sets">۳ ست</span>
+              <span class="ex-chip chip-reps">۱۲ تکرار</span>
+              <span class="ex-chip chip-rest">۹۰ ثانیه</span>
+            </div>
+            <div class="exercise-row">
+              <span class="ex-name">نشر جانب دمبل (Lateral Raise)</span>
+              <span class="ex-chip chip-sets">۳ ست</span>
+              <span class="ex-chip chip-reps">۱۵ تکرار</span>
+              <span class="ex-chip chip-rest">۶۰ ثانیه</span>
+            </div>
+          </div>
+          <div class="exercise-group">
+            <div class="group-label">کشش و پاسچر</div>
+            <div class="exercise-row">
+              <span class="ex-name">Face Pull (کابل)</span>
+              <span class="ex-chip chip-sets">۳ ست</span>
+              <span class="ex-chip chip-reps">۲۰ تکرار</span>
+              <span class="ex-chip chip-rest">۴۵ ثانیه</span>
+              <span class="ex-note">مهم‌ترین حرکت برای اصلاح قوز و پاسچر — وزن سبک، فرم صحیح</span>
+            </div>
+          </div>
+          <div class="cardio-box">
+            <span>🏃</span>
+            <div><strong>کاردیو پایان:</strong> ۱۵ دقیقه تردمیل با شیب ۵–۷٪ (Incline Walk) — بهترین کاردیو برای چربی‌سوزی و بدون فشار روی زانو</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PROGRAM C -->
+      <div class="program-card">
+        <div class="program-header p3">
+          <div class="program-title">
+            <h2>برنامه C — سینه + بازو + کور</h2>
+            <p>تمرکز: سینه، دو سر، سه سر، کمربند شکمی</p>
+          </div>
+          <div class="program-num">C</div>
+        </div>
+        <div class="program-body">
+          <div class="warmup-box">
+            <strong>🔆 گرم کردن (۵ دقیقه)</strong>
+            ۱۰ Push-up با زانو + ۱۰ Arm Circle هر طرف + کشش سینه با نوار
+          </div>
+          <div class="exercise-group">
+            <div class="group-label">سینه</div>
+            <div class="exercise-row">
+              <span class="ex-name">پرس سینه دمبل (نیمکت شیبدار ۳۰ درجه)</span>
+              <span class="ex-chip chip-sets">۴ ست</span>
+              <span class="ex-chip chip-reps">۱۲ تکرار</span>
+              <span class="ex-chip chip-rest">۹۰ ثانیه</span>
+              <span class="ex-note">شیبدار برای تقویت قسمت بالایی سینه — مفید برای پاسچر</span>
+            </div>
+            <div class="exercise-row">
+              <span class="ex-name">پرس سینه دستگاه (Machine Chest Press)</span>
+              <span class="ex-chip chip-sets">۳ ست</span>
+              <span class="ex-chip chip-reps">۱۵ تکرار</span>
+              <span class="ex-chip chip-rest">۶۰ ثانیه</span>
+            </div>
+            <div class="exercise-row">
+              <span class="ex-name">فلای کابل (Cable Fly)</span>
+              <span class="ex-chip chip-sets">۳ ست</span>
+              <span class="ex-chip chip-reps">۱۵ تکرار</span>
+              <span class="ex-chip chip-rest">۶۰ ثانیه</span>
+            </div>
+          </div>
+          <div class="exercise-group">
+            <div class="group-label">بازو</div>
+            <div class="exercise-row">
+              <span class="ex-name">جلو بازو دمبل (Dumbbell Curl)</span>
+              <span class="ex-chip chip-sets">۳ ست</span>
+              <span class="ex-chip chip-reps">۱۲–۱۵ تکرار</span>
+              <span class="ex-chip chip-rest">۶۰ ثانیه</span>
+            </div>
+            <div class="exercise-row">
+              <span class="ex-name">پشت بازو کابل (Tricep Pushdown)</span>
+              <span class="ex-chip chip-sets">۳ ست</span>
+              <span class="ex-chip chip-reps">۱۵ تکرار</span>
+              <span class="ex-chip chip-rest">۶۰ ثانیه</span>
+            </div>
+          </div>
+          <div class="exercise-group">
+            <div class="group-label">کور</div>
+            <div class="exercise-row">
+              <span class="ex-name">Hanging Knee Raise (یا دستگاه)</span>
+              <span class="ex-chip chip-sets">۳ ست</span>
+              <span class="ex-chip chip-reps">۱۵ تکرار</span>
+              <span class="ex-chip chip-rest">۶۰ ثانیه</span>
+            </div>
+            <div class="exercise-row">
+              <span class="ex-name">Dead Bug</span>
+              <span class="ex-chip chip-sets">۳ ست</span>
+              <span class="ex-chip chip-reps">۱۰ هر طرف</span>
+              <span class="ex-chip chip-rest">۴۵ ثانیه</span>
+              <span class="ex-note">برای فعال‌سازی کور عمقی — آروم و کنترل‌شده</span>
+            </div>
+            <div class="exercise-row">
+              <span class="ex-name">Russian Twist (با یا بی وزنه)</span>
+              <span class="ex-chip chip-sets">۳ ست</span>
+              <span class="ex-chip chip-reps">۲۰ تکرار</span>
+              <span class="ex-chip chip-rest">۴۵ ثانیه</span>
+            </div>
+          </div>
+          <div class="cardio-box">
+            <span>🚶</span>
+            <div><strong>کاردیو پایان:</strong> ۲۰ دقیقه Incline Walk یا ۱۵ دقیقه بایسیکل — این روز تمرین اصلی سبک‌تره، پس کاردیو رو یکم بیشتر کن</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MONTH 2 -->
+  <div id="m2" class="month-content">
+    <div class="month-badge">🌿 فاز میانی — افزایش شدت و حجم | ماه دوم</div>
+    <div class="programs-grid">
+
+      <div class="program-card">
+        <div class="program-header p1">
+          <div class="program-title">
+            <h2>برنامه A — پایین تنه پیشرفته</h2>
+            <p>باسن، پا، کور — شدت بالاتر</p>
+          </div>
+          <div class="program-num">A</div>
+        </div>
+        <div class="program-body">
+          <div class="warmup-box">
+            <strong>🔆 گرم کردن</strong>
+            ۵ دقیقه تردمیل شیبدار + مینی‌باند Glute Activation (۱۵ تکرار Clamshell هر طرف + ۱۵ Side Step)
+          </div>
+          <div class="exercise-group">
+            <div class="group-label">حرکات اصلی</div>
+            <div class="exercise-row">
+              <span class="ex-name">اسکوات هالتر اسمیت</span>
+              <span class="ex-chip chip-sets">۴ ست</span>
+              <span class="ex-chip chip-reps">۱۰–۱۲ تکرار</span>
+              <span class="ex-chip chip-rest">۱۲۰ ثانیه</span>
+              <span class="ex-note">وزن رو نسبت به ماه اول ۱۰–۱۵٪ افزایش بده</span>
+            </div>
+            <div class="exercise-row">
+              <span class="ex-name">هیپ تراست هالتر (Hip Thrust)</span>
+              <span class="ex-chip chip-sets">۴ ست</span>
+              <span class="ex-chip chip-reps">۱۲ تکرار</span>
+              <span class="ex-chip chip-rest">۹۰ ثانیه</span>
+              <span class="ex-note">مهم‌ترین حرکت برای حجم باسن — فرم رو اول با وزن سبک یاد بگیر</span>
+            </div>
+            <div class="exercise-row">
+              <span class="ex-name">رومانیایی ددلیفت دمبل (RDL)</span>
+              <span class="ex-chip chip-sets">۴ ست</span>
+              <span class="ex-chip chip-reps">۱۲ تکرار</span>
+              <span class="ex-chip chip-rest">۹۰ ثانیه</span>
+              <span class="ex-note">برای هامسترینگ و گلوت — پشت صاف، زانو کمی خم</span>
+            </div>
+            <div class="exercise-row">
+              <span class="ex-name">Bulgarian Split Squat دمبل</span>
+              <span class="ex-chip chip-sets">۳ ست</span>
+              <span class="ex-chip chip-reps">۱۰ هر پا</span>
+              <span class="ex-chip chip-rest">۹۰ ثانیه</span>
+            </div>
+          </div>
+          <div class="exercise-group">
+            <div class="group-label">ایزولیشن</div>
+            <div class="exercise-row">
+              <span class="ex-name">کیبل کیک‌بک + Pulse (در اوج)</span>
+              <span class="ex-chip chip-sets">۳ ست</span>
+              <span class="ex-chip chip-reps">۱۲+۱۲ تکرار</span>
+              <span class="ex-chip chip-rest">۶۰ ثانیه</span>
+            </div>
+            <div class="exercise-row">
+              <span class="ex-name">Abductor دستگاه با Pause</span>
+              <span class="ex-chip chip-sets">۳ ست</span>
+              <span class="ex-chip chip-reps">۱۵ تکرار + ۵ پالس</span>
+              <span class="ex-chip chip-rest">۶۰ ثانیه</span>
+            </div>
+          </div>
+          <div class="exercise-group">
+            <div class="group-label">کور (سوپرست)</div>
+            <div class="exercise-row">
+              <span class="ex-name">پلانک طرفی + Leg Raise</span>
+              <span class="ex-chip chip-sets">۳ ست</span>
+              <span class="ex-chip chip-reps">۳۰ ثانیه + ۱۵</span>
+              <span class="ex-chip chip-rest">۶۰ ثانیه</span>
+            </div>
+          </div>
+          <div class="cardio-box"><span>🔥</span><div><strong>HIIT ۱۵ دقیقه:</strong> ۴۵ ثانیه کار / ۱۵ ثانیه استراحت — تردمیل یا بایسیکل</div></div>
+        </div>
+      </div>
+
+      <div class="program-card">
+        <div class="program-header p2">
+          <div class="program-title">
+            <h2>برنامه B — پشت + شانه (پیشرفته)</h2>
+            <p>پاسچر، عضلات پشت، چربی‌سوزی پشت بدن</p>
+          </div>
+          <div class="program-num">B</div>
+        </div>
+        <div class="program-body">
+          <div class="warmup-box">
+            <strong>🔆 گرم کردن</strong>
+            ۱۵ Band Pull Apart + ۱۰ Thoracic Rotation هر طرف + ۱۰ Wall Angel
+          </div>
+          <div class="exercise-group">
+            <div class="group-label">پشت</div>
+            <div class="exercise-row">
+              <span class="ex-name">لت پول‌داون گریپ باریک</span>
+              <span class="ex-chip chip-sets">۴ ست</span>
+              <span class="ex-chip chip-reps">۱۰–۱۲ تکرار</span>
+              <span class="ex-chip chip-rest">۹۰ ثانیه</span>
+            </div>
+            <div class="exercise-row">
+              <span class="ex-name">دمبل رو — Single Arm (یه دستی)</span>
+              <span class="ex-chip chip-sets">۴ ست</span>
+              <span class="ex-chip chip-reps">۱۲ هر طرف</span>
+              <span class="ex-chip chip-rest">۹۰ ثانیه</span>
+              <span class="ex-note">آرنج رو بالا بکش — تمرکز روی فشار به پشت</span>
+            </div>
+            <div class="exercise-row">
+              <span class="ex-name">Chest-Supported Row دستگاه</span>
+              <span class="ex-chip chip-sets">۳ ست</span>
+              <span class="ex-chip chip-reps">۱۲ تکرار</span>
+              <span class="ex-chip chip-rest">۹۰ ثانیه</span>
+            </div>
+            <div class="exercise-row">
+              <span class="ex-name">Reverse Fly دمبل (خوابیده)</span>
+              <span class="ex-chip chip-sets">۳ ست</span>
+              <span class="ex-chip chip-reps">۱۵ تکرار</span>
+              <span class="ex-chip chip-rest">۶۰ ثانیه</span>
+            </div>
+          </div>
+          <div class="exercise-group">
+            <div class="group-label">شانه + پاسچر</div>
+            <div class="exercise-row">
+              <span class="ex-name">Arnold Press دمبل</span>
+              <span class="ex-chip chip-sets">۳ ست</span>
+              <span class="ex-chip chip-reps">۱۲ تکرار</span>
+              <span class="ex-chip chip-rest">۹۰ ثانیه</span>
+            </div>
+            <div class="exercise-row">
+              <span class="ex-name">Face Pull کابل (اجباری)</span>
+              <span class="ex-chip chip-sets">۴ ست</span>
+              <span class="ex-chip chip-reps">۲۰ تکرار</span>
+              <span class="ex-chip chip-rest">۴۵ ثانیه</span>
+              <span class="ex-note">هر جلسه B باید این حرکت باشه — برای قوز خیلی مهمه</span>
+            </div>
+            <div class="exercise-row">
+              <span class="ex-name">بک اکستنشن با وزنه</span>
+              <span class="ex-chip chip-sets">۳ ست</span>
+              <span class="ex-chip chip-reps">۱۵ تکرار</span>
+              <span class="ex-chip chip-rest">۶۰ ثانیه</span>
+            </div>
+          </div>
+          <div class="cardio-box"><span>🚶</span><div><strong>Incline Walk ۲۰ دقیقه</strong> — شیب ۷–۱۰٪، سرعت ۵–۶ km/h</div></div>
+        </div>
+      </div>
+
+      <div class="program-card">
+        <div class="program-header p3">
+          <div class="program-title">
+            <h2>برنامه C — بالا تنه ترکیبی</h2>
+            <p>سینه، بازو، کور با تنوع بیشتر</p>
+          </div>
+          <div class="program-num">C</div>
+        </div>
+        <div class="program-body">
+          <div class="warmup-box">
+            <strong>🔆 گرم کردن</strong>
+            ۱۰ Push-up کامل + کشش سینه ۳۰ ثانیه هر طرف + ۱۰ Shoulder CARs
+          </div>
+          <div class="exercise-group">
+            <div class="group-label">سینه</div>
+            <div class="exercise-row">
+              <span class="ex-name">پرس بنچ دمبل تخت</span>
+              <span class="ex-chip chip-sets">۴ ست</span>
+              <span class="ex-chip chip-reps">۱۰ تکرار</span>
+              <span class="ex-chip chip-rest">۹۰ ثانیه</span>
+            </div>
+            <div class="exercise-row">
+              <span class="ex-name">پرس شیبدار هالتر اسمیت</span>
+              <span class="ex-chip chip-sets">۳ ست</span>
+              <span class="ex-chip chip-reps">۱۲ تکرار</span>
+              <span class="ex-chip chip-rest">۹۰ ثانیه</span>
+            </div>
+            <div class="exercise-row">
+              <span class="ex-name">فلای دمبل تخت</span>
+              <span class="ex-chip chip-sets">۳ ست</span>
+              <span class="ex-chip chip-reps">۱۵ تکرار</span>
+              <span class="ex-chip chip-rest">۶۰ ثانیه</span>
+            </div>
+          </div>
+          <div class="exercise-group">
+            <div class="group-label">بازو (سوپرست)</div>
+            <div class="exercise-row">
+              <span class="ex-name">Hammer Curl + Tricep Overhead Extension</span>
+              <span class="ex-chip chip-sets">۳ ست</span>
+              <span class="ex-chip chip-reps">۱۲+۱۲</span>
+              <span class="ex-chip chip-rest">۶۰ ثانیه</span>
+              <span class="ex-note">سوپرست: بدون استراحت بین دو تا حرکت</span>
+            </div>
+            <div class="exercise-row">
+              <span class="ex-name">Cable Curl + Rope Pushdown</span>
+              <span class="ex-chip chip-sets">۳ ست</span>
+              <span class="ex-chip chip-reps">۱۵+۱۵</span>
+              <span class="ex-chip chip-rest">۶۰ ثانیه</span>
+            </div>
+          </div>
+          <div class="exercise-group">
+            <div class="group-label">کور</div>
+            <div class="exercise-row">
+              <span class="ex-name">Ab Wheel (چرخ شکم)</span>
+              <span class="ex-chip chip-sets">۳ ست</span>
+              <span class="ex-chip chip-reps">۱۰–۱۲ تکرار</span>
+              <span class="ex-chip chip-rest">۶۰ ثانیه</span>
+            </div>
+            <div class="exercise-row">
+              <span class="ex-name">Side Plank با Hip Dip</span>
+              <span class="ex-chip chip-sets">۳ ست</span>
+              <span class="ex-chip chip-reps">۱۵ هر طرف</span>
+              <span class="ex-chip chip-rest">۴۵ ثانیه</span>
+            </div>
+            <div class="exercise-row">
+              <span class="ex-name">Cable Crunch</span>
+              <span class="ex-chip chip-sets">۳ ست</span>
+              <span class="ex-chip chip-reps">۲۰ تکرار</span>
+              <span class="ex-chip chip-rest">۴۵ ثانیه</span>
+            </div>
+          </div>
+          <div class="cardio-box"><span>🏃</span><div><strong>HIIT ۱۵ دقیقه یا Stairmaster ۲۰ دقیقه</strong></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MONTH 3+ -->
+  <div id="m3" class="month-content">
+    <div class="month-badge">🔥 فاز نگهداری و پیشرفت — ماه سوم به بعد (تا یک سال)</div>
+    <p style="color:#777; font-size:14px; margin-bottom:24px; line-height:1.8;">این برنامه قوی‌ترین و تخصصی‌ترین نسخه‌ست. حالا بدنت آماده‌ست بارهای سنگین‌تر و شدت بیشتر رو تحمل کنه. اصل Progressive Overload رو جدی بگیر.</p>
+    <div class="programs-grid">
+
+      <div class="program-card">
+        <div class="program-header p1">
+          <div class="program-title">
+            <h2>برنامه A — Glute & Hamstring Focus</h2>
+            <p>باسن + هامسترینگ + کور قوی</p>
+          </div>
+          <div class="program-num">A</div>
+        </div>
+        <div class="program-body">
+          <div class="warmup-box">
+            <strong>🔆 پروتکل فعال‌سازی باسن (۱۰ دقیقه)</strong>
+            مینی‌باند: ۲۰ Clamshell + ۲۰ Side Step + ۱۵ Glute Bridge با باند + ۱۰ Donkey Kick هر طرف
+          </div>
+          <div class="exercise-group">
+            <div class="group-label">کامپاند اصلی</div>
+            <div class="exercise-row">
+              <span class="ex-name">Barbell Hip Thrust</span>
+              <span class="ex-chip chip-sets">۵ ست</span>
+              <span class="ex-chip chip-reps">۸–۱۰ تکرار</span>
+              <span class="ex-chip chip-rest">۱۲۰ ثانیه</span>
+              <span class="ex-note">وزن سنگین — آخرین ست تا حد خستگی. مهم‌ترین حرکت برای حجم باسن</span>
+            </div>
+            <div class="exercise-row">
+              <span class="ex-name">اسکوات پهن (Sumo Squat) هالتر</span>
+              <span class="ex-chip chip-sets">۴ ست</span>
+              <span class="ex-chip chip-reps">۱۰ تکرار</span>
+              <span class="ex-chip chip-rest">۱۲۰ ثانیه</span>
+            </div>
+            <div class="exercise-row">
+              <span class="ex-name">Romanian Deadlift هالتر</span>
+              <span class="ex-chip chip-sets">۴ ست</span>
+              <span class="ex-chip chip-reps">۱۰ تکرار</span>
+              <span class="ex-chip chip-rest">۱۲۰ ثانیه</span>
+            </div>
+          </div>
+          <div class="exercise-group">
+            <div class="group-label">ایزولیشن و فینیشر</div>
+            <div class="exercise-row">
+              <span class="ex-name">Bulgarian Split Squat با وزنه</span>
+              <span class="ex-chip chip-sets">۳ ست</span>
+              <span class="ex-chip chip-reps">۱۰ هر پا</span>
+              <span class="ex-chip chip-rest">۹۰ ثانیه</span>
+            </div>
+            <div class="exercise-row">
+              <span class="ex-name">Cable Kickback + Abductor (سوپرست)</span>
+              <span class="ex-chip chip-sets">۳ ست</span>
+              <span class="ex-chip chip-reps">۱۵+۲۰</span>
+              <span class="ex-chip chip-rest">۶۰ ثانیه</span>
+            </div>
+            <div class="exercise-row">
+              <span class="ex-name">Lying Hamstring Curl دستگاه</span>
+              <span class="ex-chip chip-sets">۳ ست</span>
+              <span class="ex-chip chip-reps">۱۵ تکرار</span>
+              <span class="ex-chip chip-rest">۶۰ ثانیه</span>
+            </div>
+          </div>
+          <div class="exercise-group">
+            <div class="group-label">کور</div>
+            <div class="exercise-row">
+              <span class="ex-name">Hanging Leg Raise + Plank (سوپرست)</span>
+              <span class="ex-chip chip-sets">۳ ست</span>
+              <span class="ex-chip chip-reps">۱۵ + ۴۵ ثانیه</span>
+              <span class="ex-chip chip-rest">۶۰ ثانیه</span>
+            </div>
+          </div>
+          <div class="cardio-box"><span>⚡</span><div><strong>HIIT ۲۰ دقیقه:</strong> Stairmaster یا بایسیکل — ۴۰ ثانیه توان / ۲۰ ثانیه استراحت</div></div>
+        </div>
+      </div>
+
+      <div class="program-card">
+        <div class="program-header p2">
+          <div class="program-title">
+            <h2>برنامه B — Back & Shoulder Sculpt</h2>
+            <p>پشت قوی، شانه متناسب، پاسچر ایده‌آل</p>
+          </div>
+          <div class="program-num">B</div>
+        </div>
+        <div class="program-body">
+          <div class="warmup-box">
+            <strong>🔆 پروتکل پاسچر (۸ دقیقه)</strong>
+            ۲۰ Band Pull Apart + ۱۰ Wall Angel + ۱۰ Thoracic Extension روی فوم رولر
+          </div>
+          <div class="exercise-group">
+            <div class="group-label">پشت — حجم و چربی‌سوزی</div>
+            <div class="exercise-row">
+              <span class="ex-name">Weighted Pull-up یا Assisted Pull-up</span>
+              <span class="ex-chip chip-sets">۴ ست</span>
+              <span class="ex-chip chip-reps">۸–۱۲ تکرار</span>
+              <span class="ex-chip chip-rest">۱۲۰ ثانیه</span>
+              <span class="ex-note">اگه می‌تونی بارکش استفاده کن — یا Lat Pulldown با وزن سنگین</span>
+            </div>
+            <div class="exercise-row">
+              <span class="ex-name">Barbell Row خم</span>
+              <span class="ex-chip chip-sets">۴ ست</span>
+              <span class="ex-chip chip-reps">۱۰ تکرار</span>
+              <span class="ex-chip chip-rest">۱۲۰ ثانیه</span>
+            </div>
+            <div class="exercise-row">
+              <span class="ex-name">Meadows Row (دمبل یه دستی با زاویه)</span>
+              <span class="ex-chip chip-sets">۳ ست</span>
+              <span class="ex-chip chip-reps">۱۲ هر طرف</span>
+              <span class="ex-chip chip-rest">۹۰ ثانیه</span>
+            </div>
+            <div class="exercise-row">
+              <span class="ex-name">Straight Arm Pulldown کابل</span>
+              <span class="ex-chip chip-sets">۳ ست</span>
+              <span class="ex-chip chip-reps">۱۵ تکرار</span>
+              <span class="ex-chip chip-rest">۶۰ ثانیه</span>
+              <span class="ex-note">برای Lat و پهن شدن پشت</span>
+            </div>
+          </div>
+          <div class="exercise-group">
+            <div class="group-label">شانه + پاسچر</div>
+            <div class="exercise-row">
+              <span class="ex-name">Push Press دمبل</span>
+              <span class="ex-chip chip-sets">۴ ست</span>
+              <span class="ex-chip chip-reps">۸ تکرار</span>
+              <span class="ex-chip chip-rest">۱۲۰ ثانیه</span>
+            </div>
+            <div class="exercise-row">
+              <span class="ex-name">Face Pull + Lateral Raise (سوپرست)</span>
+              <span class="ex-chip chip-sets">۴ ست</span>
+              <span class="ex-chip chip-reps">۲۰+۱۵</span>
+              <span class="ex-chip chip-rest">۶۰ ثانیه</span>
+            </div>
+            <div class="exercise-row">
+              <span class="ex-name">بک اکستنشن با صفحه وزنه</span>
+              <span class="ex-chip chip-sets">۳ ست</span>
+              <span class="ex-chip chip-reps">۱۵ تکرار</span>
+              <span class="ex-chip chip-rest">۶۰ ثانیه</span>
+            </div>
+          </div>
+          <div class="cardio-box"><span>🚶</span><div><strong>Incline Walk ۲۵ دقیقه</strong> — شیب ۱۰–۱۲٪ | یا ۲۰ دقیقه Stairmaster</div></div>
+        </div>
+      </div>
+
+      <div class="program-card">
+        <div class="program-header p3">
+          <div class="program-title">
+            <h2>برنامه C — Full Upper Body Power</h2>
+            <p>سینه، بازو، کور — حجم و قدرت ترکیبی</p>
+          </div>
+          <div class="program-num">C</div>
+        </div>
+        <div class="program-body">
+          <div class="warmup-box">
+            <strong>🔆 گرم کردن</strong>
+            ۱۵ Push-up + ۱۰ Inchworm + کشش شانه و سینه ۳۰ ثانیه
+          </div>
+          <div class="exercise-group">
+            <div class="group-label">سینه (حجم)</div>
+            <div class="exercise-row">
+              <span class="ex-name">Barbell Bench Press تخت</span>
+              <span class="ex-chip chip-sets">۴ ست</span>
+              <span class="ex-chip chip-reps">۸–۱۰ تکرار</span>
+              <span class="ex-chip chip-rest">۱۲۰ ثانیه</span>
+            </div>
+            <div class="exercise-row">
+              <span class="ex-name">Incline Dumbbell Press</span>
+              <span class="ex-chip chip-sets">۳ ست</span>
+              <span class="ex-chip chip-reps">۱۰–۱۲ تکرار</span>
+              <span class="ex-chip chip-rest">۹۰ ثانیه</span>
+            </div>
+            <div class="exercise-row">
+              <span class="ex-name">Cable Fly (Low to High)</span>
+              <span class="ex-chip chip-sets">۳ ست</span>
+              <span class="ex-chip chip-reps">۱۵ تکرار</span>
+              <span class="ex-chip chip-rest">۶۰ ثانیه</span>
+            </div>
+          </div>
+          <div class="exercise-group">
+            <div class="group-label">بازو (بلوک شدت)</div>
+            <div class="exercise-row">
+              <span class="ex-name">EZ Bar Curl + Skull Crusher (سوپرست)</span>
+              <span class="ex-chip chip-sets">۴ ست</span>
+              <span class="ex-chip chip-reps">۱۰+۱۰</span>
+              <span class="ex-chip chip-rest">۶۰ ثانیه</span>
+            </div>
+            <div class="exercise-row">
+              <span class="ex-name">Concentration Curl + Dip دستگاه</span>
+              <span class="ex-chip chip-sets">۳ ست</span>
+              <span class="ex-chip chip-reps">۱۲+۱۲</span>
+              <span class="ex-chip chip-rest">۶۰ ثانیه</span>
+            </div>
+          </div>
+          <div class="exercise-group">
+            <div class="group-label">کور (فینیشر)</div>
+            <div class="exercise-row">
+              <span class="ex-name">Cable Woodchop (بالا به پایین)</span>
+              <span class="ex-chip chip-sets">۳ ست</span>
+              <span class="ex-chip chip-reps">۱۵ هر طرف</span>
+              <span class="ex-chip chip-rest">۶۰ ثانیه</span>
+            </div>
+            <div class="exercise-row">
+              <span class="ex-name">Ab Wheel + Hollow Body Hold</span>
+              <span class="ex-chip chip-sets">۳ ست</span>
+              <span class="ex-chip chip-reps">۱۲ + ۳۰ ثانیه</span>
+              <span class="ex-chip chip-rest">۶۰ ثانیه</span>
+            </div>
+          </div>
+          <div class="cardio-box"><span>🔥</span><div><strong>Finisher:</strong> ۱۵ دقیقه HIIT روی Rower یا Bike — این جلسه کاردیو چربی‌سوزتره</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- NUTRITION -->
+<div class="section" style="padding-top:0">
+  <div class="section-title">تغذیه و شیک پروتئین</div>
+  <div class="nutrition-section">
+    <h3>🥗 راهنمای تغذیه</h3>
+    <div class="nutrition-grid">
+      <div class="nut-card">
+        <h4>🌅 صبحانه</h4>
+        <ul>
+          <li>تخم‌مرغ آب‌پز یا نیمرو (۲–۳ عدد)</li>
+          <li>نان سبوس‌دار یا جو دوسر</li>
+          <li>میوه تازه (کم‌قند: توت، سیب، کیوی)</li>
+        </ul>
+      </div>
+      <div class="nut-card">
+        <h4>☀️ ناهار</h4>
+        <ul>
+          <li>پروتئین: مرغ، ماهی، یا گوشت کم‌چرب</li>
+          <li>کربوهیدرات: برنج، سیب‌زمینی، یا کینوا</li>
+          <li>سبزیجات رنگارنگ</li>
+        </ul>
+      </div>
+      <div class="nut-card">
+        <h4>🌙 شام</h4>
+        <ul>
+          <li>پروتئین بالا، کربوهیدرات کم</li>
+          <li>سبزیجات بخارپز یا سالاد</li>
+          <li>ماست کم‌چرب یا پنیر</li>
+        </ul>
+      </div>
+      <div class="nut-card">
+        <h4>⚠️ چیزایی که باید کم کنی</h4>
+        <ul>
+          <li>نوشابه و آبمیوه صنعتی</li>
+          <li>تنقلات پردازش‌شده</li>
+          <li>کربوهیدرات ساده بعد از ساعت ۸</li>
+          <li>سس‌های پرکالری</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="shake-card">
+      <div class="shake-emoji">🥛</div>
+      <div class="shake-info">
+        <h4>شیک پروتئین بعد از تمرین</h4>
+        <p>
+          <strong>زمان:</strong> حداکثر ۳۰–۴۵ دقیقه بعد از تمرین<br>
+          <strong>چی بخور:</strong> ۲۵–۳۰ گرم پروتئین Whey با آب یا شیر کم‌چرب<br>
+          <strong>اضافه کن:</strong> یه موز (کربوهیدرات سریع برای ریکاوری) یا ۱ قاشق بادام زمینی<br>
+          <strong>کالری شیک:</strong> حدود ۱۵۰–۲۵۰ کالری<br>
+          <strong>نکته:</strong> روزهایی که تمرین نداری، شیک ضروری نیست — از غذا پروتئینت رو بگیر
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PROGRESS ROADMAP -->
+<div class="section" style="padding-top:0">
+  <div class="section-title">مسیر پیشرفت</div>
+  <div class="progress-section">
+    <h3>📍 چی انتظار داشته باش</h3>
+    <div class="timeline">
+      <div class="tl-item">
+        <div class="tl-dot m1"></div>
+        <div class="tl-content">
+          <h4>ماه اول — آشنایی مجدد</h4>
+          <p>بدن داره دوباره به تمرین عادت می‌کنه. ممکنه وزن خیلی تغییر نکنه ولی آب‌بندی کاهش پیدا می‌کنه. هدف: ایجاد عادت، یاد گرفتن فرم صحیح حرکات. انتظار: ۱.۵–۲.۵ کیلو کاهش وزن + کاهش سایز</p>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot m2"></div>
+        <div class="tl-content">
+          <h4>ماه دوم — شروع تغییر واقعی</h4>
+          <p>حالا عضلات دارن قوی‌تر می‌شن. متابولیسم بالاتر رفته. چربی‌سوزی سریع‌تره. انتظار: ۲.۵–۴ کیلو کاهش + تغییر محسوس در فرم باسن و شکم</p>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot m3"></div>
+        <div class="tl-content">
+          <h4>ماه سوم به بعد — Recomposition</h4>
+          <p>همزمان چربی می‌سوزه و عضله می‌سازی. پاسچر بهتر می‌شه، قوز کمتر می‌شه. ممکنه وزن کمتر کم بشه ولی سایز و فرم خیلی بهتر شه. در ۶–۱۲ ماه به وزن هدف (۵۷ کیلو) می‌رسی</p>
+        </div>
+      </div>
+    </div>
+    <div style="background:var(--warm); border-radius:16px; padding:20px; margin-top:20px; font-size:13px; color:var(--accent2); line-height:1.9;">
+      <strong>💡 نکته مهم:</strong> اگه ترازو نشون نمی‌ده ولی لباس‌هات گشاد شدن — این یعنی داری عضله می‌سازی و چربی می‌سوزی همزمان. این بهترین حالته. هر ۴ هفته اندازه‌های بدنت رو بگیر (کمر، باسن، ران) — این معیار دقیق‌تره.
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  ساخته‌شده برای <span>نیلی</span> — با ❤️ و علم<br>
+  <span style="font-size:11px; color:rgba(255,255,255,0.2);">هر گونه درد غیرعادی = مشورت با متخصص</span>
+</div>
+
+<script>
+function showMonth(id) {
+  document.querySelectorAll('.month-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.month-tab').forEach(el => el.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.target.classList.add('active');
+}
+</script>
+</body>
+</html>
