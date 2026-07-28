@@ -113,6 +113,7 @@ class CalendarScreen extends ConsumerStatefulWidget {
 class _CalendarScreenState extends ConsumerState<CalendarScreen> {
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
+  CalendarFormat _calendarFormat = CalendarFormat.month;
 
   DateTime get _windowStart =>
       DateTime(_focusedDay.year, _focusedDay.month - 1, 1);
@@ -140,14 +141,24 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
           ),
           _CustomCalendarHeader(
             focusedDay: _focusedDay,
+            calendarFormat: _calendarFormat,
+            onFormatChanged: (fmt) => setState(() => _calendarFormat = fmt),
             onLeftChevronTap: () {
               setState(() {
-                _focusedDay = DateTime(_focusedDay.year, _focusedDay.month - 1);
+                if (_calendarFormat == CalendarFormat.month) {
+                  _focusedDay = DateTime(_focusedDay.year, _focusedDay.month - 1);
+                } else {
+                  _focusedDay = _focusedDay.subtract(const Duration(days: 7));
+                }
               });
             },
             onRightChevronTap: () {
               setState(() {
-                _focusedDay = DateTime(_focusedDay.year, _focusedDay.month + 1);
+                if (_calendarFormat == CalendarFormat.month) {
+                  _focusedDay = DateTime(_focusedDay.year, _focusedDay.month + 1);
+                } else {
+                  _focusedDay = _focusedDay.add(const Duration(days: 7));
+                }
               });
             },
           ),
@@ -189,8 +200,18 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
         DayDetailScreen.show(context, dateStr);
       },
       onPageChanged: (focused) => setState(() => _focusedDay = focused),
-      calendarFormat: CalendarFormat.month,
-      availableCalendarFormats: const {CalendarFormat.month: 'Month'},
+      calendarFormat: _calendarFormat,
+      onFormatChanged: (fmt) {
+        if (_calendarFormat != fmt) {
+          setState(() {
+            _calendarFormat = fmt;
+          });
+        }
+      },
+      availableCalendarFormats: const {
+        CalendarFormat.month: 'Month',
+        CalendarFormat.week: 'Week',
+      },
       calendarStyle: const CalendarStyle(outsideDaysVisible: false),
       calendarBuilders: CalendarBuilders(
         defaultBuilder: (ctx, day, _) {
@@ -239,18 +260,22 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
       '${d.day.toString().padLeft(2, '0')}';
 }
 
-// ── Custom Month Header ────────────────────────────────────────────────────────
+// ── Custom Month/Week Header ──────────────────────────────────────────────────
 
 class _CustomCalendarHeader extends StatelessWidget {
   const _CustomCalendarHeader({
     required this.focusedDay,
+    required this.calendarFormat,
     required this.onLeftChevronTap,
     required this.onRightChevronTap,
+    required this.onFormatChanged,
   });
 
   final DateTime focusedDay;
+  final CalendarFormat calendarFormat;
   final VoidCallback onLeftChevronTap;
   final VoidCallback onRightChevronTap;
+  final ValueChanged<CalendarFormat> onFormatChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -276,25 +301,47 @@ class _CustomCalendarHeader extends StatelessWidget {
           ),
           Row(
             children: [
+              SegmentedButton<CalendarFormat>(
+                segments: const [
+                  ButtonSegment(
+                    value: CalendarFormat.month,
+                    label: Text('Month'),
+                    icon: Icon(Icons.calendar_view_month, size: 14),
+                  ),
+                  ButtonSegment(
+                    value: CalendarFormat.week,
+                    label: Text('Week'),
+                    icon: Icon(Icons.calendar_view_week, size: 14),
+                  ),
+                ],
+                selected: {calendarFormat},
+                onSelectionChanged: (val) => onFormatChanged(val.first),
+                style: SegmentedButton.styleFrom(
+                  visualDensity: VisualDensity.compact,
+                  padding: const EdgeInsets.symmetric(horizontal: 6),
+                  textStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+                ),
+              ),
+              const SizedBox(width: 8),
               IconButton(
                 onPressed: onLeftChevronTap,
                 icon: Icon(Icons.chevron_left, color: inkColor, size: 20),
                 style: IconButton.styleFrom(
                   backgroundColor: btnBg,
                   shape: const CircleBorder(),
-                  padding: const EdgeInsets.all(8),
-                  minimumSize: const Size(40, 40),
+                  padding: const EdgeInsets.all(6),
+                  minimumSize: const Size(36, 36),
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 4),
               IconButton(
                 onPressed: onRightChevronTap,
                 icon: Icon(Icons.chevron_right, color: inkColor, size: 20),
                 style: IconButton.styleFrom(
                   backgroundColor: btnBg,
                   shape: const CircleBorder(),
-                  padding: const EdgeInsets.all(8),
-                  minimumSize: const Size(40, 40),
+                  padding: const EdgeInsets.all(6),
+                  minimumSize: const Size(36, 36),
                 ),
               ),
             ],
