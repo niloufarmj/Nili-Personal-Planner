@@ -12,6 +12,8 @@ import '../finance/widgets/transaction_tile.dart';
 import '../gym/gym_screen.dart';
 import '../lists/repositories/item_repository.dart';
 import '../meals/meal_slot_repository.dart';
+import '../period/period_screen.dart';
+import '../period/services/period_service.dart';
 import 'day_tag_picker.dart';
 import 'event_edit_sheet.dart';
 
@@ -164,6 +166,11 @@ class _DayDetailSheetContent extends ConsumerWidget {
                   // Meals
                   const SectionHeader(title: 'Meals Menu'),
                   _MealsSection(date: date),
+                  const SizedBox(height: 24),
+
+                  // Cycle & Period
+                  const SectionHeader(title: 'Cycle & Period Tracker'),
+                  _PeriodSection(date: date),
                   const SizedBox(height: 24),
 
                   // Gym
@@ -548,3 +555,123 @@ final _itemsForDateStreamProvider = StreamProvider.autoDispose
         db.items,
       )..where((i) => i.dueDate.equals(date))).watch();
     });
+
+// ── Period Section ─────────────────────────────────────────────────────────────
+
+class _PeriodSection extends ConsumerWidget {
+  const _PeriodSection({required this.date});
+
+  final String date;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    final actualPeriods = ref.watch(actualPeriodDatesProvider);
+    final predictedPeriods = ref.watch(predictedPeriodDatesProvider).value ?? {};
+    final ovulationDates = ref.watch(predictedOvulationDatesProvider).value ?? {};
+
+    final isActual = actualPeriods.contains(date);
+    final isPredicted = predictedPeriods.contains(date);
+    final isOvulation = ovulationDates.contains(date);
+
+    if (isActual) {
+      return AppCard(
+        child: ListTile(
+          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+          leading: const CircleAvatar(
+            backgroundColor: DesignTokens.rose,
+            child: Icon(Icons.water_drop, color: Colors.white, size: 20),
+          ),
+          title: const Text('Period Day (Logged)', style: TextStyle(fontWeight: FontWeight.bold)),
+          subtitle: const Text('Logged cycle day. Tap to view tracker.'),
+          trailing: FilledButton.tonal(
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const PeriodScreen()),
+            ),
+            child: const Text('View'),
+          ),
+        ),
+      );
+    }
+
+    if (isPredicted) {
+      return AppCard(
+        child: ListTile(
+          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+          leading: CircleAvatar(
+            backgroundColor: DesignTokens.roseSoft,
+            child: const Icon(Icons.water_drop_outlined, color: DesignTokens.rose, size: 20),
+          ),
+          title: const Text('Estimated Period Day 🌸', style: TextStyle(fontWeight: FontWeight.bold)),
+          subtitle: const Text('Predicted period phase based on your average cycle.'),
+          trailing: FilledButton.icon(
+            icon: const Icon(Icons.add, size: 16),
+            label: const Text('Started Today'),
+            style: FilledButton.styleFrom(
+              backgroundColor: DesignTokens.rose,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () async {
+              final dateObj = DateTime.parse(date);
+              await ref.read(periodServiceProvider).logPeriodStartToday(dateObj);
+              ref.invalidate(periodLogsStreamProvider);
+              ref.invalidate(actualPeriodDatesProvider);
+              ref.invalidate(predictedPeriodDatesProvider);
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Period start logged!')),
+                );
+              }
+            },
+          ),
+        ),
+      );
+    }
+
+    if (isOvulation) {
+      return AppCard(
+        child: ListTile(
+          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+          leading: const CircleAvatar(
+            backgroundColor: DesignTokens.dustyBlueSoft,
+            child: Icon(Icons.egg_outlined, color: DesignTokens.dustyBlue, size: 20),
+          ),
+          title: const Text('Estimated Ovulation Day 🥚', style: TextStyle(fontWeight: FontWeight.bold)),
+          subtitle: const Text('Predicted fertile window.'),
+          trailing: TextButton(
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const PeriodScreen()),
+            ),
+            child: const Text('View Cycle'),
+          ),
+        ),
+      );
+    }
+
+    return AppCard(
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+        leading: const Icon(Icons.favorite_border, color: DesignTokens.rose),
+        title: const Text('Cycle & Period Tracker'),
+        subtitle: const Text('No period logged for this date.'),
+        trailing: OutlinedButton(
+          onPressed: () async {
+            final dateObj = DateTime.parse(date);
+            await ref.read(periodServiceProvider).logPeriodStartToday(dateObj);
+            ref.invalidate(periodLogsStreamProvider);
+            ref.invalidate(actualPeriodDatesProvider);
+            ref.invalidate(predictedPeriodDatesProvider);
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Period start logged for this date!')),
+              );
+            }
+          },
+          child: const Text('Log Start'),
+        ),
+      ),
+    );
+  }
+}

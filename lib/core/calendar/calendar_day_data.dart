@@ -83,6 +83,7 @@ class CalendarFilter {
     this.showPartner = true,
     this.showReminders = true,
     this.showFinance = true,
+    this.showPeriod = true,
   });
 
   final bool showLocation;
@@ -96,8 +97,7 @@ class CalendarFilter {
   final bool showPartner;
   final bool showReminders;
   final bool showFinance;
-
-  static const all = CalendarFilter();
+  final bool showPeriod;
 
   CalendarFilter copyWith({
     bool? showLocation,
@@ -111,17 +111,23 @@ class CalendarFilter {
     bool? showPartner,
     bool? showReminders,
     bool? showFinance,
-  }) => CalendarFilter(
-    showLocation: showLocation ?? this.showLocation,
-    showGym: showGym ?? this.showGym,
-    showMeals: showMeals ?? this.showMeals,
-    showWork: showWork ?? this.showWork,
-    showUni: showUni ?? this.showUni,
-    showTravel: showTravel ?? this.showTravel,
-    showSocial: showSocial ?? this.showSocial,
-    showTasks: showTasks ?? this.showTasks,
-    showPartner: showPartner ?? this.showPartner,
-    showReminders: showReminders ?? this.showReminders,
-    showFinance: showFinance ?? this.showFinance,
-  );
+    bool? showPeriod,
+  }) {
+    return CalendarFilter(
+      showLocation: showLocation ?? this.showLocation,
+      showGym: showGym ?? this.showGym,
+      showMeals: showMeals ?? this.showMeals,
+      showWork: showWork ?? this.showWork,
+      showUni: showUni ?? this.showUni,
+      showTravel: showTravel ?? this.showTravel,
+      showSocial: showSocial ?? this.showSocial,
+      showTasks: showTasks ?? this.showTasks,
+      showPartner: showPartner ?? this.showPartner,
+      showReminders: showReminders ?? this.showReminders,
+      showFinance: showFinance ?? this.showFinance,
+      showPeriod: showPeriod ?? this.showPeriod,
+    );
+  }
+
+  static const all = CalendarFilter();
 }

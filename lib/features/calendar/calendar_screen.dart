@@ -43,6 +43,7 @@ class _FilterNotifier extends StateNotifier<CalendarFilter> {
       'tasks' => state.copyWith(showTasks: !state.showTasks),
       'partner' => state.copyWith(showPartner: !state.showPartner),
       'reminders' => state.copyWith(showReminders: !state.showReminders),
+      'period' => state.copyWith(showPeriod: !state.showPeriod),
       _ => state,
     };
     final prefs = await SharedPreferences.getInstance();
@@ -59,7 +60,8 @@ class _FilterNotifier extends StateNotifier<CalendarFilter> {
       (f.showSocial ? 64 : 0) |
       (f.showTasks ? 128 : 0) |
       (f.showPartner ? 256 : 0) |
-      (f.showReminders ? 512 : 0);
+      (f.showReminders ? 512 : 0) |
+      (f.showPeriod ? 1024 : 0);
 
   static CalendarFilter _fromBits(int b) => CalendarFilter(
     showLocation: b & 1 != 0,
@@ -72,6 +74,7 @@ class _FilterNotifier extends StateNotifier<CalendarFilter> {
     showTasks: b & 128 != 0,
     showPartner: b & 256 != 0,
     showReminders: b & 512 != 0,
+    showPeriod: b & 1024 != 0,
   );
 }
 
@@ -169,6 +172,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     Set<String> predictedPeriods,
     Set<String> ovulationDates,
   ) {
+    final filter = ref.watch(_calendarFilterProvider);
+
     return TableCalendar<CalendarDayData>(
       firstDay: DateTime(2020),
       lastDay: DateTime(2040),
@@ -195,9 +200,9 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
             dayData: data[dateStr],
             isSelected: false,
             isToday: false,
-            isPeriod: actualPeriods.contains(dateStr),
-            isPredictedPeriod: predictedPeriods.contains(dateStr),
-            isOvulation: ovulationDates.contains(dateStr),
+            isPeriod: filter.showPeriod && actualPeriods.contains(dateStr),
+            isPredictedPeriod: filter.showPeriod && predictedPeriods.contains(dateStr),
+            isOvulation: filter.showPeriod && ovulationDates.contains(dateStr),
           );
         },
         todayBuilder: (ctx, day, _) {
@@ -207,9 +212,9 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
             dayData: data[dateStr],
             isSelected: false,
             isToday: true,
-            isPeriod: actualPeriods.contains(dateStr),
-            isPredictedPeriod: predictedPeriods.contains(dateStr),
-            isOvulation: ovulationDates.contains(dateStr),
+            isPeriod: filter.showPeriod && actualPeriods.contains(dateStr),
+            isPredictedPeriod: filter.showPeriod && predictedPeriods.contains(dateStr),
+            isOvulation: filter.showPeriod && ovulationDates.contains(dateStr),
           );
         },
         selectedBuilder: (ctx, day, _) {
@@ -219,9 +224,9 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
             dayData: data[dateStr],
             isSelected: true,
             isToday: isSameDay(day, DateTime.now()),
-            isPeriod: actualPeriods.contains(dateStr),
-            isPredictedPeriod: predictedPeriods.contains(dateStr),
-            isOvulation: ovulationDates.contains(dateStr),
+            isPeriod: filter.showPeriod && actualPeriods.contains(dateStr),
+            isPredictedPeriod: filter.showPeriod && predictedPeriods.contains(dateStr),
+            isOvulation: filter.showPeriod && ovulationDates.contains(dateStr),
           );
         },
       ),
@@ -381,6 +386,13 @@ class _HorizontalFilterBar extends ConsumerWidget {
         key: 'reminders',
         color: DesignTokens.roseSoft,
         icon: Icons.notifications_none,
+      ),
+      (
+        label: 'Period',
+        active: filter.showPeriod,
+        key: 'period',
+        color: DesignTokens.rose,
+        icon: Icons.water_drop_outlined,
       ),
     ];
 
