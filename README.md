@@ -8,8 +8,9 @@ A comprehensive, beautifully designed, and offline-first personal organizer buil
 
 ### 📅 1. Planner & Calendar
 *   **Day Tagging**: Personalize daily logs with custom tags, mood emojis, energy levels, and statuses.
-*   **Daily Agenda**: Create and schedule events with start/end times, category labels, descriptions, and custom alerts.
-*   **Reminders Engine**: Manage custom notifications, recurring triggers, and alarm configurations.
+*   **Month & Week Agenda Views**: Toggle between a month grid and a detailed vertical 7-day Week Agenda List displaying day row cards with scheduled events, location overlays, workouts, meals, due tasks, and cycle status.
+*   **Filter Chips Bar**: Toggle overlays on/off in real-time (Location, Gym, Meals, Work, Uni, Travel, Social, Tasks, Partner, Reminders, and Period).
+*   **Day Details & Action Sheets**: Tap any calendar day to inspect detailed sections for events, finance, meals, fitness, period logs, and chore deadlines.
 
 ### ☀️ 2. Today's Dashboard & Next 7 Days
 *   **Daily Focus & Priorities**: Highlight key tasks and manage checklist priorities with gamified completion feedback.
@@ -41,20 +42,21 @@ A comprehensive, beautifully designed, and offline-first personal organizer buil
 *   **Recipe Creator**: Detail recipes, prep times, cooking steps, and list ingredient mappings.
 *   **Weekly Meal Slot Board**: Plan weekly breakfasts, lunches, dinners, and snacks. Mark slots as `'planned'` or `'eaten'`.
 
-### 🏋️ 7. Fitness, Gym & Weight Metrics
-*   **Workout Routine Creator**: Design workout plans with custom exercises, sets, reps, and target weights.
-*   **Gym Session Tracker**: Check in to gym sessions and log completed exercises in real-time.
+### 🏋️ 7. Gym, Sports & Fitness Tracker
+*   **Multi-Sport Activity Logging**: Log sessions across Swimming 🏊, Tennis 🎾, Biking 🚴, Running 🏃, Walking 🚶, Yoga 🧘, Pilates 🥋, Gym 🏋️, and Other activities.
+*   **Month 3+ Gym Program Guide**: Full interactive guide detailing Month 3+ Plans A, B, and C (warmups, exercises, sets, reps, rest times, notes, and cardio finishers).
+*   **Sport Analytics & Charts**: Reactive Daily, Weekly, and Monthly stacked bar charts for duration and burned calories across all sports.
+*   **Session Scheduling & One-Tap Completion**: Plan upcoming gym or sport sessions for target dates, with 1-tap "Done" completion directly from the tracker dashboard.
 *   **Body Metrics Log**: Track weight, waist, chest, hip, bicep, and thigh dimensions. Supports goal-setting, metric directions (`gain` or `lose`), and progress state photo uploads.
 
 ### 🧘 8. Wellbeing & Mindfulness
 *   **Self-Care Catalog**: Choose wellbeing actions (reading, meditation, spa, stretching) and log completions.
 *   **Mood Tracker**: Connect mood logs with daily logs to analyze patterns.
 
-### 🩸 9. Period Tracker
+### 🩸 9. Period Tracker & Cycle Integration
 *   **Cycle Predictions**: Track period dates, fertile windows, and ovulation days.
-*   **Late Markers**: Flags late periods dynamically.
-*   **Cycle Diagrams**: Visual cycle history graphs.
-*   **Calendar Sync**: Highlights period days on the main planner calendar using dedicated rose styling.
+*   **Calendar & Day Detail Integration**: Dedicated `Period` top filter chip on the main calendar and a Cycle & Period section in `DayDetailScreen` with 1-tap "Started Today" logging.
+*   **Late Markers & Analytics**: Flags late periods dynamically and presents visual cycle history graphs. calendar using dedicated rose styling.
 
 ### ⏱️ 10. Work Time Tracker
 *   **Focus Contexts**: Organize work sessions by contexts or categories.
