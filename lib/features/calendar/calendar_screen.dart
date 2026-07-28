@@ -166,9 +166,13 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
           const SizedBox(height: 8),
           Expanded(
             child: dataAsync.when(
-              loading: () => _buildCalendar(context, {}, actualPeriods, predictedPeriods, ovulationDates),
+              loading: () => _calendarFormat == CalendarFormat.month
+                  ? _buildCalendar(context, {}, actualPeriods, predictedPeriods, ovulationDates)
+                  : const Center(child: CircularProgressIndicator()),
               error: (e, _) => Center(child: Text('Error: $e')),
-              data: (data) => _buildCalendar(context, data, actualPeriods, predictedPeriods, ovulationDates),
+              data: (data) => _calendarFormat == CalendarFormat.month
+                  ? _buildCalendar(context, data, actualPeriods, predictedPeriods, ovulationDates)
+                  : _buildWeekAgenda(context, data, actualPeriods, predictedPeriods, ovulationDates),
             ),
           ),
         ],
@@ -254,6 +258,42 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     );
   }
 
+  Widget _buildWeekAgenda(
+    BuildContext context,
+    Map<String, CalendarDayData> data,
+    Set<String> actualPeriods,
+    Set<String> predictedPeriods,
+    Set<String> ovulationDates,
+  ) {
+    final filter = ref.watch(_calendarFilterProvider);
+    final mon = DateTime(_focusedDay.year, _focusedDay.month, _focusedDay.day)
+        .subtract(Duration(days: _focusedDay.weekday - 1));
+    final weekDays = List.generate(7, (i) => DateTime(mon.year, mon.month, mon.day + i));
+
+    return ListView.separated(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+      itemCount: 7,
+      separatorBuilder: (_, __) => const SizedBox(height: 10),
+      itemBuilder: (context, idx) {
+        final day = weekDays[idx];
+        final dateStr = _fmt(day);
+        final dayData = data[dateStr];
+
+        return _WeekDayCard(
+          day: day,
+          dateStr: dateStr,
+          dayData: dayData,
+          filter: filter,
+          isToday: isSameDay(day, DateTime.now()),
+          isPeriod: filter.showPeriod && actualPeriods.contains(dateStr),
+          isPredictedPeriod: filter.showPeriod && predictedPeriods.contains(dateStr),
+          isOvulation: filter.showPeriod && ovulationDates.contains(dateStr),
+          onTap: () => DayDetailScreen.show(context, dateStr),
+        );
+      },
+    );
+  }
+
   static String _fmt(DateTime d) =>
       '${d.year.toString().padLeft(4, '0')}-'
       '${d.month.toString().padLeft(2, '0')}-'
@@ -282,7 +322,19 @@ class _CustomCalendarHeader extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    final monthStr = DateFormat('MMMM yyyy').format(focusedDay);
+    String headerTitle;
+    if (calendarFormat == CalendarFormat.month) {
+      headerTitle = DateFormat('MMMM yyyy').format(focusedDay);
+    } else {
+      final mon = focusedDay.subtract(Duration(days: focusedDay.weekday - 1));
+      final sun = mon.add(const Duration(days: 6));
+      if (mon.month == sun.month) {
+        headerTitle = '${DateFormat('MMM d').format(mon)} – ${DateFormat('d, yyyy').format(sun)}';
+      } else {
+        headerTitle = '${DateFormat('MMM d').format(mon)} – ${DateFormat('MMM d, yyyy').format(sun)}';
+      }
+    }
+
     final inkColor = isDark ? DesignTokens.inkDark : DesignTokens.inkLight;
     final btnBg = isDark ? DesignTokens.surfaceDark : DesignTokens.lineLight;
 
@@ -291,12 +343,16 @@ class _CustomCalendarHeader extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            monthStr,
-            style: GoogleFonts.fraunces(
-              fontSize: DesignTokens.fontTitle,
-              fontWeight: FontWeight.w600,
-              color: inkColor,
+          Expanded(
+            child: Text(
+              headerTitle,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: GoogleFonts.fraunces(
+                fontSize: DesignTokens.fontTitle,
+                fontWeight: FontWeight.w600,
+                color: inkColor,
+              ),
             ),
           ),
           Row(
@@ -745,6 +801,291 @@ class _DotRow extends StatelessWidget {
             ),
           ),
       ],
+    );
+  }
+}
+
+// ── Detailed Week Day Row Card (for Week View Agenda) ───────────────────────────
+
+class _WeekDayCard extends StatelessWidget {
+  const _WeekDayCard({
+    required this.day,
+    required this.dateStr,
+    required this.dayData,
+    required this.filter,
+    required this.isToday,
+    required this.isPeriod,
+    required this.isPredictedPeriod,
+    required this.isOvulation,
+    required this.onTap,
+  });
+
+  final DateTime day;
+  final String dateStr;
+  final CalendarDayData? dayData;
+  final CalendarFilter filter;
+  final bool isToday;
+  final bool isPeriod;
+  final bool isPredictedPeriod;
+  final bool isOvulation;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    final cardBg = isDark ? DesignTokens.surfaceDark : Colors.white;
+    final inkColor = isDark ? DesignTokens.inkDark : DesignTokens.inkLight;
+    final softInk = isDark ? DesignTokens.inkSoftDark : DesignTokens.inkSoftLight;
+
+    final events = dayData?.eventOccurrences ?? [];
+    final gymSession = dayData?.gymSession;
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        decoration: BoxDecoration(
+          color: cardBg,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isToday
+                ? (isDark ? DesignTokens.accentDark : DesignTokens.accentLight)
+                : (isDark ? DesignTokens.lineDark : DesignTokens.lineLight),
+            width: isToday ? 2 : 1,
+          ),
+          boxShadow: isDark
+              ? null
+              : [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.04),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+        ),
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Row Header: Date & Badges
+            Row(
+              children: [
+                // Day name & date
+                Text(
+                  DateFormat('EEEE, MMM d').format(day),
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: isToday
+                        ? (isDark ? DesignTokens.accentDark : DesignTokens.accentLight)
+                        : inkColor,
+                  ),
+                ),
+                if (isToday) ...[
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: (isDark ? DesignTokens.accentDark : DesignTokens.accentLight).withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      'Today',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: isDark ? DesignTokens.accentDark : DesignTokens.accentLight,
+                      ),
+                    ),
+                  ),
+                ],
+                const Spacer(),
+
+                // Badges: Location & Cycle
+                if (filter.showLocation && dayData?.overlayColor != null) ...[
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: dayData!.overlayColor!.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.location_on, size: 12, color: dayData!.overlayColor),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Location',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: dayData!.overlayColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                ],
+
+                if (isPeriod) ...[
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: DesignTokens.rose.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Text(
+                      '🩸 Period',
+                      style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: DesignTokens.rose),
+                    ),
+                  ),
+                ] else if (isPredictedPeriod) ...[
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: DesignTokens.roseSoft.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Text(
+                      '🌸 Est. Period',
+                      style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: DesignTokens.rose),
+                    ),
+                  ),
+                ] else if (isOvulation) ...[
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: DesignTokens.dustyBlueSoft.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Text(
+                      '🥚 Ovulation',
+                      style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: DesignTokens.dustyBlue),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+            const SizedBox(height: 10),
+
+            // Content Rows
+            // 1. Events list (up to 3)
+            if (events.isNotEmpty) ...[
+              ...events.take(3).map((occ) {
+                final startFmt = occ.event.startTime != null && occ.event.startTime!.isNotEmpty
+                    ? occ.event.startTime!
+                    : 'All day';
+                final color = AppColors.forTagName(occ.event.category ?? 'social');
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 8,
+                        height: 8,
+                        decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        startFmt,
+                        style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: softInk),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          occ.event.title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(fontSize: 12, color: inkColor),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }),
+            ],
+
+            // 2. Gym / Fitness
+            if (filter.showGym && gymSession != null) ...[
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  Icon(
+                    gymSession.status == 'done' ? Icons.check_circle : Icons.fitness_center,
+                    size: 14,
+                    color: gymSession.status == 'done' ? Colors.green : DesignTokens.dustyBlue,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    gymSession.status == 'done'
+                        ? 'Workout Done (${gymSession.durationMin ?? 45} min)'
+                        : 'Workout Planned',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: gymSession.status == 'done' ? Colors.green : DesignTokens.dustyBlue,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+
+            // 3. Summary indicators row (Meals, Tasks, Finance)
+            if ((filter.showMeals && (dayData?.mealDots ?? 0) > 0) ||
+                (filter.showTasks && (dayData?.dueDots ?? 0) > 0) ||
+                (filter.showFinance && (dayData?.financeDots ?? 0) > 0)) ...[
+              const SizedBox(height: 6),
+              Wrap(
+                spacing: 12,
+                children: [
+                  if (filter.showMeals && (dayData?.mealDots ?? 0) > 0)
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.restaurant, size: 12, color: DesignTokens.peach),
+                        const SizedBox(width: 4),
+                        Text('${dayData!.mealDots} meals', style: TextStyle(fontSize: 11, color: softInk)),
+                      ],
+                    ),
+                  if (filter.showTasks && (dayData?.dueDots ?? 0) > 0)
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.task_alt, size: 12, color: DesignTokens.lavender),
+                        const SizedBox(width: 4),
+                        Text('${dayData!.dueDots} tasks due', style: TextStyle(fontSize: 11, color: softInk)),
+                      ],
+                    ),
+                  if (filter.showFinance && (dayData?.financeDots ?? 0) > 0)
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.account_balance_wallet_outlined, size: 12, color: DesignTokens.sage),
+                        const SizedBox(width: 4),
+                        Text('${dayData!.financeDots} finance', style: TextStyle(fontSize: 11, color: softInk)),
+                      ],
+                    ),
+                ],
+              ),
+            ],
+
+            // 4. If nothing scheduled
+            if (events.isEmpty &&
+                gymSession == null &&
+                (dayData?.mealDots ?? 0) == 0 &&
+                (dayData?.dueDots ?? 0) == 0 &&
+                (dayData?.financeDots ?? 0) == 0) ...[
+              const SizedBox(height: 2),
+              Text(
+                'No events or tasks scheduled',
+                style: TextStyle(fontSize: 11, fontStyle: FontStyle.italic, color: softInk),
+              ),
+            ],
+          ],
+        ),
+      ),
     );
   }
 }
