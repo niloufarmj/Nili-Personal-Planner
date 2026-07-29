@@ -68,7 +68,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? e]) : super(e ?? connect());
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -90,6 +90,9 @@ class AppDatabase extends _$AppDatabase {
       }
       if (from < 6) {
         await m.createTable(sportActivities);
+      }
+      if (from < 7) {
+        await m.addColumn(recipes, recipes.proteinGrams);
       }
     },
   );

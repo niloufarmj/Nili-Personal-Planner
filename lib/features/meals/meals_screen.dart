@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -518,16 +519,36 @@ class RecipesScreen extends ConsumerWidget {
               hint: 'Tap + to add your first recipe',
             );
           }
-          return ListView.builder(
+          return ListView.separated(
             padding: const EdgeInsets.all(16),
             itemCount: recipes.length,
+            separatorBuilder: (_, __) => const SizedBox(height: 8),
             itemBuilder: (_, i) {
               final r = recipes[i];
+              final hasImage = r.image != null && File(r.image!).existsSync();
+              final proteinStr = r.proteinGrams != null ? '🥩 ${r.proteinGrams}g protein  ' : '';
+              final tagsStr = r.tags.isNotEmpty ? '· ${r.tags.take(3).join(', ')}' : '';
+
               return AppCard(
                 child: ListTile(
-                  title: Text(r.name),
+                  leading: ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: Container(
+                      width: 50,
+                      height: 50,
+                      color: DesignTokens.lineLight.withValues(alpha: 0.3),
+                      child: hasImage
+                          ? Image.file(File(r.image!), fit: BoxFit.cover)
+                          : const Icon(Icons.restaurant_menu, color: DesignTokens.peach),
+                    ),
+                  ),
+                  title: Text(
+                    r.name,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
                   subtitle: Text(
-                    '${r.mealSlot} · ${r.tags.take(3).join(', ')}',
+                    '${r.mealSlot.toUpperCase()}  $proteinStr$tagsStr',
+                    style: const TextStyle(fontSize: 12),
                   ),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push('/recipe/${r.id}'),
