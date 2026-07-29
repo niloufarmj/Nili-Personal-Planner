@@ -4,72 +4,64 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/db/database.dart';
 import '../../core/db/repositories/day_repository.dart';
 import '../../core/design/design.dart';
+import 'groceries_service.dart';
 import 'meal_slot_repository.dart';
 import 'meal_suggester.dart';
 import 'recipe_repository.dart';
 import 'shopping_generator.dart';
 
-// ── Providers ─────────────────────────────────────────────────────────────────
-
-final _selectedWeekProvider = StateProvider<DateTime>((ref) {
-  final now = DateTime.now();
-  // Monday of the current week.
-  return _mondayOf(now);
-});
-
-final _weekSlotsProvider = StreamProvider.autoDispose
-    .family<List<MealSlot>, DateTime>((ref, week) {
-      return ref.watch(mealSlotRepositoryProvider).watchWeek(week);
-    });
-
-final _weekTagsProvider = FutureProvider.autoDispose
-    .family<Map<String, List<Tag>>, DateTime>((ref, week) {
-      final dayRepo = ref.watch(dayRepositoryProvider);
-      final end = week.add(const Duration(days: 6));
-      return dayRepo.watchTagsForRange(week, end).first;
-    });
-
-// ── MealsScreen ───────────────────────────────────────────────────────────────
-
-class MealsScreen extends ConsumerWidget {
+class MealsScreen extends ConsumerStatefulWidget {
   const MealsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final selectedWeek = ref.watch(_selectedWeekProvider);
-    final slotsAsync = ref.watch(_weekSlotsProvider(selectedWeek));
+  ConsumerState<MealsScreen> createState() => _MealsScreenState();
+}
+
+class _MealsScreenState extends ConsumerState<MealsScreen> {
+  late DateTime _weekStart;
+
+  @override
+  void initState() {
+    super.initState();
+    _weekStart = _mondayOf(DateTime.now());
+  }
+
+  void _prevWeek() => setState(() {
+        _weekStart = _weekStart.subtract(const Duration(days: 7));
+      });
+
+  void _nextWeek() => setState(() {
+        _weekStart = _weekStart.add(const Duration(days: 7));
+      });
+
+  @override
+  Widget build(BuildContext context) {
+    final slotsAsync = ref.watch(_weekSlotsProvider(_weekStart));
+    final recipesAsync = ref.watch(_recipesProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          'Meals — week of ${_fmt(selectedWeek)}',
-          style: GoogleFonts.fraunces(
-            fontSize: DesignTokens.fontTitle,
-            fontWeight: FontWeight.w600,
-            color: isDark ? DesignTokens.inkDark : DesignTokens.inkLight,
-          ),
-        ),
+        title: const Text('Meals'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.chevron_left),
-            onPressed: () => ref.read(_selectedWeekProvider.notifier).state =
-                selectedWeek.subtract(const Duration(days: 7)),
+            icon: const Icon(Icons.shopping_bag_outlined),
+            tooltip: 'Groceries List (Lists tab)',
+            onPressed: () async {
+              final col = await ref
+                  .read(groceriesServiceProvider)
+                  .getOrCreateGroceriesCollection();
+              if (context.mounted) {
+                context.push('/collection/${col.id}');
+              }
+            },
           ),
           IconButton(
-            icon: const Icon(Icons.chevron_right),
-            onPressed: () => ref.read(_selectedWeekProvider.notifier).state =
-                selectedWeek.add(const Duration(days: 7)),
-          ),
-          IconButton(
-            icon: const Icon(Icons.restaurant_menu),
+            icon: const Icon(Icons.menu_book),
             tooltip: 'Recipes',
             onPressed: () => context.push('/recipes'),
           ),
@@ -77,196 +69,175 @@ class MealsScreen extends ConsumerWidget {
       ),
       body: Column(
         children: [
+          _WeekHeader(
+            weekStart: _weekStart,
+            onPrev: _prevWeek,
+            onNext: _nextWeek,
+          ),
           Expanded(
             child: slotsAsync.when(
-              loading: () => const Center(
-                child: Padding(
-                  padding: EdgeInsets.all(24),
-                  child: ShimmerSkeleton(width: double.infinity, height: 300),
-                ),
-              ),
+              loading: () => const LinearProgressIndicator(minHeight: 2),
               error: (e, _) => Center(child: Text('Error: $e')),
-              data: (slots) => _WeekGrid(week: selectedWeek, slots: slots),
+              data: (slotMap) {
+                final recipes = recipesAsync.value ?? [];
+                return _MealGrid(
+                  weekStart: _weekStart,
+                  slotMap: slotMap,
+                  recipes: recipes,
+                );
+              },
             ),
           ),
-          _BottomActions(week: selectedWeek),
+          _BottomActions(week: _weekStart),
         ],
       ),
     );
   }
-
-  static String _fmt(DateTime d) => DateFormat('d MMM').format(d);
 }
 
-// ── Week grid ─────────────────────────────────────────────────────────────────
+// ── Week Header ───────────────────────────────────────────────────────────────
 
-class _WeekGrid extends ConsumerWidget {
-  const _WeekGrid({required this.week, required this.slots});
-  final DateTime week;
-  final List<MealSlot> slots;
+class _WeekHeader extends StatelessWidget {
+  const _WeekHeader({
+    required this.weekStart,
+    required this.onPrev,
+    required this.onNext,
+  });
 
-  static const _allSlots = ['breakfast', 'lunch', 'dinner', 'post-gym-shake'];
+  final DateTime weekStart;
+  final VoidCallback onPrev;
+  final VoidCallback onNext;
+
+  @override
+  Widget build(BuildContext context) {
+    final end = weekStart.add(const Duration(days: 6));
+    final fmt = DateFormat('d MMM');
+    final label = '${fmt.format(weekStart)} – ${fmt.format(end)}';
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          IconButton(
+            icon: const Icon(Icons.chevron_left),
+            onPressed: onPrev,
+          ),
+          Text(
+            label,
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+          ),
+          IconButton(
+            icon: const Icon(Icons.chevron_right),
+            onPressed: onNext,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Grid ──────────────────────────────────────────────────────────────────────
+
+class _MealGrid extends ConsumerWidget {
+  const _MealGrid({
+    required this.weekStart,
+    required this.slotMap,
+    required this.recipes,
+  });
+
+  final DateTime weekStart;
+
+  /// dateStr -> (slotStr -> MealSlot)
+  final Map<String, Map<String, MealSlot>> slotMap;
+  final List<Recipe> recipes;
+
+  static const _slots = ['breakfast', 'lunch', 'dinner', 'post-gym-shake'];
+
+  static const _dayLabels = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final tagsAsync = ref.watch(_weekTagsProvider(week));
-    final slotMap = {for (final s in slots) '${s.date}:${s.slot}': s};
-    final days = List.generate(7, (i) => week.add(Duration(days: i)));
-    final dayFmt = DateFormat('EEE\nd');
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final dates = List.generate(
+      7,
+      (i) => _dateStr(weekStart.add(Duration(days: i))),
+    );
 
-    return tagsAsync.when(
-      loading: () => const Center(
-        child: Padding(
-          padding: EdgeInsets.all(24),
-          child: ShimmerSkeleton(width: double.infinity, height: 300),
-        ),
-      ),
-      error: (e, _) => Center(child: Text('Error: $e')),
-      data: (tagsByDate) {
-        return SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: Table(
-                defaultColumnWidth: const IntrinsicColumnWidth(),
-                children: [
-                  // Header row
-                  TableRow(
-                    decoration: BoxDecoration(
-                      color: isDark
-                          ? DesignTokens.lineDark
-                          : DesignTokens.lineLight,
-                      borderRadius: const BorderRadius.vertical(
-                        top: Radius.circular(12),
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: SingleChildScrollView(
+        child: Table(
+          defaultColumnWidth: const FixedColumnWidth(88),
+          children: [
+            // Row 0: Day headers
+            TableRow(
+              children: [
+                const _Cell(child: Text('Slot')),
+                ...dates.asMap().entries.map((e) {
+                  final dayNum = weekStart
+                      .add(Duration(days: e.key))
+                      .day
+                      .toString();
+                  return _Cell(
+                    child: Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            _dayLabels[e.key],
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          Text(
+                            dayNum,
+                            style: Theme.of(context).textTheme.labelSmall,
+                          ),
+                        ],
                       ),
                     ),
-                    children: [
-                      const _Cell(child: SizedBox(width: 80)),
-                      ...days.map((d) {
-                        final dateStr = _dateStr(d);
-                        final tags = tagsByDate[dateStr] ?? [];
-                        final tagColors = tags
-                            .map((t) => AppColors.forTagName(t.name))
-                            .toList();
-
-                        return Container(
-                          decoration: DayWashDecoration(
-                            tagColors: tagColors,
-                            isDark: isDark,
-                          ),
-                          child: _Cell(
-                            child: Column(
-                              children: [
-                                Text(
-                                  dayFmt.format(d),
-                                  textAlign: TextAlign.center,
-                                  style: Theme.of(context).textTheme.labelSmall
-                                      ?.copyWith(
-                                        fontWeight: FontWeight.w600,
-                                        color: isDark
-                                            ? DesignTokens.inkDark
-                                            : DesignTokens.inkLight,
-                                      ),
-                                ),
-                                if (tags.isNotEmpty)
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 4.0),
-                                    child: Wrap(
-                                      children: tags
-                                          .map(
-                                            (t) => Padding(
-                                              padding: const EdgeInsets.only(
-                                                right: 2,
-                                              ),
-                                              child: Icon(
-                                                Icons.circle,
-                                                size: 6,
-                                                color: _tagColor(t.name),
-                                              ),
-                                            ),
-                                          )
-                                          .toList(),
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          ),
-                        );
-                      }),
-                    ],
-                  ),
-                  // One row per slot
-                  ..._allSlots.map(
-                    (slot) => TableRow(
-                      children: [
-                        _Cell(
-                          child: Text(
-                            _slotLabel(slot),
-                            style: Theme.of(context).textTheme.labelSmall
-                                ?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                  color: isDark
-                                      ? DesignTokens.inkSoftDark
-                                      : DesignTokens.inkSoftLight,
-                                ),
-                          ),
-                        ),
-                        ...days.map((d) {
-                          final dateStr = _dateStr(d);
-                          final key = '$dateStr:$slot';
-                          final mealSlot = slotMap[key];
-                          final tags = tagsByDate[dateStr] ?? [];
-                          final tagColors = tags
-                              .map((t) => AppColors.forTagName(t.name))
-                              .toList();
-
-                          return Container(
-                            decoration: DayWashDecoration(
-                              tagColors: tagColors,
-                              isDark: isDark,
-                            ),
-                            child: _MealCell(
-                              date: dateStr,
-                              slot: slot,
-                              mealSlot: mealSlot,
-                            ),
-                          );
-                        }),
-                      ],
+                  );
+                }),
+              ],
+            ),
+            // Rows 1-4: Slots
+            ..._slots.map(
+              (slotStr) => TableRow(
+                children: [
+                  _Cell(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Text(
+                        _slotLabel(slotStr),
+                        style: Theme.of(context).textTheme.labelSmall,
+                      ),
                     ),
                   ),
+                  ...dates.map((dateStr) {
+                    final mealSlot = slotMap[dateStr]?[slotStr];
+                    return _MealCell(
+                      date: dateStr,
+                      slot: slotStr,
+                      mealSlot: mealSlot,
+                    );
+                  }),
                 ],
               ),
             ),
-          ),
-        );
-      },
+          ],
+        ),
+      ),
     );
   }
 
-  static Color _tagColor(String name) {
-    return switch (name) {
-      'travel' => const Color(0xFF3EBF6F),
-      'gym' => const Color(0xFFEF6C00),
-      'work' => const Color(0xFF1565C0),
-      _ => const Color(0xFF9E9E9E),
-    };
-  }
-
   static String _slotLabel(String s) => switch (s) {
-    'breakfast' => 'Breakfast',
+    'breakfast' => 'Brkfast',
     'lunch' => 'Lunch',
     'dinner' => 'Dinner',
     'post-gym-shake' => 'Shake',
     _ => s,
   };
-
-  static String _dateStr(DateTime d) =>
-      '${d.year.toString().padLeft(4, '0')}-'
-      '${d.month.toString().padLeft(2, '0')}-'
-      '${d.day.toString().padLeft(2, '0')}';
 }
 
 class _Cell extends StatelessWidget {
@@ -319,41 +290,179 @@ class _MealCell extends ConsumerWidget {
 
   void _showSlotActions(BuildContext context, WidgetRef ref) {
     final slotRepo = ref.read(mealSlotRepositoryProvider);
+    final recipeRepo = ref.read(recipeRepositoryProvider);
+    final groceriesService = ref.read(groceriesServiceProvider);
+
     showModalBottomSheet<void>(
       context: context,
-      builder: (_) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (mealSlot?.status == 'accepted' ||
-                mealSlot?.status == 'suggested') ...[
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.symmetric(vertical: 12),
+                decoration: BoxDecoration(
+                  color: Colors.grey.withValues(alpha: 0.4),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Text(
+                  '${slot.toUpperCase()} · $date',
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+              ),
+              const Divider(),
               ListTile(
-                leading: const Icon(Icons.check),
-                title: const Text('Mark eaten'),
+                leading: const Icon(Icons.restaurant_menu),
+                title: Text(mealSlot?.recipeId != null ? 'Change Recipe' : 'Assign Recipe'),
                 onTap: () async {
-                  Navigator.pop(context);
-                  await slotRepo.updateStatus(date, slot, 'eaten');
+                  Navigator.pop(ctx);
+                  final recipes = await recipeRepo.getAll();
+                  if (!context.mounted) return;
+
+                  showModalBottomSheet<void>(
+                    context: context,
+                    builder: (sheetCtx) => ListView.builder(
+                      itemCount: recipes.length,
+                      itemBuilder: (_, i) {
+                        final r = recipes[i];
+                        return ListTile(
+                          title: Text(r.name),
+                          subtitle: Text(r.mealSlot.toUpperCase()),
+                          onTap: () async {
+                            Navigator.pop(sheetCtx);
+                            await slotRepo.upsert(
+                              date: date,
+                              slot: slot,
+                              recipeId: r.id,
+                              status: 'accepted',
+                            );
+
+                            final missing = await groceriesService.getMissingIngredientsForRecipe(r.id);
+                            if (missing.isNotEmpty) {
+                              await groceriesService.ensureMissingIngredientsInGroceriesList(missing);
+                              if (context.mounted) {
+                                final missingNames = missing.join(', ');
+                                final col = await groceriesService.getOrCreateGroceriesCollection();
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Planned "${r.name}"! 🛒 Need to buy: $missingNames'),
+                                    action: SnackBarAction(
+                                      label: 'Groceries List',
+                                      onPressed: () => context.push('/collection/${col.id}'),
+                                    ),
+                                  ),
+                                );
+                              }
+                            }
+                          },
+                        );
+                      },
+                    ),
+                  );
                 },
               ),
-              ListTile(
-                leading: const Icon(Icons.skip_next),
-                title: const Text('Mark skipped'),
-                onTap: () async {
-                  Navigator.pop(context);
-                  await slotRepo.updateStatus(date, slot, 'skipped');
-                },
-              ),
+              if (mealSlot?.recipeId != null)
+                ListTile(
+                  leading: const Icon(Icons.shopping_bag_outlined, color: Colors.orange),
+                  title: const Text('View Missing Ingredients'),
+                  onTap: () async {
+                    Navigator.pop(ctx);
+                    final missing = await groceriesService.getMissingIngredientsForRecipe(mealSlot!.recipeId!);
+                    if (context.mounted) {
+                      _showMissingDialog(context, ref, mealSlot!.recipeId!, missing);
+                    }
+                  },
+                ),
+              if (mealSlot?.status == 'accepted' ||
+                  mealSlot?.status == 'suggested') ...[
+                ListTile(
+                  leading: const Icon(Icons.check, color: Colors.green),
+                  title: const Text('Mark eaten'),
+                  onTap: () async {
+                    Navigator.pop(ctx);
+                    await slotRepo.updateStatus(date, slot, 'eaten');
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.skip_next, color: Colors.grey),
+                  title: const Text('Mark skipped'),
+                  onTap: () async {
+                    Navigator.pop(ctx);
+                    await slotRepo.updateStatus(date, slot, 'skipped');
+                  },
+                ),
+              ],
+              if (mealSlot != null)
+                ListTile(
+                  leading: const Icon(Icons.delete_outline, color: Colors.red),
+                  title: const Text('Clear slot'),
+                  onTap: () async {
+                    Navigator.pop(ctx);
+                    await slotRepo.delete(date, slot);
+                  },
+                ),
             ],
-            ListTile(
-              leading: const Icon(Icons.delete_outline),
-              title: const Text('Clear slot'),
-              onTap: () async {
-                Navigator.pop(context);
-                await slotRepo.delete(date, slot);
-              },
-            ),
-          ],
+          ),
         ),
+      ),
+    );
+  }
+
+  void _showMissingDialog(BuildContext context, WidgetRef ref, int recipeId, List<String> missing) {
+    final groceriesService = ref.read(groceriesServiceProvider);
+
+    showDialog(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        title: const Text('Missing Ingredients'),
+        content: missing.isEmpty
+            ? const Text('All ingredients for this meal are checked off in your Groceries List! 🎉')
+            : SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: missing
+                      .map(
+                        (name) => ListTile(
+                          leading: const Icon(Icons.remove_shopping_cart, color: Colors.orange),
+                          title: Text(name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                          trailing: FilledButton.tonal(
+                            onPressed: () async {
+                              await groceriesService.toggleGroceryItemStock(name, true);
+                              if (dialogCtx.mounted) Navigator.pop(dialogCtx);
+                            },
+                            child: const Text('I Have It'),
+                          ),
+                        ),
+                      )
+                      .toList(),
+                ),
+              ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogCtx),
+            child: const Text('Close'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              Navigator.pop(dialogCtx);
+              final col = await groceriesService.getOrCreateGroceriesCollection();
+              if (context.mounted) {
+                context.push('/collection/${col.id}');
+              }
+            },
+            child: const Text('Go to Groceries List'),
+          ),
+        ],
       ),
     );
   }
@@ -374,14 +483,53 @@ class _RecipeName extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final recipeAsync = ref.watch(_recipeNameProvider(recipeId));
+    final missingAsync = ref.watch(_missingIngredientsProvider(recipeId));
+    final missingNames = missingAsync.value ?? [];
+
     return recipeAsync.when(
       loading: () => const SizedBox.shrink(),
       error: (_, _) => const Text('?'),
-      data: (name) => Text(
-        name ?? '?',
-        style: Theme.of(context).textTheme.labelSmall,
-        overflow: TextOverflow.ellipsis,
-        maxLines: 2,
+      data: (name) => Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            name ?? '?',
+            style: Theme.of(context).textTheme.labelSmall,
+            overflow: TextOverflow.ellipsis,
+            maxLines: 2,
+          ),
+          if (missingNames.isNotEmpty) ...[
+            const SizedBox(height: 2),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+              decoration: BoxDecoration(
+                color: Colors.red.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(4),
+                border: Border.all(color: Colors.redAccent.withValues(alpha: 0.5), width: 0.5),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.error_outline, size: 10, color: Colors.redAccent),
+                  const SizedBox(width: 2),
+                  Expanded(
+                    child: Text(
+                      'Need: ${missingNames.join(", ")}',
+                      style: const TextStyle(
+                        fontSize: 9,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.redAccent,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }
@@ -393,6 +541,13 @@ final _recipeNameProvider = FutureProvider.autoDispose.family<String?, int>((
 ) async {
   final r = await ref.watch(recipeRepositoryProvider).getById(id);
   return r?.name;
+});
+
+final _missingIngredientsProvider =
+    FutureProvider.autoDispose.family<List<String>, int>((ref, recipeId) async {
+  return ref
+      .watch(groceriesServiceProvider)
+      .getMissingIngredientsForRecipe(recipeId);
 });
 
 // ── Bottom actions ────────────────────────────────────────────────────────────
@@ -433,6 +588,7 @@ class _BottomActions extends ConsumerWidget {
     final recipeRepo = ref.read(recipeRepositoryProvider);
     final dayRepo = ref.read(dayRepositoryProvider);
     final slotRepo = ref.read(mealSlotRepositoryProvider);
+    final groceriesService = ref.read(groceriesServiceProvider);
 
     final pool = await recipeRepo.getAll();
     final end = week.add(const Duration(days: 6));
@@ -455,6 +611,7 @@ class _BottomActions extends ConsumerWidget {
       random: Random(),
     ).suggest(week: weekContexts, pool: pool, recentHistory: history);
 
+    final allMissing = <String>{};
     for (final entry in suggestions.entries) {
       for (final slotEntry in entry.value.entries) {
         if (!slotEntry.value.noMatch && slotEntry.value.recipe != null) {
@@ -464,14 +621,40 @@ class _BottomActions extends ConsumerWidget {
             recipeId: slotEntry.value.recipe!.id,
             status: 'suggested',
           );
+          final missing = await groceriesService
+              .getMissingIngredientsForRecipe(slotEntry.value.recipe!.id);
+          allMissing.addAll(missing);
         }
       }
     }
 
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Week suggestions generated!')),
+    if (allMissing.isNotEmpty) {
+      await groceriesService.ensureMissingIngredientsInGroceriesList(
+        allMissing.toList(),
       );
+    }
+
+    if (context.mounted) {
+      if (allMissing.isNotEmpty) {
+        final col = await groceriesService.getOrCreateGroceriesCollection();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Week suggested! 🛒 Added missing ingredients to Groceries list: ${allMissing.take(3).join(", ")}${allMissing.length > 3 ? "..." : ""}',
+            ),
+            action: SnackBarAction(
+              label: 'Groceries List',
+              onPressed: () => context.push('/collection/${col.id}'),
+            ),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Week suggestions generated! All ingredients in stock 🎉'),
+          ),
+        );
+      }
     }
   }
 
@@ -488,12 +671,29 @@ class _BottomActions extends ConsumerWidget {
   }
 
   static String _dateStr(DateTime d) =>
-      '${d.year.toString().padLeft(4, '0')}-'
-      '${d.month.toString().padLeft(2, '0')}-'
-      '${d.day.toString().padLeft(2, '0')}';
+      '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
 }
 
-// ── Recipes list screen ───────────────────────────────────────────────────────
+// ── Providers ─────────────────────────────────────────────────────────────────
+
+final _weekSlotsProvider = StreamProvider.autoDispose
+    .family<Map<String, Map<String, MealSlot>>, DateTime>((ref, week) {
+  final repo = ref.watch(mealSlotRepositoryProvider);
+  return repo.watchWeek(week).map((slots) {
+    final map = <String, Map<String, MealSlot>>{};
+    for (final s in slots) {
+      (map[s.date] ??= {})[s.slot] = s;
+    }
+    return map;
+  });
+});
+
+final _recipesProvider = StreamProvider.autoDispose<List<Recipe>>((ref) {
+  final repo = ref.watch(recipeRepositoryProvider);
+  return repo.watchAll();
+});
+
+// ── Recipes sub-screen ────────────────────────────────────────────────────────
 
 class RecipesScreen extends ConsumerWidget {
   const RecipesScreen({super.key});
@@ -506,9 +706,16 @@ class RecipesScreen extends ConsumerWidget {
         title: const Text('Recipes'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.kitchen_outlined),
-            tooltip: 'Ingredients Catalog',
-            onPressed: () => context.push('/ingredients'),
+            icon: const Icon(Icons.shopping_bag_outlined),
+            tooltip: 'Groceries List (Lists tab)',
+            onPressed: () async {
+              final col = await ref
+                  .read(groceriesServiceProvider)
+                  .getOrCreateGroceriesCollection();
+              if (context.mounted) {
+                context.push('/collection/${col.id}');
+              }
+            },
           ),
         ],
       ),
@@ -535,8 +742,10 @@ class RecipesScreen extends ConsumerWidget {
             itemBuilder: (_, i) {
               final r = recipes[i];
               final hasImage = r.image != null && File(r.image!).existsSync();
-              final proteinStr = r.proteinGrams != null ? '🥩 ${r.proteinGrams}g protein  ' : '';
-              final tagsStr = r.tags.isNotEmpty ? '· ${r.tags.take(3).join(', ')}' : '';
+              final proteinStr =
+                  r.proteinGrams != null ? '🥩 ${r.proteinGrams}g protein  ' : '';
+              final tagsStr =
+                  r.tags.isNotEmpty ? '· ${r.tags.take(3).join(', ')}' : '';
 
               return AppCard(
                 child: ListTile(
@@ -548,7 +757,10 @@ class RecipesScreen extends ConsumerWidget {
                       color: DesignTokens.lineLight.withValues(alpha: 0.3),
                       child: hasImage
                           ? Image.file(File(r.image!), fit: BoxFit.cover)
-                          : const Icon(Icons.restaurant_menu, color: DesignTokens.peach),
+                          : const Icon(
+                              Icons.restaurant_menu,
+                              color: DesignTokens.peach,
+                            ),
                     ),
                   ),
                   title: Text(
@@ -578,5 +790,9 @@ final _allRecipesProvider = StreamProvider.autoDispose<List<Recipe>>(
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 DateTime _mondayOf(DateTime d) {
-  return d.subtract(Duration(days: d.weekday - 1));
+  final clean = DateTime(d.year, d.month, d.day);
+  return clean.subtract(Duration(days: clean.weekday - 1));
 }
+
+String _dateStr(DateTime d) =>
+    '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';

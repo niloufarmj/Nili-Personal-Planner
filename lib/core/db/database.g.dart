@@ -5816,6 +5816,21 @@ class $IngredientsTable extends Ingredients
     type: DriftSqlType.double,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _inStockMeta = const VerificationMeta(
+    'inStock',
+  );
+  @override
+  late final GeneratedColumn<bool> inStock = GeneratedColumn<bool>(
+    'in_stock',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("in_stock" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -5823,6 +5838,7 @@ class $IngredientsTable extends Ingredients
     category,
     kcalPer100g,
     proteinPer100g,
+    inStock,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -5871,6 +5887,12 @@ class $IngredientsTable extends Ingredients
         ),
       );
     }
+    if (data.containsKey('in_stock')) {
+      context.handle(
+        _inStockMeta,
+        inStock.isAcceptableOrUnknown(data['in_stock']!, _inStockMeta),
+      );
+    }
     return context;
   }
 
@@ -5900,6 +5922,10 @@ class $IngredientsTable extends Ingredients
         DriftSqlType.double,
         data['${effectivePrefix}protein_per100g'],
       ),
+      inStock: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}in_stock'],
+      )!,
     );
   }
 
@@ -5915,12 +5941,14 @@ class Ingredient extends DataClass implements Insertable<Ingredient> {
   final String? category;
   final double? kcalPer100g;
   final double? proteinPer100g;
+  final bool inStock;
   const Ingredient({
     required this.id,
     required this.name,
     this.category,
     this.kcalPer100g,
     this.proteinPer100g,
+    required this.inStock,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -5936,6 +5964,7 @@ class Ingredient extends DataClass implements Insertable<Ingredient> {
     if (!nullToAbsent || proteinPer100g != null) {
       map['protein_per100g'] = Variable<double>(proteinPer100g);
     }
+    map['in_stock'] = Variable<bool>(inStock);
     return map;
   }
 
@@ -5952,6 +5981,7 @@ class Ingredient extends DataClass implements Insertable<Ingredient> {
       proteinPer100g: proteinPer100g == null && nullToAbsent
           ? const Value.absent()
           : Value(proteinPer100g),
+      inStock: Value(inStock),
     );
   }
 
@@ -5966,6 +5996,7 @@ class Ingredient extends DataClass implements Insertable<Ingredient> {
       category: serializer.fromJson<String?>(json['category']),
       kcalPer100g: serializer.fromJson<double?>(json['kcalPer100g']),
       proteinPer100g: serializer.fromJson<double?>(json['proteinPer100g']),
+      inStock: serializer.fromJson<bool>(json['inStock']),
     );
   }
   @override
@@ -5977,6 +6008,7 @@ class Ingredient extends DataClass implements Insertable<Ingredient> {
       'category': serializer.toJson<String?>(category),
       'kcalPer100g': serializer.toJson<double?>(kcalPer100g),
       'proteinPer100g': serializer.toJson<double?>(proteinPer100g),
+      'inStock': serializer.toJson<bool>(inStock),
     };
   }
 
@@ -5986,6 +6018,7 @@ class Ingredient extends DataClass implements Insertable<Ingredient> {
     Value<String?> category = const Value.absent(),
     Value<double?> kcalPer100g = const Value.absent(),
     Value<double?> proteinPer100g = const Value.absent(),
+    bool? inStock,
   }) => Ingredient(
     id: id ?? this.id,
     name: name ?? this.name,
@@ -5994,6 +6027,7 @@ class Ingredient extends DataClass implements Insertable<Ingredient> {
     proteinPer100g: proteinPer100g.present
         ? proteinPer100g.value
         : this.proteinPer100g,
+    inStock: inStock ?? this.inStock,
   );
   Ingredient copyWithCompanion(IngredientsCompanion data) {
     return Ingredient(
@@ -6006,6 +6040,7 @@ class Ingredient extends DataClass implements Insertable<Ingredient> {
       proteinPer100g: data.proteinPer100g.present
           ? data.proteinPer100g.value
           : this.proteinPer100g,
+      inStock: data.inStock.present ? data.inStock.value : this.inStock,
     );
   }
 
@@ -6016,14 +6051,15 @@ class Ingredient extends DataClass implements Insertable<Ingredient> {
           ..write('name: $name, ')
           ..write('category: $category, ')
           ..write('kcalPer100g: $kcalPer100g, ')
-          ..write('proteinPer100g: $proteinPer100g')
+          ..write('proteinPer100g: $proteinPer100g, ')
+          ..write('inStock: $inStock')
           ..write(')'))
         .toString();
   }
 
   @override
   int get hashCode =>
-      Object.hash(id, name, category, kcalPer100g, proteinPer100g);
+      Object.hash(id, name, category, kcalPer100g, proteinPer100g, inStock);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -6032,7 +6068,8 @@ class Ingredient extends DataClass implements Insertable<Ingredient> {
           other.name == this.name &&
           other.category == this.category &&
           other.kcalPer100g == this.kcalPer100g &&
-          other.proteinPer100g == this.proteinPer100g);
+          other.proteinPer100g == this.proteinPer100g &&
+          other.inStock == this.inStock);
 }
 
 class IngredientsCompanion extends UpdateCompanion<Ingredient> {
@@ -6041,12 +6078,14 @@ class IngredientsCompanion extends UpdateCompanion<Ingredient> {
   final Value<String?> category;
   final Value<double?> kcalPer100g;
   final Value<double?> proteinPer100g;
+  final Value<bool> inStock;
   const IngredientsCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
     this.category = const Value.absent(),
     this.kcalPer100g = const Value.absent(),
     this.proteinPer100g = const Value.absent(),
+    this.inStock = const Value.absent(),
   });
   IngredientsCompanion.insert({
     this.id = const Value.absent(),
@@ -6054,6 +6093,7 @@ class IngredientsCompanion extends UpdateCompanion<Ingredient> {
     this.category = const Value.absent(),
     this.kcalPer100g = const Value.absent(),
     this.proteinPer100g = const Value.absent(),
+    this.inStock = const Value.absent(),
   }) : name = Value(name);
   static Insertable<Ingredient> custom({
     Expression<int>? id,
@@ -6061,6 +6101,7 @@ class IngredientsCompanion extends UpdateCompanion<Ingredient> {
     Expression<String>? category,
     Expression<double>? kcalPer100g,
     Expression<double>? proteinPer100g,
+    Expression<bool>? inStock,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -6068,6 +6109,7 @@ class IngredientsCompanion extends UpdateCompanion<Ingredient> {
       if (category != null) 'category': category,
       if (kcalPer100g != null) 'kcal_per100g': kcalPer100g,
       if (proteinPer100g != null) 'protein_per100g': proteinPer100g,
+      if (inStock != null) 'in_stock': inStock,
     });
   }
 
@@ -6077,6 +6119,7 @@ class IngredientsCompanion extends UpdateCompanion<Ingredient> {
     Value<String?>? category,
     Value<double?>? kcalPer100g,
     Value<double?>? proteinPer100g,
+    Value<bool>? inStock,
   }) {
     return IngredientsCompanion(
       id: id ?? this.id,
@@ -6084,6 +6127,7 @@ class IngredientsCompanion extends UpdateCompanion<Ingredient> {
       category: category ?? this.category,
       kcalPer100g: kcalPer100g ?? this.kcalPer100g,
       proteinPer100g: proteinPer100g ?? this.proteinPer100g,
+      inStock: inStock ?? this.inStock,
     );
   }
 
@@ -6105,6 +6149,9 @@ class IngredientsCompanion extends UpdateCompanion<Ingredient> {
     if (proteinPer100g.present) {
       map['protein_per100g'] = Variable<double>(proteinPer100g.value);
     }
+    if (inStock.present) {
+      map['in_stock'] = Variable<bool>(inStock.value);
+    }
     return map;
   }
 
@@ -6115,7 +6162,8 @@ class IngredientsCompanion extends UpdateCompanion<Ingredient> {
           ..write('name: $name, ')
           ..write('category: $category, ')
           ..write('kcalPer100g: $kcalPer100g, ')
-          ..write('proteinPer100g: $proteinPer100g')
+          ..write('proteinPer100g: $proteinPer100g, ')
+          ..write('inStock: $inStock')
           ..write(')'))
         .toString();
   }
@@ -16726,6 +16774,7 @@ typedef $$IngredientsTableCreateCompanionBuilder =
       Value<String?> category,
       Value<double?> kcalPer100g,
       Value<double?> proteinPer100g,
+      Value<bool> inStock,
     });
 typedef $$IngredientsTableUpdateCompanionBuilder =
     IngredientsCompanion Function({
@@ -16734,6 +16783,7 @@ typedef $$IngredientsTableUpdateCompanionBuilder =
       Value<String?> category,
       Value<double?> kcalPer100g,
       Value<double?> proteinPer100g,
+      Value<bool> inStock,
     });
 
 final class $$IngredientsTableReferences
@@ -16799,6 +16849,11 @@ class $$IngredientsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<bool> get inStock => $composableBuilder(
+    column: $table.inStock,
+    builder: (column) => ColumnFilters(column),
+  );
+
   Expression<bool> recipeIngredientsRefs(
     Expression<bool> Function($$RecipeIngredientsTableFilterComposer f) f,
   ) {
@@ -16858,6 +16913,11 @@ class $$IngredientsTableOrderingComposer
     column: $table.proteinPer100g,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<bool> get inStock => $composableBuilder(
+    column: $table.inStock,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$IngredientsTableAnnotationComposer
@@ -16887,6 +16947,9 @@ class $$IngredientsTableAnnotationComposer
     column: $table.proteinPer100g,
     builder: (column) => column,
   );
+
+  GeneratedColumn<bool> get inStock =>
+      $composableBuilder(column: $table.inStock, builder: (column) => column);
 
   Expression<T> recipeIngredientsRefs<T extends Object>(
     Expression<T> Function($$RecipeIngredientsTableAnnotationComposer a) f,
@@ -16948,12 +17011,14 @@ class $$IngredientsTableTableManager
                 Value<String?> category = const Value.absent(),
                 Value<double?> kcalPer100g = const Value.absent(),
                 Value<double?> proteinPer100g = const Value.absent(),
+                Value<bool> inStock = const Value.absent(),
               }) => IngredientsCompanion(
                 id: id,
                 name: name,
                 category: category,
                 kcalPer100g: kcalPer100g,
                 proteinPer100g: proteinPer100g,
+                inStock: inStock,
               ),
           createCompanionCallback:
               ({
@@ -16962,12 +17027,14 @@ class $$IngredientsTableTableManager
                 Value<String?> category = const Value.absent(),
                 Value<double?> kcalPer100g = const Value.absent(),
                 Value<double?> proteinPer100g = const Value.absent(),
+                Value<bool> inStock = const Value.absent(),
               }) => IngredientsCompanion.insert(
                 id: id,
                 name: name,
                 category: category,
                 kcalPer100g: kcalPer100g,
                 proteinPer100g: proteinPer100g,
+                inStock: inStock,
               ),
           withReferenceMapper: (p0) => p0
               .map(

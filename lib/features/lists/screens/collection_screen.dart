@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import '../../../core/db/database.dart';
 import '../../../core/design/design.dart';
 import '../../finance/repositories/transaction_repository.dart';
+import '../../meals/groceries_service.dart';
 import '../repositories/collection_repository.dart';
 import '../repositories/item_repository.dart';
 import '../templates/template_registry.dart';
@@ -34,8 +35,38 @@ class CollectionScreen extends ConsumerWidget {
         }
         final template = TemplateRegistry.get(collection.template);
 
+        // Auto-sync ingredients if this is a shopping/groceries collection
+        if (collection.template == 'shopping') {
+          Future.microtask(
+            () => ref
+                .read(groceriesServiceProvider)
+                .syncAllIngredientsToGroceriesList(targetCollectionId: collection.id),
+          );
+        }
+
         return Scaffold(
-          appBar: AppBar(title: Text(collection.name)),
+          appBar: AppBar(
+            title: Text(collection.name),
+            actions: [
+              if (collection.template == 'shopping')
+                IconButton(
+                  icon: const Icon(Icons.sync),
+                  tooltip: 'Sync all ingredients to this list',
+                  onPressed: () async {
+                    await ref
+                        .read(groceriesServiceProvider)
+                        .syncAllIngredientsToGroceriesList(targetCollectionId: collection.id);
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Synced all catalog ingredients into Groceries list!'),
+                        ),
+                      );
+                    }
+                  },
+                ),
+            ],
+          ),
           floatingActionButton: FloatingActionButton(
             tooltip: 'Add item',
             onPressed: () => _openAddSheet(context, ref, collection, template),
@@ -49,11 +80,21 @@ class CollectionScreen extends ConsumerWidget {
                 return EmptyState(
                   icon: template.icon,
                   message: 'No items yet',
-                  hint:
-                      'Tap + to add your first ${template.label.toLowerCase()} item.',
-                  action: () =>
-                      _openAddSheet(context, ref, collection, template),
-                  actionLabel: 'Add item',
+                  hint: collection.template == 'shopping'
+                      ? 'Tap "Populate All Ingredients" or + to add items.'
+                      : 'Tap + to add your first ${template.label.toLowerCase()} item.',
+                  action: () async {
+                    if (collection.template == 'shopping') {
+                      await ref
+                          .read(groceriesServiceProvider)
+                          .syncAllIngredientsToGroceriesList(targetCollectionId: collection.id);
+                    } else {
+                      _openAddSheet(context, ref, collection, template);
+                    }
+                  },
+                  actionLabel: collection.template == 'shopping'
+                      ? 'Populate All Ingredients'
+                      : 'Add item',
                 );
               }
               return _ItemList(
@@ -225,7 +266,41 @@ class _ItemTileState extends ConsumerState<_ItemTile> {
                         spacing: 6,
                         runSpacing: 4,
                         children: [
-                          StatusChip(status: item.status, compact: true),
+                          if (template.id == 'shopping')
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: isDone
+                                    ? Colors.green.withValues(alpha: 0.15)
+                                    : Colors.orange.withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: isDone ? Colors.green : Colors.orange,
+                                  width: 0.5,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    isDone ? Icons.check_circle : Icons.remove_shopping_cart,
+                                    size: 10,
+                                    color: isDone ? Colors.green : Colors.orange,
+                                  ),
+                                  const SizedBox(width: 3),
+                                  Text(
+                                    isDone ? 'In Stock' : 'Need to buy',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                      color: isDone ? Colors.green : Colors.orange,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          else
+                            StatusChip(status: item.status, compact: true),
                           if (template.fields.priority && item.priority != null)
                             PriorityBadge(priority: item.priority!),
                           if (template.fields.dueDate && item.dueDate != null)

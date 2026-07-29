@@ -222,7 +222,7 @@ abstract final class AppTheme {
       ),
       labelMedium: GoogleFonts.nunitoSans(
         fontSize: DesignTokens.fontCaption - 1, // 12
-        fontWeight: FontWeight.w500,
+        fontWeight: FontWeight.w600,
         color: baseColor,
       ),
       labelSmall: GoogleFonts.nunitoSans(

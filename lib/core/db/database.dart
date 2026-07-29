@@ -68,7 +68,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? e]) : super(e ?? connect());
 
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 8;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -92,7 +92,18 @@ class AppDatabase extends _$AppDatabase {
         await m.createTable(sportActivities);
       }
       if (from < 7) {
-        await m.addColumn(recipes, recipes.proteinGrams);
+        try {
+          await m.addColumn(recipes, recipes.proteinGrams);
+        } catch (_) {
+          // Ignore if column already added
+        }
+      }
+      if (from < 8) {
+        try {
+          await m.addColumn(ingredients, ingredients.inStock);
+        } catch (_) {
+          // Ignore if column already added
+        }
       }
     },
   );

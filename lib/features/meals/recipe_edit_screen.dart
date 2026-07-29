@@ -514,7 +514,7 @@ class _IngredientRowWidgetState extends ConsumerState<_IngredientRowWidget> {
               onTap: () => _openIngredientPicker(context),
               borderRadius: BorderRadius.circular(12),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                 decoration: BoxDecoration(
                   color: isDark ? DesignTokens.surfaceDark : DesignTokens.lineLight.withValues(alpha: 0.25),
                   borderRadius: BorderRadius.circular(12),
@@ -530,7 +530,7 @@ class _IngredientRowWidgetState extends ConsumerState<_IngredientRowWidget> {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize: 14,
+                          fontSize: 13,
                           fontWeight: displayName != null ? FontWeight.w600 : FontWeight.normal,
                           color: displayName != null
                               ? (isDark ? DesignTokens.inkDark : DesignTokens.inkLight)
@@ -540,6 +540,7 @@ class _IngredientRowWidgetState extends ConsumerState<_IngredientRowWidget> {
                     ),
                     Icon(
                       Icons.arrow_drop_down,
+                      size: 20,
                       color: isDark ? DesignTokens.inkSoftDark : DesignTokens.inkSoftLight,
                     ),
                   ],
@@ -547,42 +548,69 @@ class _IngredientRowWidgetState extends ConsumerState<_IngredientRowWidget> {
               ),
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 6),
 
           // Amount TextField
           SizedBox(
-            width: 58,
+            width: 50,
             child: TextField(
               controller: _amtCtrl,
-              decoration: const InputDecoration(
+              style: const TextStyle(fontSize: 13),
+              decoration: InputDecoration(
                 hintText: 'Amt',
-                contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+                isDense: true,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide(
+                    color: isDark ? DesignTokens.lineDark : DesignTokens.lineLight,
+                  ),
+                ),
               ),
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
             ),
           ),
           const SizedBox(width: 6),
 
-          // Unit Dropdown
-          SizedBox(
-            width: 78,
-            child: DropdownButtonFormField<String>(
-              value: _availableUnits.contains(widget.row.unit) ? widget.row.unit : 'g',
-              decoration: const InputDecoration(
-                contentPadding: EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+          // Unit Compact Dropdown
+          Container(
+            width: 66,
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            decoration: BoxDecoration(
+              color: isDark ? DesignTokens.surfaceDark : DesignTokens.lineLight.withValues(alpha: 0.25),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: isDark ? DesignTokens.lineDark : DesignTokens.lineLight,
               ),
-              items: _availableUnits
-                  .map((u) => DropdownMenuItem(value: u, child: Text(u)))
-                  .toList(),
-              onChanged: (v) {
-                if (v != null) {
-                  widget.onChanged(widget.row.copyWith(unit: v));
-                }
-              },
+            ),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                value: _availableUnits.contains(widget.row.unit) ? widget.row.unit : 'g',
+                isDense: true,
+                isExpanded: true,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? DesignTokens.inkDark : DesignTokens.inkLight,
+                ),
+                items: _availableUnits
+                    .map((u) => DropdownMenuItem(value: u, child: Text(u)))
+                    .toList(),
+                onChanged: (v) {
+                  if (v != null) {
+                    widget.onChanged(widget.row.copyWith(unit: v));
+                  }
+                },
+              ),
             ),
           ),
+          const SizedBox(width: 4),
+
+          // Compact Delete Icon Button
           IconButton(
-            icon: const Icon(Icons.delete_outline, size: 20),
+            icon: const Icon(Icons.delete_outline, size: 18, color: Colors.redAccent),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
             onPressed: widget.onDelete,
           ),
         ],

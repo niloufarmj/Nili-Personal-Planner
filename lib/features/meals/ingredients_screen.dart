@@ -48,16 +48,17 @@ class _IngredientsScreenState extends ConsumerState<IngredientsScreen> {
       appBar: AppBar(
         title: const Text('Ingredients Catalog'),
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
         heroTag: 'add_ingredient_fab',
         onPressed: () => _showAddEditDialog(context),
-        child: const Icon(Icons.add),
+        icon: const Icon(Icons.add),
+        label: const Text('Add Ingredient'),
       ),
       body: Column(
         children: [
-          // Search & Category Bar
+          // Search Bar
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
@@ -104,7 +105,7 @@ class _IngredientsScreenState extends ConsumerState<IngredientsScreen> {
               }).toList(),
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 4),
 
           Expanded(
             child: ingredientsAsync.when(
@@ -124,8 +125,8 @@ class _IngredientsScreenState extends ConsumerState<IngredientsScreen> {
                     icon: Icons.kitchen_outlined,
                     message: _searchQuery.isNotEmpty
                         ? 'No ingredient found matching "$_searchQuery"'
-                        : 'No ingredients in catalogue',
-                    hint: 'Tap + to add a new ingredient',
+                        : 'No ingredients in catalog',
+                    hint: 'Tap + Add Ingredient to create one',
                   );
                 }
 
@@ -167,7 +168,10 @@ class _IngredientsScreenState extends ConsumerState<IngredientsScreen> {
                           },
                           itemBuilder: (_) => const [
                             PopupMenuItem(value: 'edit', child: Text('Edit')),
-                            PopupMenuItem(value: 'delete', child: Text('Delete', style: TextStyle(color: Colors.red))),
+                            PopupMenuItem(
+                              value: 'delete',
+                              child: Text('Delete', style: TextStyle(color: Colors.red)),
+                            ),
                           ],
                         ),
                       ),
@@ -201,117 +205,122 @@ class _IngredientsScreenState extends ConsumerState<IngredientsScreen> {
         _ => '📦',
       };
 
-  Future<void> _showAddEditDialog(BuildContext context, {Ingredient? item}) async {
+  void _showAddEditDialog(BuildContext context, {Ingredient? item}) {
     final nameCtrl = TextEditingController(text: item?.name ?? '');
-    final kcalCtrl = TextEditingController(text: item?.kcalPer100g?.toString() ?? '');
-    final proteinCtrl = TextEditingController(text: item?.proteinPer100g?.toString() ?? '');
+    final kcalCtrl =
+        TextEditingController(text: item?.kcalPer100g?.toString() ?? '');
+    final proteinCtrl =
+        TextEditingController(text: item?.proteinPer100g?.toString() ?? '');
     String cat = item?.category ?? 'produce';
 
-    await showDialog(
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          title: Text(item == null ? 'Add Ingredient' : 'Edit Ingredient'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: nameCtrl,
+                  decoration: const InputDecoration(labelText: 'Name *'),
+                  autofocus: true,
+                ),
+                const SizedBox(height: 12),
+                DropdownButtonFormField<String>(
+                  value: cat,
+                  decoration: const InputDecoration(labelText: 'Category'),
+                  items: _categories
+                      .where((c) => c != 'all')
+                      .map(
+                        (c) => DropdownMenuItem(
+                          value: c,
+                          child: Text(_categoryLabel(c)),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (v) {
+                    if (v != null) setDialogState(() => cat = v);
+                  },
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: kcalCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'Calories (kcal / 100g)',
+                  ),
+                  keyboardType: TextInputType.number,
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: proteinCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'Protein (g / 100g)',
+                  ),
+                  keyboardType: TextInputType.number,
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () async {
+                final name = nameCtrl.text.trim();
+                if (name.isEmpty) return;
+
+                final repo = ref.read(ingredientRepositoryProvider);
+                if (item == null) {
+                  await repo.create(
+                    name: name,
+                    category: cat,
+                    kcalPer100g: double.tryParse(kcalCtrl.text),
+                    proteinPer100g: double.tryParse(proteinCtrl.text),
+                  );
+                } else {
+                  await repo.update(
+                    item.copyWith(
+                      name: name,
+                      category: Value(cat),
+                      kcalPer100g: Value(double.tryParse(kcalCtrl.text)),
+                      proteinPer100g: Value(double.tryParse(proteinCtrl.text)),
+                    ),
+                  );
+                }
+                if (ctx.mounted) Navigator.pop(ctx);
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _confirmDelete(BuildContext context, Ingredient item) {
+    showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(item == null ? 'Add Ingredient' : 'Edit Ingredient'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: nameCtrl,
-                decoration: const InputDecoration(labelText: 'Name *'),
-                autofocus: true,
-              ),
-              const SizedBox(height: 12),
-              DropdownButtonFormField<String>(
-                value: cat,
-                decoration: const InputDecoration(labelText: 'Category'),
-                items: const [
-                  DropdownMenuItem(value: 'produce', child: Text('Produce 🥗')),
-                  DropdownMenuItem(value: 'dairy', child: Text('Dairy 🥛')),
-                  DropdownMenuItem(value: 'pantry', child: Text('Pantry 🌾')),
-                  DropdownMenuItem(value: 'meat', child: Text('Meat & Fish 🥩')),
-                  DropdownMenuItem(value: 'spices', child: Text('Spices & Oils 🧂')),
-                  DropdownMenuItem(value: 'other', child: Text('Other 📦')),
-                ],
-                onChanged: (v) => cat = v!,
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: kcalCtrl,
-                      decoration: const InputDecoration(labelText: 'Kcal/100g'),
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: TextField(
-                      controller: proteinCtrl,
-                      decoration: const InputDecoration(labelText: 'Protein/100g (g)'),
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
+        title: Text('Delete "${item.name}"?'),
+        content: const Text('This will remove the item from your catalogue.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
             child: const Text('Cancel'),
           ),
-          ElevatedButton(
+          TextButton(
             onPressed: () async {
-              final name = nameCtrl.text.trim();
-              if (name.isEmpty) return;
-              final repo = ref.read(ingredientRepositoryProvider);
-
-              if (item == null) {
-                await repo.create(
-                  name: name,
-                  category: cat,
-                  kcalPer100g: double.tryParse(kcalCtrl.text),
-                  proteinPer100g: double.tryParse(proteinCtrl.text),
-                );
-              } else {
-                await repo.update(
-                  item.copyWith(
-                    name: name,
-                    category: Value(cat),
-                    kcalPer100g: Value(double.tryParse(kcalCtrl.text)),
-                    proteinPer100g: Value(double.tryParse(proteinCtrl.text)),
-                  ),
-                );
-              }
+              await ref.read(ingredientRepositoryProvider).delete(item.id);
               if (ctx.mounted) Navigator.pop(ctx);
             },
-            child: const Text('Save'),
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
     );
-  }
-
-  Future<void> _confirmDelete(BuildContext context, Ingredient item) async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Delete Ingredient'),
-        content: Text('Are you sure you want to delete "${item.name}" from your catalog?'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
-    );
-    if (confirm == true) {
-      await ref.read(ingredientRepositoryProvider).delete(item.id);
-    }
   }
 }

@@ -10,6 +10,7 @@ class Ingredients extends Table {
       text().nullable()(); // 'produce','dairy','pantry',...
   RealColumn get kcalPer100g => real().nullable()();
   RealColumn get proteinPer100g => real().nullable()();
+  BoolColumn get inStock => boolean().withDefault(const Constant(true))();
 }
 
 /// Recipe definitions.
