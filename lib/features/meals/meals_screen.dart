@@ -502,7 +502,16 @@ class RecipesScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final recipesAsync = ref.watch(_allRecipesProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Recipes')),
+      appBar: AppBar(
+        title: const Text('Recipes'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.kitchen_outlined),
+            tooltip: 'Ingredients Catalog',
+            onPressed: () => context.push('/ingredients'),
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
         heroTag: 'recipe_fab',
         onPressed: () => context.push('/recipe/new'),

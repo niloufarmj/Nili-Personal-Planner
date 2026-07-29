@@ -14,6 +14,7 @@ import '../../features/gym/gym_screen.dart';
 import '../../features/habits/habits_screen.dart';
 import '../../features/lists/lists_screen.dart';
 import '../../features/lists/screens/collection_screen.dart';
+import '../../features/meals/ingredients_screen.dart';
 import '../../features/meals/meals_screen.dart';
 import '../../features/meals/recipe_edit_screen.dart';
 import '../../features/more/more_screen.dart';
@@ -211,6 +212,14 @@ final List<RouteBase> agentRoutes = [
       context: context,
       state: state,
       child: const RecipesScreen(),
+    ),
+  ),
+  GoRoute(
+    path: '/ingredients',
+    pageBuilder: (context, state) => _fadeThroughPage(
+      context: context,
+      state: state,
+      child: const IngredientsScreen(),
     ),
   ),
   GoRoute(

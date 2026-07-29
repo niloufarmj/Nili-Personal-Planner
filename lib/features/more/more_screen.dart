@@ -65,6 +65,14 @@ class MoreScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 12),
               _MoreEntry(
+                icon: Icons.kitchen_outlined,
+                title: 'Ingredients Catalog',
+                subtitle: 'Manage pantry ingredients & measurements',
+                color: DesignTokens.peach,
+                onTap: () => context.push('/ingredients'),
+              ),
+              const SizedBox(height: 12),
+              _MoreEntry(
                 icon: Icons.trending_up,
                 title: 'Personal Growth',
                 subtitle: 'Track your personal goals & habits',

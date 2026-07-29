@@ -4,6 +4,7 @@ import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../core/db/database.dart';
 import '../../core/design/design.dart';
@@ -289,7 +290,7 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> {
             const SectionHeader(title: 'Ingredients'),
             ..._ingredientRows.asMap().entries.map(
               (e) => _IngredientRowWidget(
-                key: ValueKey('ing_${e.key}_${e.value.ingredientName}'),
+                key: ValueKey(e.value.id),
                 row: e.value,
                 onChanged: (r) => setState(() => _ingredientRows[e.key] = r),
                 onDelete: () => setState(() => _ingredientRows.removeAt(e.key)),
@@ -386,12 +387,15 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> {
 
 class _IngRow {
   _IngRow({
+    String? id,
     this.ingredient,
     String? ingredientName,
     required this.amount,
     required this.unit,
-  }) : ingredientName = ingredientName ?? ingredient?.name ?? '';
+  })  : id = id ?? const Uuid().v4(),
+        ingredientName = ingredientName ?? ingredient?.name ?? '';
 
+  final String id;
   final Ingredient? ingredient;
   final String ingredientName;
   final String amount;
@@ -403,6 +407,7 @@ class _IngRow {
     String? amount,
     String? unit,
   }) => _IngRow(
+    id: id,
     ingredient: ingredient ?? this.ingredient,
     ingredientName: name ?? (ingredient != null ? ingredient.name : this.ingredientName),
     amount: amount ?? this.amount,
@@ -429,27 +434,25 @@ class _IngredientRowWidget extends ConsumerStatefulWidget {
 }
 
 class _IngredientRowWidgetState extends ConsumerState<_IngredientRowWidget> {
-  late final TextEditingController _namCtrl;
   late final TextEditingController _amtCtrl;
-  String _unit = 'g';
+
+  static const _availableUnits = [
+    'g',
+    'ml',
+    'pcs',
+    'tbsp',
+    'tsp',
+    'cup',
+    'clove',
+    'slice',
+    'pinch',
+  ];
 
   @override
   void initState() {
     super.initState();
-    _namCtrl = TextEditingController(
-      text: widget.row.ingredient?.name ?? widget.row.ingredientName,
-    );
     _amtCtrl = TextEditingController(text: widget.row.amount);
-    _unit = widget.row.unit;
-
-    _namCtrl.addListener(_onTextChanged);
     _amtCtrl.addListener(_onAmountChanged);
-  }
-
-  void _onTextChanged() {
-    if (_namCtrl.text != widget.row.ingredientName) {
-      widget.onChanged(widget.row.copyWith(name: _namCtrl.text));
-    }
   }
 
   void _onAmountChanged() {
@@ -460,77 +463,274 @@ class _IngredientRowWidgetState extends ConsumerState<_IngredientRowWidget> {
 
   @override
   void dispose() {
-    _namCtrl.removeListener(_onTextChanged);
     _amtCtrl.removeListener(_onAmountChanged);
-    _namCtrl.dispose();
     _amtCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _openIngredientPicker(BuildContext context) async {
+    final ingRepo = ref.read(ingredientRepositoryProvider);
+
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => _IngredientSearchSheet(
+        onSelected: (ing) {
+          Navigator.pop(ctx);
+          widget.onChanged(widget.row.copyWith(ingredient: ing, name: ing.name));
+        },
+        onAddNew: (newQuery) async {
+          Navigator.pop(ctx);
+          final id = await ingRepo.findOrCreate(newQuery);
+          final ing = await ingRepo.getByName(newQuery);
+          if (ing != null) {
+            widget.onChanged(widget.row.copyWith(ingredient: ing, name: ing.name));
+          } else {
+            widget.onChanged(widget.row.copyWith(name: newQuery));
+          }
+        },
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final displayName = widget.row.ingredient?.name ??
+        (widget.row.ingredientName.isNotEmpty ? widget.row.ingredientName : null);
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        children: [
+          // Ingredient Selector Box
+          Expanded(
+            flex: 3,
+            child: InkWell(
+              onTap: () => _openIngredientPicker(context),
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                decoration: BoxDecoration(
+                  color: isDark ? DesignTokens.surfaceDark : DesignTokens.lineLight.withValues(alpha: 0.25),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: isDark ? DesignTokens.lineDark : DesignTokens.lineLight,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        displayName ?? 'Select ingredient...',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: displayName != null ? FontWeight.w600 : FontWeight.normal,
+                          color: displayName != null
+                              ? (isDark ? DesignTokens.inkDark : DesignTokens.inkLight)
+                              : (isDark ? DesignTokens.inkSoftDark : DesignTokens.inkSoftLight),
+                        ),
+                      ),
+                    ),
+                    Icon(
+                      Icons.arrow_drop_down,
+                      color: isDark ? DesignTokens.inkSoftDark : DesignTokens.inkSoftLight,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+
+          // Amount TextField
+          SizedBox(
+            width: 58,
+            child: TextField(
+              controller: _amtCtrl,
+              decoration: const InputDecoration(
+                hintText: 'Amt',
+                contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+              ),
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            ),
+          ),
+          const SizedBox(width: 6),
+
+          // Unit Dropdown
+          SizedBox(
+            width: 78,
+            child: DropdownButtonFormField<String>(
+              value: _availableUnits.contains(widget.row.unit) ? widget.row.unit : 'g',
+              decoration: const InputDecoration(
+                contentPadding: EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+              ),
+              items: _availableUnits
+                  .map((u) => DropdownMenuItem(value: u, child: Text(u)))
+                  .toList(),
+              onChanged: (v) {
+                if (v != null) {
+                  widget.onChanged(widget.row.copyWith(unit: v));
+                }
+              },
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.delete_outline, size: 20),
+            onPressed: widget.onDelete,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Search & Select Ingredient Modal Sheet ────────────────────────────────────
+
+class _IngredientSearchSheet extends ConsumerStatefulWidget {
+  const _IngredientSearchSheet({
+    required this.onSelected,
+    required this.onAddNew,
+  });
+
+  final ValueChanged<Ingredient> onSelected;
+  final ValueChanged<String> onAddNew;
+
+  @override
+  ConsumerState<_IngredientSearchSheet> createState() =>
+      _IngredientSearchSheetState();
+}
+
+class _IngredientSearchSheetState extends ConsumerState<_IngredientSearchSheet> {
+  final _searchCtrl = TextEditingController();
+  String _query = '';
+
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        children: [
-          Expanded(
-            flex: 3,
-            child: Autocomplete<Ingredient>(
-              initialValue: TextEditingValue(text: _namCtrl.text),
-              optionsBuilder: (v) async {
-                if (v.text.isEmpty) return [];
-                return ref.read(ingredientRepositoryProvider).search(v.text);
-              },
-              displayStringForOption: (i) => i.name,
-              onSelected: (i) {
-                _namCtrl.text = i.name;
-                widget.onChanged(widget.row.copyWith(ingredient: i, name: i.name));
-              },
-              fieldViewBuilder: (_, ctrl, focus, onSubmit) => TextField(
-                controller: ctrl,
-                focusNode: focus,
-                decoration: const InputDecoration(hintText: 'Ingredient'),
-                onChanged: (val) {
-                  _namCtrl.text = val;
-                  widget.onChanged(widget.row.copyWith(name: val));
-                },
+    final ingRepo = ref.watch(ingredientRepositoryProvider);
+
+    return DraggableScrollableSheet(
+      expand: false,
+      initialChildSize: 0.75,
+      minChildSize: 0.4,
+      maxChildSize: 0.9,
+      builder: (context, scrollController) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Column(
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.withValues(alpha: 0.4),
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
-            ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  const Text(
+                    'Select Ingredient',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+
+              // Search bar
+              TextField(
+                controller: _searchCtrl,
+                autofocus: true,
+                decoration: InputDecoration(
+                  hintText: 'Search or type new ingredient...',
+                  prefixIcon: const Icon(Icons.search),
+                  suffixIcon: _query.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.clear),
+                          onPressed: () {
+                            _searchCtrl.clear();
+                            setState(() => _query = '');
+                          },
+                        )
+                      : null,
+                ),
+                onChanged: (val) => setState(() => _query = val.trim()),
+              ),
+              const SizedBox(height: 12),
+
+              // Async Ingredient List
+              Expanded(
+                child: FutureBuilder<List<Ingredient>>(
+                  future: _query.isEmpty ? ingRepo.getAll() : ingRepo.search(_query),
+                  builder: (context, snapshot) {
+                    final items = snapshot.data ?? [];
+                    final exactMatch = items.any(
+                      (i) => i.name.toLowerCase() == _query.toLowerCase(),
+                    );
+
+                    return ListView(
+                      controller: scrollController,
+                      children: [
+                        if (_query.isNotEmpty && !exactMatch) ...[
+                          ListTile(
+                            leading: const CircleAvatar(
+                              backgroundColor: DesignTokens.accentLight,
+                              child: Icon(Icons.add, color: Colors.white, size: 20),
+                            ),
+                            title: Text(
+                              'Add "$_query" as new ingredient',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: DesignTokens.accentLight,
+                              ),
+                            ),
+                            subtitle: const Text('Will be saved to your ingredient catalog'),
+                            onTap: () => widget.onAddNew(_query),
+                          ),
+                          const Divider(),
+                        ],
+                        if (items.isEmpty && _query.isEmpty)
+                          const Padding(
+                            padding: EdgeInsets.all(24),
+                            child: Center(
+                              child: Text('No ingredients found. Type to search or add.'),
+                            ),
+                          )
+                        else
+                          ...items.map(
+                            (ing) => ListTile(
+                              title: Text(ing.name, style: const TextStyle(fontWeight: FontWeight.w600)),
+                              subtitle: ing.category != null ? Text(ing.category!) : null,
+                              onTap: () => widget.onSelected(ing),
+                            ),
+                          ),
+                      ],
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 8),
-          SizedBox(
-            width: 60,
-            child: TextField(
-              controller: _amtCtrl,
-              decoration: const InputDecoration(hintText: 'Amt'),
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              onChanged: (v) => widget.onChanged(widget.row.copyWith(amount: v)),
-            ),
-          ),
-          const SizedBox(width: 4),
-          SizedBox(
-            width: 70,
-            child: DropdownButton<String>(
-              value: _unit,
-              underline: const SizedBox(),
-              items: const [
-                DropdownMenuItem(value: 'g', child: Text('g')),
-                DropdownMenuItem(value: 'ml', child: Text('ml')),
-                DropdownMenuItem(value: 'pcs', child: Text('pcs')),
-                DropdownMenuItem(value: 'tbsp', child: Text('tbsp')),
-              ],
-              onChanged: (v) {
-                setState(() => _unit = v!);
-                widget.onChanged(widget.row.copyWith(unit: v));
-              },
-            ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.delete_outline, size: 18),
-            onPressed: widget.onDelete,
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
