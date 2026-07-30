@@ -1,9 +1,13 @@
+import 'dart:io';
+
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../core/db/database.dart';
 import '../../core/design/design.dart';
+import 'groceries_service.dart';
 import 'ingredient_repository.dart';
 
 final _allIngredientsProvider = StreamProvider.autoDispose<List<Ingredient>>(
@@ -41,8 +45,6 @@ class _IngredientsScreenState extends ConsumerState<IngredientsScreen> {
   @override
   Widget build(BuildContext context) {
     final ingredientsAsync = ref.watch(_allIngredientsProvider);
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
       appBar: AppBar(
@@ -136,18 +138,14 @@ class _IngredientsScreenState extends ConsumerState<IngredientsScreen> {
                   separatorBuilder: (_, __) => const SizedBox(height: 8),
                   itemBuilder: (context, idx) {
                     final item = filtered[idx];
+                    final hasImage =
+                        item.image != null && File(item.image!).existsSync();
+                    final estCostStr = item.estimatedCost != null
+                        ? ' · Est. \$${item.estimatedCost!.toStringAsFixed(2)}'
+                        : '';
+
                     return AppCard(
                       child: ListTile(
-                        leading: CircleAvatar(
-                          backgroundColor: (isDark
-                                  ? DesignTokens.accentDark
-                                  : DesignTokens.accentLight)
-                              .withValues(alpha: 0.15),
-                          child: Text(
-                            _categoryEmoji(item.category),
-                            style: const TextStyle(fontSize: 18),
-                          ),
-                        ),
                         title: Text(
                           item.name,
                           style: const TextStyle(fontWeight: FontWeight.bold),
@@ -155,22 +153,43 @@ class _IngredientsScreenState extends ConsumerState<IngredientsScreen> {
                         subtitle: Text(
                           '${_categoryLabel(item.category ?? 'other')}'
                           '${item.proteinPer100g != null ? ' · ${item.proteinPer100g}g protein/100g' : ''}'
-                          '${item.kcalPer100g != null ? ' · ${item.kcalPer100g} kcal/100g' : ''}',
+                          '${item.kcalPer100g != null ? ' · ${item.kcalPer100g} kcal/100g' : ''}'
+                          '$estCostStr',
                           style: const TextStyle(fontSize: 12),
                         ),
-                        trailing: PopupMenuButton<String>(
-                          onSelected: (val) {
-                            if (val == 'edit') {
-                              _showAddEditDialog(context, item: item);
-                            } else if (val == 'delete') {
-                              _confirmDelete(context, item);
-                            }
-                          },
-                          itemBuilder: (_) => const [
-                            PopupMenuItem(value: 'edit', child: Text('Edit')),
-                            PopupMenuItem(
-                              value: 'delete',
-                              child: Text('Delete', style: TextStyle(color: Colors.red)),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Small circular ingredient image on the right side
+                            CircleAvatar(
+                              radius: 18,
+                              backgroundColor:
+                                  DesignTokens.peach.withValues(alpha: 0.2),
+                              backgroundImage:
+                                  hasImage ? FileImage(File(item.image!)) : null,
+                              child: !hasImage
+                                  ? Text(
+                                      _categoryEmoji(item.category),
+                                      style: const TextStyle(fontSize: 14),
+                                    )
+                                  : null,
+                            ),
+                            const SizedBox(width: 4),
+                            PopupMenuButton<String>(
+                              onSelected: (val) {
+                                if (val == 'edit') {
+                                  _showAddEditDialog(context, item: item);
+                                } else if (val == 'delete') {
+                                  _confirmDelete(context, item);
+                                }
+                              },
+                              itemBuilder: (_) => const [
+                                PopupMenuItem(value: 'edit', child: Text('Edit')),
+                                PopupMenuItem(
+                                  value: 'delete',
+                                  child: Text('Delete', style: TextStyle(color: Colors.red)),
+                                ),
+                              ],
                             ),
                           ],
                         ),
@@ -211,7 +230,10 @@ class _IngredientsScreenState extends ConsumerState<IngredientsScreen> {
         TextEditingController(text: item?.kcalPer100g?.toString() ?? '');
     final proteinCtrl =
         TextEditingController(text: item?.proteinPer100g?.toString() ?? '');
+    final estCostCtrl =
+        TextEditingController(text: item?.estimatedCost?.toString() ?? '');
     String cat = item?.category ?? 'produce';
+    String? imagePath = item?.image;
 
     showDialog(
       context: context,
@@ -222,6 +244,34 @@ class _IngredientsScreenState extends ConsumerState<IngredientsScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                // Image picker avatar
+                GestureDetector(
+                  onTap: () async {
+                    final picker = ImagePicker();
+                    final picked =
+                        await picker.pickImage(source: ImageSource.gallery);
+                    if (picked != null) {
+                      setDialogState(() => imagePath = picked.path);
+                    }
+                  },
+                  child: CircleAvatar(
+                    radius: 32,
+                    backgroundColor: DesignTokens.peach.withValues(alpha: 0.2),
+                    backgroundImage: imagePath != null &&
+                            File(imagePath!).existsSync()
+                        ? FileImage(File(imagePath!))
+                        : null,
+                    child: imagePath == null || !File(imagePath!).existsSync()
+                        ? const Icon(Icons.add_a_photo, size: 24)
+                        : null,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                const Text(
+                  'Tap to select image',
+                  style: TextStyle(fontSize: 11, color: Colors.grey),
+                ),
+                const SizedBox(height: 12),
                 TextField(
                   controller: nameCtrl,
                   decoration: const InputDecoration(labelText: 'Name *'),
@@ -260,6 +310,15 @@ class _IngredientsScreenState extends ConsumerState<IngredientsScreen> {
                   ),
                   keyboardType: TextInputType.number,
                 ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: estCostCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'Est. Cost per unit / pack (\$) (optional)',
+                  ),
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
+                ),
               ],
             ),
           ),
@@ -280,6 +339,8 @@ class _IngredientsScreenState extends ConsumerState<IngredientsScreen> {
                     category: cat,
                     kcalPer100g: double.tryParse(kcalCtrl.text),
                     proteinPer100g: double.tryParse(proteinCtrl.text),
+                    image: imagePath,
+                    estimatedCost: double.tryParse(estCostCtrl.text),
                   );
                 } else {
                   await repo.update(
@@ -288,9 +349,16 @@ class _IngredientsScreenState extends ConsumerState<IngredientsScreen> {
                       category: Value(cat),
                       kcalPer100g: Value(double.tryParse(kcalCtrl.text)),
                       proteinPer100g: Value(double.tryParse(proteinCtrl.text)),
+                      image: Value(imagePath),
+                      estimatedCost: Value(double.tryParse(estCostCtrl.text)),
                     ),
                   );
                 }
+                // Sync all ingredients to Groceries list so the new image is present
+                await ref
+                    .read(groceriesServiceProvider)
+                    .syncAllIngredientsToGroceriesList();
+
                 if (ctx.mounted) Navigator.pop(ctx);
               },
               child: const Text('Save'),

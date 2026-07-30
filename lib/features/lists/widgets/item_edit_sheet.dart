@@ -145,7 +145,7 @@ class _ItemEditSheetState extends ConsumerState<ItemEditSheet> {
                 ),
 
               // Planned cost
-              if (template.fields.plannedCost) ...[
+              if (template.fields.plannedCost && template.id != 'shopping') ...[
                 Padding(
                   padding: const EdgeInsets.only(bottom: 12),
                   child: _CostField(

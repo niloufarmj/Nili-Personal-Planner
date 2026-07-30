@@ -5831,6 +5831,26 @@ class $IngredientsTable extends Ingredients
     ),
     defaultValue: const Constant(true),
   );
+  static const VerificationMeta _imageMeta = const VerificationMeta('image');
+  @override
+  late final GeneratedColumn<String> image = GeneratedColumn<String>(
+    'image',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _estimatedCostMeta = const VerificationMeta(
+    'estimatedCost',
+  );
+  @override
+  late final GeneratedColumn<double> estimatedCost = GeneratedColumn<double>(
+    'estimated_cost',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -5839,6 +5859,8 @@ class $IngredientsTable extends Ingredients
     kcalPer100g,
     proteinPer100g,
     inStock,
+    image,
+    estimatedCost,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -5893,6 +5915,21 @@ class $IngredientsTable extends Ingredients
         inStock.isAcceptableOrUnknown(data['in_stock']!, _inStockMeta),
       );
     }
+    if (data.containsKey('image')) {
+      context.handle(
+        _imageMeta,
+        image.isAcceptableOrUnknown(data['image']!, _imageMeta),
+      );
+    }
+    if (data.containsKey('estimated_cost')) {
+      context.handle(
+        _estimatedCostMeta,
+        estimatedCost.isAcceptableOrUnknown(
+          data['estimated_cost']!,
+          _estimatedCostMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -5926,6 +5963,14 @@ class $IngredientsTable extends Ingredients
         DriftSqlType.bool,
         data['${effectivePrefix}in_stock'],
       )!,
+      image: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}image'],
+      ),
+      estimatedCost: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}estimated_cost'],
+      ),
     );
   }
 
@@ -5942,6 +5987,8 @@ class Ingredient extends DataClass implements Insertable<Ingredient> {
   final double? kcalPer100g;
   final double? proteinPer100g;
   final bool inStock;
+  final String? image;
+  final double? estimatedCost;
   const Ingredient({
     required this.id,
     required this.name,
@@ -5949,6 +5996,8 @@ class Ingredient extends DataClass implements Insertable<Ingredient> {
     this.kcalPer100g,
     this.proteinPer100g,
     required this.inStock,
+    this.image,
+    this.estimatedCost,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -5965,6 +6014,12 @@ class Ingredient extends DataClass implements Insertable<Ingredient> {
       map['protein_per100g'] = Variable<double>(proteinPer100g);
     }
     map['in_stock'] = Variable<bool>(inStock);
+    if (!nullToAbsent || image != null) {
+      map['image'] = Variable<String>(image);
+    }
+    if (!nullToAbsent || estimatedCost != null) {
+      map['estimated_cost'] = Variable<double>(estimatedCost);
+    }
     return map;
   }
 
@@ -5982,6 +6037,12 @@ class Ingredient extends DataClass implements Insertable<Ingredient> {
           ? const Value.absent()
           : Value(proteinPer100g),
       inStock: Value(inStock),
+      image: image == null && nullToAbsent
+          ? const Value.absent()
+          : Value(image),
+      estimatedCost: estimatedCost == null && nullToAbsent
+          ? const Value.absent()
+          : Value(estimatedCost),
     );
   }
 
@@ -5997,6 +6058,8 @@ class Ingredient extends DataClass implements Insertable<Ingredient> {
       kcalPer100g: serializer.fromJson<double?>(json['kcalPer100g']),
       proteinPer100g: serializer.fromJson<double?>(json['proteinPer100g']),
       inStock: serializer.fromJson<bool>(json['inStock']),
+      image: serializer.fromJson<String?>(json['image']),
+      estimatedCost: serializer.fromJson<double?>(json['estimatedCost']),
     );
   }
   @override
@@ -6009,6 +6072,8 @@ class Ingredient extends DataClass implements Insertable<Ingredient> {
       'kcalPer100g': serializer.toJson<double?>(kcalPer100g),
       'proteinPer100g': serializer.toJson<double?>(proteinPer100g),
       'inStock': serializer.toJson<bool>(inStock),
+      'image': serializer.toJson<String?>(image),
+      'estimatedCost': serializer.toJson<double?>(estimatedCost),
     };
   }
 
@@ -6019,6 +6084,8 @@ class Ingredient extends DataClass implements Insertable<Ingredient> {
     Value<double?> kcalPer100g = const Value.absent(),
     Value<double?> proteinPer100g = const Value.absent(),
     bool? inStock,
+    Value<String?> image = const Value.absent(),
+    Value<double?> estimatedCost = const Value.absent(),
   }) => Ingredient(
     id: id ?? this.id,
     name: name ?? this.name,
@@ -6028,6 +6095,10 @@ class Ingredient extends DataClass implements Insertable<Ingredient> {
         ? proteinPer100g.value
         : this.proteinPer100g,
     inStock: inStock ?? this.inStock,
+    image: image.present ? image.value : this.image,
+    estimatedCost: estimatedCost.present
+        ? estimatedCost.value
+        : this.estimatedCost,
   );
   Ingredient copyWithCompanion(IngredientsCompanion data) {
     return Ingredient(
@@ -6041,6 +6112,10 @@ class Ingredient extends DataClass implements Insertable<Ingredient> {
           ? data.proteinPer100g.value
           : this.proteinPer100g,
       inStock: data.inStock.present ? data.inStock.value : this.inStock,
+      image: data.image.present ? data.image.value : this.image,
+      estimatedCost: data.estimatedCost.present
+          ? data.estimatedCost.value
+          : this.estimatedCost,
     );
   }
 
@@ -6052,14 +6127,24 @@ class Ingredient extends DataClass implements Insertable<Ingredient> {
           ..write('category: $category, ')
           ..write('kcalPer100g: $kcalPer100g, ')
           ..write('proteinPer100g: $proteinPer100g, ')
-          ..write('inStock: $inStock')
+          ..write('inStock: $inStock, ')
+          ..write('image: $image, ')
+          ..write('estimatedCost: $estimatedCost')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, name, category, kcalPer100g, proteinPer100g, inStock);
+  int get hashCode => Object.hash(
+    id,
+    name,
+    category,
+    kcalPer100g,
+    proteinPer100g,
+    inStock,
+    image,
+    estimatedCost,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -6069,7 +6154,9 @@ class Ingredient extends DataClass implements Insertable<Ingredient> {
           other.category == this.category &&
           other.kcalPer100g == this.kcalPer100g &&
           other.proteinPer100g == this.proteinPer100g &&
-          other.inStock == this.inStock);
+          other.inStock == this.inStock &&
+          other.image == this.image &&
+          other.estimatedCost == this.estimatedCost);
 }
 
 class IngredientsCompanion extends UpdateCompanion<Ingredient> {
@@ -6079,6 +6166,8 @@ class IngredientsCompanion extends UpdateCompanion<Ingredient> {
   final Value<double?> kcalPer100g;
   final Value<double?> proteinPer100g;
   final Value<bool> inStock;
+  final Value<String?> image;
+  final Value<double?> estimatedCost;
   const IngredientsCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
@@ -6086,6 +6175,8 @@ class IngredientsCompanion extends UpdateCompanion<Ingredient> {
     this.kcalPer100g = const Value.absent(),
     this.proteinPer100g = const Value.absent(),
     this.inStock = const Value.absent(),
+    this.image = const Value.absent(),
+    this.estimatedCost = const Value.absent(),
   });
   IngredientsCompanion.insert({
     this.id = const Value.absent(),
@@ -6094,6 +6185,8 @@ class IngredientsCompanion extends UpdateCompanion<Ingredient> {
     this.kcalPer100g = const Value.absent(),
     this.proteinPer100g = const Value.absent(),
     this.inStock = const Value.absent(),
+    this.image = const Value.absent(),
+    this.estimatedCost = const Value.absent(),
   }) : name = Value(name);
   static Insertable<Ingredient> custom({
     Expression<int>? id,
@@ -6102,6 +6195,8 @@ class IngredientsCompanion extends UpdateCompanion<Ingredient> {
     Expression<double>? kcalPer100g,
     Expression<double>? proteinPer100g,
     Expression<bool>? inStock,
+    Expression<String>? image,
+    Expression<double>? estimatedCost,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -6110,6 +6205,8 @@ class IngredientsCompanion extends UpdateCompanion<Ingredient> {
       if (kcalPer100g != null) 'kcal_per100g': kcalPer100g,
       if (proteinPer100g != null) 'protein_per100g': proteinPer100g,
       if (inStock != null) 'in_stock': inStock,
+      if (image != null) 'image': image,
+      if (estimatedCost != null) 'estimated_cost': estimatedCost,
     });
   }
 
@@ -6120,6 +6217,8 @@ class IngredientsCompanion extends UpdateCompanion<Ingredient> {
     Value<double?>? kcalPer100g,
     Value<double?>? proteinPer100g,
     Value<bool>? inStock,
+    Value<String?>? image,
+    Value<double?>? estimatedCost,
   }) {
     return IngredientsCompanion(
       id: id ?? this.id,
@@ -6128,6 +6227,8 @@ class IngredientsCompanion extends UpdateCompanion<Ingredient> {
       kcalPer100g: kcalPer100g ?? this.kcalPer100g,
       proteinPer100g: proteinPer100g ?? this.proteinPer100g,
       inStock: inStock ?? this.inStock,
+      image: image ?? this.image,
+      estimatedCost: estimatedCost ?? this.estimatedCost,
     );
   }
 
@@ -6152,6 +6253,12 @@ class IngredientsCompanion extends UpdateCompanion<Ingredient> {
     if (inStock.present) {
       map['in_stock'] = Variable<bool>(inStock.value);
     }
+    if (image.present) {
+      map['image'] = Variable<String>(image.value);
+    }
+    if (estimatedCost.present) {
+      map['estimated_cost'] = Variable<double>(estimatedCost.value);
+    }
     return map;
   }
 
@@ -6163,7 +6270,9 @@ class IngredientsCompanion extends UpdateCompanion<Ingredient> {
           ..write('category: $category, ')
           ..write('kcalPer100g: $kcalPer100g, ')
           ..write('proteinPer100g: $proteinPer100g, ')
-          ..write('inStock: $inStock')
+          ..write('inStock: $inStock, ')
+          ..write('image: $image, ')
+          ..write('estimatedCost: $estimatedCost')
           ..write(')'))
         .toString();
   }
@@ -16775,6 +16884,8 @@ typedef $$IngredientsTableCreateCompanionBuilder =
       Value<double?> kcalPer100g,
       Value<double?> proteinPer100g,
       Value<bool> inStock,
+      Value<String?> image,
+      Value<double?> estimatedCost,
     });
 typedef $$IngredientsTableUpdateCompanionBuilder =
     IngredientsCompanion Function({
@@ -16784,6 +16895,8 @@ typedef $$IngredientsTableUpdateCompanionBuilder =
       Value<double?> kcalPer100g,
       Value<double?> proteinPer100g,
       Value<bool> inStock,
+      Value<String?> image,
+      Value<double?> estimatedCost,
     });
 
 final class $$IngredientsTableReferences
@@ -16854,6 +16967,16 @@ class $$IngredientsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get image => $composableBuilder(
+    column: $table.image,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get estimatedCost => $composableBuilder(
+    column: $table.estimatedCost,
+    builder: (column) => ColumnFilters(column),
+  );
+
   Expression<bool> recipeIngredientsRefs(
     Expression<bool> Function($$RecipeIngredientsTableFilterComposer f) f,
   ) {
@@ -16918,6 +17041,16 @@ class $$IngredientsTableOrderingComposer
     column: $table.inStock,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get image => $composableBuilder(
+    column: $table.image,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get estimatedCost => $composableBuilder(
+    column: $table.estimatedCost,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$IngredientsTableAnnotationComposer
@@ -16950,6 +17083,14 @@ class $$IngredientsTableAnnotationComposer
 
   GeneratedColumn<bool> get inStock =>
       $composableBuilder(column: $table.inStock, builder: (column) => column);
+
+  GeneratedColumn<String> get image =>
+      $composableBuilder(column: $table.image, builder: (column) => column);
+
+  GeneratedColumn<double> get estimatedCost => $composableBuilder(
+    column: $table.estimatedCost,
+    builder: (column) => column,
+  );
 
   Expression<T> recipeIngredientsRefs<T extends Object>(
     Expression<T> Function($$RecipeIngredientsTableAnnotationComposer a) f,
@@ -17012,6 +17153,8 @@ class $$IngredientsTableTableManager
                 Value<double?> kcalPer100g = const Value.absent(),
                 Value<double?> proteinPer100g = const Value.absent(),
                 Value<bool> inStock = const Value.absent(),
+                Value<String?> image = const Value.absent(),
+                Value<double?> estimatedCost = const Value.absent(),
               }) => IngredientsCompanion(
                 id: id,
                 name: name,
@@ -17019,6 +17162,8 @@ class $$IngredientsTableTableManager
                 kcalPer100g: kcalPer100g,
                 proteinPer100g: proteinPer100g,
                 inStock: inStock,
+                image: image,
+                estimatedCost: estimatedCost,
               ),
           createCompanionCallback:
               ({
@@ -17028,6 +17173,8 @@ class $$IngredientsTableTableManager
                 Value<double?> kcalPer100g = const Value.absent(),
                 Value<double?> proteinPer100g = const Value.absent(),
                 Value<bool> inStock = const Value.absent(),
+                Value<String?> image = const Value.absent(),
+                Value<double?> estimatedCost = const Value.absent(),
               }) => IngredientsCompanion.insert(
                 id: id,
                 name: name,
@@ -17035,6 +17182,8 @@ class $$IngredientsTableTableManager
                 kcalPer100g: kcalPer100g,
                 proteinPer100g: proteinPer100g,
                 inStock: inStock,
+                image: image,
+                estimatedCost: estimatedCost,
               ),
           withReferenceMapper: (p0) => p0
               .map(

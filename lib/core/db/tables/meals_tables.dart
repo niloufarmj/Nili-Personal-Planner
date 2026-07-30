@@ -11,6 +11,8 @@ class Ingredients extends Table {
   RealColumn get kcalPer100g => real().nullable()();
   RealColumn get proteinPer100g => real().nullable()();
   BoolColumn get inStock => boolean().withDefault(const Constant(true))();
+  TextColumn get image => text().nullable()();
+  RealColumn get estimatedCost => real().nullable()();
 }
 
 /// Recipe definitions.

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -5,7 +7,6 @@ import 'package:intl/intl.dart';
 
 import '../../../core/db/database.dart';
 import '../../../core/design/design.dart';
-import '../../finance/repositories/transaction_repository.dart';
 import '../../meals/groceries_service.dart';
 import '../repositories/collection_repository.dart';
 import '../repositories/item_repository.dart';
@@ -13,15 +14,32 @@ import '../templates/template_registry.dart';
 import '../widgets/item_edit_sheet.dart';
 import '../widgets/subtask_list.dart';
 
-class CollectionScreen extends ConsumerWidget {
+/// Helper to determine whether a list item is completed / in stock.
+bool _isItemDone(Item item, TemplateDef template) {
+  final s = item.status.toLowerCase();
+  return s == template.doneStatus.toLowerCase() ||
+      s == 'done' ||
+      s == 'bought' ||
+      template.statusDef(item.status).isDone;
+}
+
+class CollectionScreen extends ConsumerStatefulWidget {
   const CollectionScreen({required this.collectionId, super.key});
 
   final int collectionId;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final collAsync = ref.watch(_collectionProvider(collectionId));
-    final itemsAsync = ref.watch(_collectionItemsProvider(collectionId));
+  ConsumerState<CollectionScreen> createState() => _CollectionScreenState();
+}
+
+class _CollectionScreenState extends ConsumerState<CollectionScreen> {
+  // Filter for shopping template collections: 'all', 'need', 'have'
+  String _stockFilter = 'all';
+
+  @override
+  Widget build(BuildContext context) {
+    final collAsync = ref.watch(_collectionProvider(widget.collectionId));
+    final itemsAsync = ref.watch(_collectionItemsProvider(widget.collectionId));
 
     return collAsync.when(
       loading: () =>
@@ -97,10 +115,60 @@ class CollectionScreen extends ConsumerWidget {
                       : 'Add item',
                 );
               }
-              return _ItemList(
-                items: items,
-                collection: collection,
-                template: template,
+
+              // Apply stock filter for shopping collections
+              final filteredItems = items.where((i) {
+                if (collection.template != 'shopping') return true;
+                final isDone = _isItemDone(i, template);
+                if (_stockFilter == 'need') return !isDone;
+                if (_stockFilter == 'have') return isDone;
+                return true;
+              }).toList();
+
+              return Column(
+                children: [
+                  if (collection.template == 'shopping') ...[
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
+                      child: SegmentedButton<String>(
+                        segments: const [
+                          ButtonSegment<String>(
+                            value: 'all',
+                            label: Text('All'),
+                            icon: Icon(Icons.format_list_bulleted, size: 16),
+                          ),
+                          ButtonSegment<String>(
+                            value: 'need',
+                            label: Text('Need to buy 🛒'),
+                          ),
+                          ButtonSegment<String>(
+                            value: 'have',
+                            label: Text('In stock ✅'),
+                          ),
+                        ],
+                        selected: {_stockFilter},
+                        onSelectionChanged: (sel) {
+                          setState(() => _stockFilter = sel.first);
+                        },
+                      ),
+                    ),
+                  ],
+                  Expanded(
+                    child: filteredItems.isEmpty
+                        ? EmptyState(
+                            icon: Icons.shopping_bag_outlined,
+                            message: _stockFilter == 'need'
+                                ? 'Everything is in stock! 🎉'
+                                : 'No items matching filter',
+                            hint: 'Switch tab or tap + to add items',
+                          )
+                        : _ItemList(
+                            items: filteredItems,
+                            collection: collection,
+                            template: template,
+                          ),
+                  ),
+                ],
               );
             },
           ),
@@ -195,7 +263,10 @@ class _ItemTileState extends ConsumerState<_ItemTile> {
     final template = widget.template;
     final repo = ref.read(itemRepositoryProvider);
 
-    final isDone = item.status == template.doneStatus;
+    final isDone = _isItemDone(item, template);
+    final isShopping = template.id == 'shopping';
+    final hasImage =
+        item.imageBefore != null && File(item.imageBefore!).existsSync();
 
     return Dismissible(
       key: ValueKey(item.id),
@@ -222,19 +293,20 @@ class _ItemTileState extends ConsumerState<_ItemTile> {
       },
       onDismissed: (_) => repo.deleteItem(item.id),
       child: AppCard(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        onTap: () => _openEditSheet(context),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        // For shopping template: tap ONLY toggles state
+        onTap: () => isShopping ? _handleStatusToggle() : _openEditSheet(context),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 // Status checkbox / icon
                 GestureDetector(
                   onTap: () => _handleStatusToggle(),
                   child: Padding(
-                    padding: const EdgeInsets.only(right: 10, top: 2),
+                    padding: const EdgeInsets.only(right: 10),
                     child: Icon(
                       isDone
                           ? Icons.check_circle
@@ -266,7 +338,7 @@ class _ItemTileState extends ConsumerState<_ItemTile> {
                         spacing: 6,
                         runSpacing: 4,
                         children: [
-                          if (template.id == 'shopping')
+                          if (isShopping)
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                               decoration: BoxDecoration(
@@ -289,7 +361,7 @@ class _ItemTileState extends ConsumerState<_ItemTile> {
                                   ),
                                   const SizedBox(width: 3),
                                   Text(
-                                    isDone ? 'In Stock' : 'Need to buy',
+                                    isDone ? 'In stock' : 'Need to buy',
                                     style: TextStyle(
                                       fontSize: 10,
                                       fontWeight: FontWeight.bold,
@@ -305,14 +377,23 @@ class _ItemTileState extends ConsumerState<_ItemTile> {
                             PriorityBadge(priority: item.priority!),
                           if (template.fields.dueDate && item.dueDate != null)
                             _DueDateChip(dueDate: item.dueDate!),
-                          if (template.fields.plannedCost &&
-                              item.plannedCostCents != null)
+                          // Do NOT display planned cost chip for shopping template!
+                          if (!isShopping && template.fields.plannedCost && item.plannedCostCents != null)
                             _CostChip(cents: item.plannedCostCents!),
                         ],
                       ),
                     ],
                   ),
                 ),
+                // Small circular ingredient image on the right side
+                if (hasImage)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8),
+                    child: CircleAvatar(
+                      radius: 16,
+                      backgroundImage: FileImage(File(item.imageBefore!)),
+                    ),
+                  ),
                 // Subtask expand toggle
                 if (template.fields.subtasks)
                   IconButton(
@@ -326,74 +407,35 @@ class _ItemTileState extends ConsumerState<_ItemTile> {
                   ),
               ],
             ),
-            // Subtask inline list
-            if (template.fields.subtasks && _expanded)
-              Padding(
-                padding: const EdgeInsets.only(left: 32, top: 6),
-                child: SubtaskList(itemId: item.id),
-              ),
-            // Images for upgrade template
-            if (template.fields.imageBefore || template.fields.imageAfter)
-              _ImageRow(
-                imageBefore: item.imageBefore,
-                imageAfter: item.imageAfter,
-              ),
+            if (_expanded && template.fields.subtasks) ...[
+              const Divider(height: 12),
+              SubtaskList(itemId: item.id),
+            ],
           ],
         ),
       ),
     );
   }
 
-  Widget _swipeBackground({
-    required Color color,
-    required IconData icon,
-    required Alignment alignment,
-  }) => Container(
-    color: color,
-    alignment: alignment,
-    padding: const EdgeInsets.symmetric(horizontal: 20),
-    child: Icon(icon, color: Colors.white, size: 28),
-  );
-
-  Future<bool> _confirmDelete(BuildContext context) async {
-    return ConfirmDialog.show(
-      context,
-      title: 'Delete "${widget.item.title}"?',
-      message: 'This cannot be undone.',
-      confirmLabel: 'Delete',
-      isDestructive: true,
-    );
-  }
-
-  void _showUndoSnackbar(
-    ScaffoldMessengerState messenger,
-    WidgetRef ref,
-    Item item,
-    TemplateDef template,
-  ) {
+  Future<bool> _handleStatusToggle() async {
+    final template = widget.template;
     final repo = ref.read(itemRepositoryProvider);
-    messenger.showSnackBar(
-      SnackBar(
-        content: Text(
-          item.status == template.doneStatus
-              ? '"${item.title}" marked done'
-              : '"${item.title}" reopened',
-        ),
-        duration: const Duration(seconds: 3),
-        action: SnackBarAction(
-          label: 'Undo',
-          onPressed: () => repo.toggleItemStatus(
-            item.id,
-            doneStatus: template.doneStatus,
-            openStatus: template.openStatus,
-          ),
-        ),
+    final item = widget.item;
+
+    final isDone = _isItemDone(item, template);
+    final newStatus = isDone ? template.openStatus : template.doneStatus;
+
+    await repo.updateItem(
+      item.copyWith(
+        status: newStatus,
+        doneDate: Value(!isDone ? _todayIso() : null),
       ),
     );
+    return true;
   }
 
-  Future<void> _openEditSheet(BuildContext context) async {
-    await showModalBottomSheet<void>(
+  void _openEditSheet(BuildContext context) {
+    showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       builder: (_) => ItemEditSheet(
@@ -404,117 +446,94 @@ class _ItemTileState extends ConsumerState<_ItemTile> {
     );
   }
 
-  Future<bool> _handleStatusToggle() async {
-    final item = widget.item;
-    final template = widget.template;
-    final repo = ref.read(itemRepositoryProvider);
-    final isGoingToDone = item.status != template.doneStatus;
-
-    if (widget.collection.template == 'shopping' && isGoingToDone) {
-      final double? realCost = await _showRealCostDialog(context, item);
-      if (realCost == null) return false;
-
-      await repo.toggleItemStatus(
-        item.id,
-        doneStatus: template.doneStatus,
-        openStatus: template.openStatus,
-      );
-
-      final cents = (realCost * 100).round();
-      final todayStr = DateFormat('yyyy-MM-dd').format(DateTime.now());
-      final txRepo = ref.read(transactionRepositoryProvider);
-      await txRepo.create(
-        TransactionsCompanion.insert(
-          date: todayStr,
-          amountCents: cents,
-          direction: 'out',
-          status: 'actual',
-          category: 'shopping',
-          note: Value('Bought: ${item.title}'),
-          itemId: Value(item.id),
-        ),
-      );
-      return true;
-    } else {
-      await repo.toggleItemStatus(
-        item.id,
-        doneStatus: template.doneStatus,
-        openStatus: template.openStatus,
-      );
-      return true;
-    }
-  }
-
-  Future<double?> _showRealCostDialog(BuildContext context, Item item) async {
-    final defaultPrice = (item.plannedCostCents ?? 0) / 100.0;
-    final controller = TextEditingController(
-      text: defaultPrice > 0 ? defaultPrice.toStringAsFixed(2) : '',
-    );
-
-    return showDialog<double>(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Confirm Real Cost'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text('How much did "${item.title}" actually cost?'),
-              const SizedBox(height: 16),
-              TextField(
-                controller: controller,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                autofocus: true,
-                decoration: const InputDecoration(
-                  labelText: 'Price (€)',
-                  border: OutlineInputBorder(),
-                  prefixText: '€ ',
-                ),
+  Future<bool> _confirmDelete(BuildContext context) async {
+    return await showDialog<bool>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text('Delete item?'),
+            content: Text('Are you sure you want to delete "${widget.item.title}"?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                child: const Text('Delete', style: TextStyle(color: Colors.red)),
               ),
             ],
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
-            ),
-            FilledButton(
-              onPressed: () {
-                final double? val = double.tryParse(controller.text);
-                if (val != null && val >= 0) {
-                  Navigator.of(context).pop(val);
-                } else if (controller.text.isEmpty) {
-                  Navigator.of(context).pop(0.0);
-                }
-              },
-              child: const Text('Confirm'),
-            ),
-          ],
-        );
-      },
+        ) ??
+        false;
+  }
+
+  void _showUndoSnackbar(
+    ScaffoldMessengerState messenger,
+    WidgetRef ref,
+    Item item,
+    TemplateDef template,
+  ) {
+    messenger.removeCurrentSnackBar();
+    final isDone = _isItemDone(item, template);
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(
+          isDone
+              ? 'Marked "${item.title}" as in stock'
+              : 'Marked "${item.title}" as need to buy',
+        ),
+        duration: const Duration(seconds: 3),
+        action: SnackBarAction(
+          label: 'Undo',
+          onPressed: () {
+            ref.read(itemRepositoryProvider).updateItem(
+                  item.copyWith(
+                    status: item.status,
+                    doneDate: Value(item.doneDate),
+                  ),
+                );
+          },
+        ),
+      ),
     );
+  }
+
+  static Widget _swipeBackground({
+    required Color color,
+    required IconData icon,
+    required Alignment alignment,
+  }) {
+    return Container(
+      color: color,
+      alignment: alignment,
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Icon(icon, color: Colors.white),
+    );
+  }
+
+  static String _todayIso() {
+    final d = DateTime.now();
+    return '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
   }
 }
 
-// ── Small chips ───────────────────────────────────────────────────────────────
+// ── Utility Chips ──────────────────────────────────────────────────────────────
 
 class _DueDateChip extends StatelessWidget {
   const _DueDateChip({required this.dueDate});
-
   final String dueDate;
 
   @override
   Widget build(BuildContext context) {
-    final date = DateTime.tryParse(dueDate);
-    final label = date != null ? DateFormat('d MMM').format(date) : dueDate;
-    final isOverdue = date != null && date.isBefore(DateTime.now());
+    final isOverdue = _checkOverdue(dueDate);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: isOverdue ? Colors.red.shade100 : Colors.blue.shade50,
-        borderRadius: BorderRadius.circular(8),
+        color: (isOverdue ? Colors.red : Colors.blue).withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(
+          color: (isOverdue ? Colors.red : Colors.blue).withValues(alpha: 0.3),
+        ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -522,24 +541,45 @@ class _DueDateChip extends StatelessWidget {
           Icon(
             Icons.calendar_today,
             size: 10,
-            color: isOverdue ? Colors.red.shade700 : Colors.blue.shade700,
+            color: isOverdue ? Colors.red : Colors.blue,
           ),
           const SizedBox(width: 3),
           Text(
-            label,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: isOverdue ? Colors.red.shade700 : Colors.blue.shade700,
+            _formatDate(dueDate),
+            style: TextStyle(
+              fontSize: 10,
+              color: isOverdue ? Colors.red : Colors.blue,
+              fontWeight: isOverdue ? FontWeight.bold : FontWeight.normal,
             ),
           ),
         ],
       ),
     );
   }
+
+  static bool _checkOverdue(String isoDate) {
+    try {
+      final due = DateTime.parse(isoDate);
+      final today = DateTime.now();
+      final todayClean = DateTime(today.year, today.month, today.day);
+      return due.isBefore(todayClean);
+    } catch (_) {
+      return false;
+    }
+  }
+
+  static String _formatDate(String isoDate) {
+    try {
+      final dt = DateTime.parse(isoDate);
+      return DateFormat('d MMM').format(dt);
+    } catch (_) {
+      return isoDate;
+    }
+  }
 }
 
 class _CostChip extends StatelessWidget {
   const _CostChip({required this.cents});
-
   final int cents;
 
   @override
@@ -548,70 +588,17 @@ class _CostChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: Colors.teal.shade50,
-        borderRadius: BorderRadius.circular(8),
+        color: Colors.purple.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: Colors.purple.withValues(alpha: 0.3)),
       ),
       child: Text(
-        '€$amount',
-        style: Theme.of(
-          context,
-        ).textTheme.labelSmall?.copyWith(color: Colors.teal.shade700),
-      ),
-    );
-  }
-}
-
-class _ImageRow extends StatelessWidget {
-  const _ImageRow({this.imageBefore, this.imageAfter});
-
-  final String? imageBefore;
-  final String? imageAfter;
-
-  @override
-  Widget build(BuildContext context) {
-    if (imageBefore == null && imageAfter == null) return const SizedBox();
-    return Padding(
-      padding: const EdgeInsets.only(top: 8),
-      child: Row(
-        children: [
-          if (imageBefore != null)
-            _ImageSlot(path: imageBefore!, label: 'Before'),
-          if (imageAfter != null) _ImageSlot(path: imageAfter!, label: 'After'),
-        ],
-      ),
-    );
-  }
-}
-
-class _ImageSlot extends StatelessWidget {
-  const _ImageSlot({required this.path, required this.label});
-
-  final String path;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 8),
-      child: Column(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(6),
-            child: Image.asset(
-              path,
-              width: 60,
-              height: 60,
-              fit: BoxFit.cover,
-              errorBuilder: (ctx, err, st) => Container(
-                width: 60,
-                height: 60,
-                color: Colors.grey.shade200,
-                child: const Icon(Icons.image_outlined, size: 28),
-              ),
-            ),
-          ),
-          Text(label, style: Theme.of(context).textTheme.labelSmall),
-        ],
+        '\$$amount',
+        style: const TextStyle(
+          fontSize: 10,
+          color: Colors.purple,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }

@@ -38,9 +38,11 @@ A comprehensive, beautifully designed, and offline-first personal organizer buil
 *   **Forecast Integration**: Live forecaster computes whether your trip budget is sustainable based on future financial schedules.
 
 ### 🥩 6. Meal Planner & Recipe Book
-*   **Ingredient Bank**: Manage pantry supplies, measuring units, and quantities.
+*   **Ingredient Catalog**: Manage pantry supplies, measuring units, quantities, calories, protein, estimated costs, and custom ingredient photo avatars.
 *   **Recipe Creator**: Detail recipes, prep times, cooking steps, and list ingredient mappings.
-*   **Weekly Meal Slot Board**: Plan weekly breakfasts, lunches, dinners, and snacks. Mark slots as `'planned'` or `'eaten'`.
+*   **Weekly Meal Slot Board**: Plan weekly breakfasts, lunches, dinners, and post-gym shakes.
+*   **Groceries List Sync & Missing Ingredient Alerts**: Integrated directly with your Groceries collection in the Lists tab. Automatically cross-checks planned meal ingredients against stock status, alerts for missing items (`⚠️ Need: Cucumber, Toast`), and populates items into your Groceries shopping list.
+*   **3 Stock Filter Tabs**: Filter Groceries list by `All`, `Need to buy 🛒`, and `In stock ✅` with 1-tap stock status toggling and small circular ingredient photo avatars.
 
 ### 🏋️ 7. Gym, Sports & Fitness Tracker
 *   **Multi-Sport Activity Logging**: Log sessions across Swimming 🏊, Tennis 🎾, Biking 🚴, Running 🏃, Walking 🚶, Yoga 🧘, Pilates 🥋, Gym 🏋️, and Other activities.

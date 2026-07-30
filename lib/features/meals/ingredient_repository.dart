@@ -48,6 +48,8 @@ class IngredientRepository {
     String? category,
     double? kcalPer100g,
     double? proteinPer100g,
+    String? image,
+    double? estimatedCost,
   }) => _db
       .into(_db.ingredients)
       .insert(
@@ -56,6 +58,8 @@ class IngredientRepository {
           category: Value(category),
           kcalPer100g: Value(kcalPer100g),
           proteinPer100g: Value(proteinPer100g),
+          image: Value(image),
+          estimatedCost: Value(estimatedCost),
         ),
       );
 

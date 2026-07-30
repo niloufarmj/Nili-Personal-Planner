@@ -50,18 +50,24 @@ class GroceriesService {
 
     for (final ing in catalog) {
       final ingNameLower = ing.name.toLowerCase();
-      final exists = existingItems.any((i) {
+      final existingItem = existingItems.cast<Item?>().firstWhere((i) {
+        if (i == null) return false;
         final titleLower = i.title.toLowerCase();
         return titleLower.contains(ingNameLower) || ingNameLower.contains(titleLower);
-      });
-      if (!exists) {
+      }, orElse: () => null);
+
+      if (existingItem == null) {
         await _db.into(_db.items).insert(
               ItemsCompanion.insert(
                 collectionId: collection.id,
                 title: ing.name,
                 status: Value(ing.inStock ? 'done' : 'open'),
+                imageBefore: Value(ing.image),
               ),
             );
+      } else if (ing.image != null && existingItem.imageBefore != ing.image) {
+        await (_db.update(_db.items)..where((i) => i.id.equals(existingItem.id)))
+            .write(ItemsCompanion(imageBefore: Value(ing.image)));
       }
     }
   }

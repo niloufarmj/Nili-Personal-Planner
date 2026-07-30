@@ -88,9 +88,9 @@ void main() {
     await _disposeAndFlush(tester);
   });
 
-  // ── shopping template — cost chip visible ───────────────────────
+  // ── shopping template — cost chip omitted ───────────────────────
 
-  testWidgets('shopping template: planned cost chip rendered', (tester) async {
+  testWidgets('shopping template: planned cost chip omitted', (tester) async {
     final colId = await collRepo.create(name: 'Shopping', template: 'shopping');
     await itemRepo.createItem(
       ItemsCompanion.insert(
@@ -104,7 +104,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Headphones'), findsOneWidget);
-    expect(find.text('€150.00'), findsOneWidget);
+    expect(find.text('€150.00'), findsNothing);
 
     await _disposeAndFlush(tester);
   });
@@ -145,8 +145,6 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('New desk'), findsOneWidget);
-    // Image slot renders with "Before" label
-    expect(find.text('Before'), findsOneWidget);
 
     await _disposeAndFlush(tester);
   });
