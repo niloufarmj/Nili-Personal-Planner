@@ -3,8 +3,8 @@ import 'package:personal_planner/features/lists/templates/template_registry.dart
 
 void main() {
   group('TemplateRegistry', () {
-    test('all 9 templates are registered', () {
-      expect(TemplateRegistry.all.length, 9);
+    test('all 10 templates are registered', () {
+      expect(TemplateRegistry.all.length, 10);
     });
 
     test('every template has at least 2 statuses', () {

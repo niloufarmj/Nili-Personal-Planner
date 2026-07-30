@@ -14,9 +14,8 @@ class GroceriesService {
     final existing = await (_db.select(_db.collections)
           ..where(
             (c) =>
-                c.template.equals('shopping') |
-                c.name.equals('Groceries') |
-                c.name.equals('Shopping'),
+                c.template.equals('groceries') |
+                c.name.equals('Groceries'),
           ))
         .get();
 
@@ -27,7 +26,7 @@ class GroceriesService {
     final id = await _db.into(_db.collections).insert(
           CollectionsCompanion.insert(
             name: 'Groceries',
-            template: 'shopping',
+            template: 'groceries',
             icon: const Value('shopping_bag'),
           ),
         );
@@ -35,13 +34,39 @@ class GroceriesService {
         .getSingle());
   }
 
+  /// Cleans up any catalog ingredient items mistakenly injected into standard Shopping lists.
+  Future<void> cleanAccidentalGroceriesFromShoppingLists() async {
+    final groceriesCol = await getOrCreateGroceriesCollection();
+    final nonGroceriesCols = await (_db.select(_db.collections)
+      ..where((c) => c.id.equals(groceriesCol.id).not() & c.name.equals('Groceries').not())).get();
+
+    if (nonGroceriesCols.isEmpty) return;
+
+    final catalog = await (_db.select(_db.ingredients)).get();
+    final ingNames = catalog.map((i) => i.name.toLowerCase()).toSet();
+
+    for (final col in nonGroceriesCols) {
+      final items = await (_db.select(_db.items)..where((i) => i.collectionId.equals(col.id))).get();
+      for (final item in items) {
+        if (ingNames.contains(item.title.toLowerCase())) {
+          await (_db.delete(_db.items)..where((i) => i.id.equals(item.id))).go();
+        }
+      }
+    }
+  }
+
   /// Syncs/populates all catalog ingredients into a Groceries list in the Lists tab.
   /// If [targetCollectionId] is provided, syncs into that collection; otherwise syncs into default Groceries collection.
   Future<void> syncAllIngredientsToGroceriesList({int? targetCollectionId}) async {
+    await cleanAccidentalGroceriesFromShoppingLists();
+
     final collection = targetCollectionId != null
         ? ((await (_db.select(_db.collections)..where((c) => c.id.equals(targetCollectionId))).getSingleOrNull()) ??
             await getOrCreateGroceriesCollection())
         : await getOrCreateGroceriesCollection();
+
+    // Ensure we are only syncing into a Groceries collection
+    if (collection.template != 'groceries' && collection.name != 'Groceries') return;
 
     final catalog = await (_db.select(_db.ingredients)).get();
     final existingItems = await (_db.select(_db.items)

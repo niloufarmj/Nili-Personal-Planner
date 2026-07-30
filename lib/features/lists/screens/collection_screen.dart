@@ -52,9 +52,10 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
           );
         }
         final template = TemplateRegistry.get(collection.template);
+        final isGroceries = collection.template == 'groceries' || collection.name == 'Groceries';
 
-        // Auto-sync ingredients if this is a shopping/groceries collection
-        if (collection.template == 'shopping') {
+        // Auto-sync ingredients ONLY if this is a dedicated Groceries collection
+        if (isGroceries) {
           Future.microtask(
             () => ref
                 .read(groceriesServiceProvider)
@@ -66,7 +67,7 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
           appBar: AppBar(
             title: Text(collection.name),
             actions: [
-              if (collection.template == 'shopping')
+              if (isGroceries)
                 IconButton(
                   icon: const Icon(Icons.sync),
                   tooltip: 'Sync all ingredients to this list',
@@ -98,11 +99,11 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
                 return EmptyState(
                   icon: template.icon,
                   message: 'No items yet',
-                  hint: collection.template == 'shopping'
+                  hint: isGroceries
                       ? 'Tap "Populate All Ingredients" or + to add items.'
                       : 'Tap + to add your first ${template.label.toLowerCase()} item.',
                   action: () async {
-                    if (collection.template == 'shopping') {
+                    if (isGroceries) {
                       await ref
                           .read(groceriesServiceProvider)
                           .syncAllIngredientsToGroceriesList(targetCollectionId: collection.id);
@@ -110,15 +111,15 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
                       _openAddSheet(context, ref, collection, template);
                     }
                   },
-                  actionLabel: collection.template == 'shopping'
+                  actionLabel: isGroceries
                       ? 'Populate All Ingredients'
                       : 'Add item',
                 );
               }
 
-              // Apply stock filter for shopping collections
+              // Apply stock filter for groceries collections only
               final filteredItems = items.where((i) {
-                if (collection.template != 'shopping') return true;
+                if (!isGroceries) return true;
                 final isDone = _isItemDone(i, template);
                 if (_stockFilter == 'need') return !isDone;
                 if (_stockFilter == 'have') return isDone;
@@ -127,7 +128,7 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
 
               return Column(
                 children: [
-                  if (collection.template == 'shopping') ...[
+                  if (isGroceries) ...[
                     Padding(
                       padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
                       child: SegmentedButton<String>(
@@ -264,7 +265,7 @@ class _ItemTileState extends ConsumerState<_ItemTile> {
     final repo = ref.read(itemRepositoryProvider);
 
     final isDone = _isItemDone(item, template);
-    final isShopping = template.id == 'shopping';
+    final isGroceries = template.id == 'groceries' || widget.collection.name == 'Groceries';
     final hasImage =
         item.imageBefore != null && File(item.imageBefore!).existsSync();
 
@@ -294,8 +295,9 @@ class _ItemTileState extends ConsumerState<_ItemTile> {
       onDismissed: (_) => repo.deleteItem(item.id),
       child: AppCard(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        // For shopping template: tap ONLY toggles state
-        onTap: () => isShopping ? _handleStatusToggle() : _openEditSheet(context),
+        // For groceries template: tap ONLY toggles state
+        // For standard shopping & other templates: tap opens edit/description sheet
+        onTap: () => isGroceries ? _handleStatusToggle() : _openEditSheet(context),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -338,7 +340,7 @@ class _ItemTileState extends ConsumerState<_ItemTile> {
                         spacing: 6,
                         runSpacing: 4,
                         children: [
-                          if (isShopping)
+                          if (isGroceries)
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                               decoration: BoxDecoration(
@@ -377,16 +379,15 @@ class _ItemTileState extends ConsumerState<_ItemTile> {
                             PriorityBadge(priority: item.priority!),
                           if (template.fields.dueDate && item.dueDate != null)
                             _DueDateChip(dueDate: item.dueDate!),
-                          // Do NOT display planned cost chip for shopping template!
-                          if (!isShopping && template.fields.plannedCost && item.plannedCostCents != null)
+                          if (template.fields.plannedCost && item.plannedCostCents != null)
                             _CostChip(cents: item.plannedCostCents!),
                         ],
                       ),
                     ],
                   ),
                 ),
-                // Small circular ingredient image on the right side
-                if (hasImage)
+                // Small circular ingredient image on the right side for Groceries
+                if (isGroceries && hasImage)
                   Padding(
                     padding: const EdgeInsets.only(left: 8),
                     child: CircleAvatar(

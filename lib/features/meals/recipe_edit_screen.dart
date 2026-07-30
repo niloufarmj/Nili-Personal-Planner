@@ -28,6 +28,7 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> {
   String _slot = 'dinner';
   int? _prepMinutes;
   int? _proteinGrams;
+  int? _calories;
   String? _imagePath;
   List<String> _tags = [];
   List<_IngRow> _ingredientRows = [];
@@ -58,6 +59,7 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> {
         _slot = data.recipe.mealSlot;
         _prepMinutes = data.recipe.prepMinutes;
         _proteinGrams = data.recipe.proteinGrams;
+        _calories = data.recipe.calories;
         _imagePath = data.recipe.image;
         _tags = List.of(data.recipe.tags);
         _ingredientRows = data.rows
@@ -234,27 +236,40 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> {
             ),
             const SizedBox(height: 12),
 
-            // Prep time & Protein row
+            // Prep time, Calories & Protein row
             Row(
               children: [
                 Expanded(
                   child: TextFormField(
                     initialValue: _prepMinutes?.toString(),
                     decoration: const InputDecoration(
-                      labelText: 'Prep time (mins)',
-                      prefixIcon: Icon(Icons.timer_outlined, size: 18),
+                      labelText: 'Prep (mins)',
+                      prefixIcon: Icon(Icons.timer_outlined, size: 16),
                     ),
                     keyboardType: TextInputType.number,
                     onChanged: (v) => _prepMinutes = int.tryParse(v),
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: TextFormField(
+                    initialValue: _calories?.toString(),
+                    decoration: const InputDecoration(
+                      labelText: 'Calories',
+                      prefixIcon: Icon(Icons.local_fire_department_outlined, size: 16),
+                      suffixText: 'kcal',
+                    ),
+                    keyboardType: TextInputType.number,
+                    onChanged: (v) => _calories = int.tryParse(v),
+                  ),
+                ),
+                const SizedBox(width: 8),
                 Expanded(
                   child: TextFormField(
                     initialValue: _proteinGrams?.toString(),
                     decoration: const InputDecoration(
-                      labelText: 'Protein (grams)',
-                      prefixIcon: Icon(Icons.fitness_center_outlined, size: 18),
+                      labelText: 'Protein',
+                      prefixIcon: Icon(Icons.fitness_center_outlined, size: 16),
                       suffixText: 'g',
                     ),
                     keyboardType: TextInputType.number,
@@ -350,6 +365,7 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> {
         mealSlot: _slot,
         prepMinutes: _prepMinutes,
         proteinGrams: _proteinGrams,
+        calories: _calories,
         tags: _tags,
         instructions: _instructions.text.trim().isEmpty
             ? null
@@ -366,6 +382,7 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> {
             mealSlot: _slot,
             prepMinutes: Value(_prepMinutes),
             proteinGrams: Value(_proteinGrams),
+            calories: Value(_calories),
             tags: _tags,
             instructions: Value(
               _instructions.text.trim().isEmpty

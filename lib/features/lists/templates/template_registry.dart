@@ -423,4 +423,24 @@ const _templates = [
       ),
     ],
   ),
+
+  // 10. groceries
+  TemplateDef(
+    id: 'groceries',
+    label: 'Groceries',
+    icon: Icons.shopping_bag_outlined,
+    openStatus: 'open',
+    doneStatus: 'done',
+    defaultSort: 'priority',
+    statuses: [
+      StatusDef(value: 'open', label: 'Need to buy', color: AppColors.statusOpen),
+      StatusDef(
+        value: 'done',
+        label: 'In stock',
+        color: AppColors.statusDone,
+        isDone: true,
+      ),
+    ],
+    fields: VisibleFields(),
+  ),
 ];

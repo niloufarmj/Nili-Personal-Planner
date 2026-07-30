@@ -14,6 +14,9 @@ import '../../core/services/image_service.dart';
 import 'fitness_repository.dart';
 import 'package:go_router/go_router.dart';
 
+import '../meals/nutrition_profile.dart' hide FitnessGoal;
+import '../meals/widgets/nutrition_profile_sheet.dart';
+
 // ── State for custom field definitions ────────────────────────────────────────
 
 final _customFieldsProvider =
@@ -63,6 +66,21 @@ class FitnessScreen extends ConsumerWidget {
         appBar: AppBar(
           title: const Text('Fitness'),
           actions: [
+            IconButton(
+              icon: const Icon(Icons.person_outline),
+              tooltip: 'Body Profile (Age, Height, Gender)',
+              onPressed: () async {
+                final fitRepo = ref.read(fitnessRepositoryProvider);
+                final profile = await ref.read(nutritionProfileRepositoryProvider).loadProfile(fitRepo);
+                if (context.mounted) {
+                  showModalBottomSheet<void>(
+                    context: context,
+                    isScrollControlled: true,
+                    builder: (_) => NutritionProfileSheet(profile: profile),
+                  );
+                }
+              },
+            ),
             IconButton(
               icon: const Icon(Icons.settings),
               tooltip: 'Custom Fields',

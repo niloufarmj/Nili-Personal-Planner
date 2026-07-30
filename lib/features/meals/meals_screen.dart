@@ -12,8 +12,11 @@ import '../../core/design/design.dart';
 import 'groceries_service.dart';
 import 'meal_slot_repository.dart';
 import 'meal_suggester.dart';
+import 'nutrition_calculator.dart';
+import 'nutrition_profile.dart';
 import 'recipe_repository.dart';
 import 'shopping_generator.dart';
+import 'widgets/nutrition_profile_sheet.dart';
 
 class MealsScreen extends ConsumerStatefulWidget {
   const MealsScreen({super.key});
@@ -585,6 +588,48 @@ class _BottomActions extends ConsumerWidget {
   }
 
   Future<void> _suggestWeek(BuildContext context, WidgetRef ref) async {
+    final profile = await ref.read(nutritionProfileRepositoryProvider).loadProfile();
+
+    // 1. Verify generic setup profile is complete (managed in Fitness Tracker tab)
+    if (!profile.isComplete) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Please complete your Body Profile (Age, Height, Gender) in Fitness Tracker first.'),
+            action: SnackBarAction(
+              label: 'Fitness Tracker',
+              onPressed: () => context.push('/fitness'),
+            ),
+          ),
+        );
+      }
+      return;
+    }
+
+    // 2. Pre-generation confirmation dialog
+    if (context.mounted) {
+      final proceed = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('Confirm Next Week Setup'),
+          content: const Text(
+            'Please make sure you have updated sport activity plan, travel plan and partner plan for next week so you get the best result.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('Proceed & Generate'),
+            ),
+          ],
+        ),
+      );
+      if (proceed != true) return;
+    }
+
     final recipeRepo = ref.read(recipeRepositoryProvider);
     final dayRepo = ref.read(dayRepositoryProvider);
     final slotRepo = ref.read(mealSlotRepositoryProvider);
@@ -742,6 +787,7 @@ class RecipesScreen extends ConsumerWidget {
             itemBuilder: (_, i) {
               final r = recipes[i];
               final hasImage = r.image != null && File(r.image!).existsSync();
+              final calStr = r.calories != null ? '🔥 ${r.calories} kcal  ' : '';
               final proteinStr =
                   r.proteinGrams != null ? '🥩 ${r.proteinGrams}g protein  ' : '';
               final tagsStr =
@@ -768,7 +814,7 @@ class RecipesScreen extends ConsumerWidget {
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   subtitle: Text(
-                    '${r.mealSlot.toUpperCase()}  $proteinStr$tagsStr',
+                    '${r.mealSlot.toUpperCase()}  $calStr$proteinStr$tagsStr',
                     style: const TextStyle(fontSize: 12),
                   ),
                   trailing: const Icon(Icons.chevron_right),

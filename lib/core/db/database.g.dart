@@ -6338,6 +6338,17 @@ class $RecipesTable extends Recipes with TableInfo<$RecipesTable, Recipe> {
     type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _caloriesMeta = const VerificationMeta(
+    'calories',
+  );
+  @override
+  late final GeneratedColumn<int> calories = GeneratedColumn<int>(
+    'calories',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   @override
   late final GeneratedColumnWithTypeConverter<List<String>, String> tags =
       GeneratedColumn<String>(
@@ -6374,6 +6385,7 @@ class $RecipesTable extends Recipes with TableInfo<$RecipesTable, Recipe> {
     mealSlot,
     prepMinutes,
     proteinGrams,
+    calories,
     tags,
     instructions,
     image,
@@ -6427,6 +6439,12 @@ class $RecipesTable extends Recipes with TableInfo<$RecipesTable, Recipe> {
         ),
       );
     }
+    if (data.containsKey('calories')) {
+      context.handle(
+        _caloriesMeta,
+        calories.isAcceptableOrUnknown(data['calories']!, _caloriesMeta),
+      );
+    }
     if (data.containsKey('instructions')) {
       context.handle(
         _instructionsMeta,
@@ -6471,6 +6489,10 @@ class $RecipesTable extends Recipes with TableInfo<$RecipesTable, Recipe> {
         DriftSqlType.int,
         data['${effectivePrefix}protein_grams'],
       ),
+      calories: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}calories'],
+      ),
       tags: $RecipesTable.$convertertags.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.string,
@@ -6503,6 +6525,7 @@ class Recipe extends DataClass implements Insertable<Recipe> {
   final String mealSlot;
   final int? prepMinutes;
   final int? proteinGrams;
+  final int? calories;
   final List<String> tags;
   final String? instructions;
   final String? image;
@@ -6512,6 +6535,7 @@ class Recipe extends DataClass implements Insertable<Recipe> {
     required this.mealSlot,
     this.prepMinutes,
     this.proteinGrams,
+    this.calories,
     required this.tags,
     this.instructions,
     this.image,
@@ -6527,6 +6551,9 @@ class Recipe extends DataClass implements Insertable<Recipe> {
     }
     if (!nullToAbsent || proteinGrams != null) {
       map['protein_grams'] = Variable<int>(proteinGrams);
+    }
+    if (!nullToAbsent || calories != null) {
+      map['calories'] = Variable<int>(calories);
     }
     {
       map['tags'] = Variable<String>($RecipesTable.$convertertags.toSql(tags));
@@ -6551,6 +6578,9 @@ class Recipe extends DataClass implements Insertable<Recipe> {
       proteinGrams: proteinGrams == null && nullToAbsent
           ? const Value.absent()
           : Value(proteinGrams),
+      calories: calories == null && nullToAbsent
+          ? const Value.absent()
+          : Value(calories),
       tags: Value(tags),
       instructions: instructions == null && nullToAbsent
           ? const Value.absent()
@@ -6572,6 +6602,7 @@ class Recipe extends DataClass implements Insertable<Recipe> {
       mealSlot: serializer.fromJson<String>(json['mealSlot']),
       prepMinutes: serializer.fromJson<int?>(json['prepMinutes']),
       proteinGrams: serializer.fromJson<int?>(json['proteinGrams']),
+      calories: serializer.fromJson<int?>(json['calories']),
       tags: serializer.fromJson<List<String>>(json['tags']),
       instructions: serializer.fromJson<String?>(json['instructions']),
       image: serializer.fromJson<String?>(json['image']),
@@ -6586,6 +6617,7 @@ class Recipe extends DataClass implements Insertable<Recipe> {
       'mealSlot': serializer.toJson<String>(mealSlot),
       'prepMinutes': serializer.toJson<int?>(prepMinutes),
       'proteinGrams': serializer.toJson<int?>(proteinGrams),
+      'calories': serializer.toJson<int?>(calories),
       'tags': serializer.toJson<List<String>>(tags),
       'instructions': serializer.toJson<String?>(instructions),
       'image': serializer.toJson<String?>(image),
@@ -6598,6 +6630,7 @@ class Recipe extends DataClass implements Insertable<Recipe> {
     String? mealSlot,
     Value<int?> prepMinutes = const Value.absent(),
     Value<int?> proteinGrams = const Value.absent(),
+    Value<int?> calories = const Value.absent(),
     List<String>? tags,
     Value<String?> instructions = const Value.absent(),
     Value<String?> image = const Value.absent(),
@@ -6607,6 +6640,7 @@ class Recipe extends DataClass implements Insertable<Recipe> {
     mealSlot: mealSlot ?? this.mealSlot,
     prepMinutes: prepMinutes.present ? prepMinutes.value : this.prepMinutes,
     proteinGrams: proteinGrams.present ? proteinGrams.value : this.proteinGrams,
+    calories: calories.present ? calories.value : this.calories,
     tags: tags ?? this.tags,
     instructions: instructions.present ? instructions.value : this.instructions,
     image: image.present ? image.value : this.image,
@@ -6622,6 +6656,7 @@ class Recipe extends DataClass implements Insertable<Recipe> {
       proteinGrams: data.proteinGrams.present
           ? data.proteinGrams.value
           : this.proteinGrams,
+      calories: data.calories.present ? data.calories.value : this.calories,
       tags: data.tags.present ? data.tags.value : this.tags,
       instructions: data.instructions.present
           ? data.instructions.value
@@ -6638,6 +6673,7 @@ class Recipe extends DataClass implements Insertable<Recipe> {
           ..write('mealSlot: $mealSlot, ')
           ..write('prepMinutes: $prepMinutes, ')
           ..write('proteinGrams: $proteinGrams, ')
+          ..write('calories: $calories, ')
           ..write('tags: $tags, ')
           ..write('instructions: $instructions, ')
           ..write('image: $image')
@@ -6652,6 +6688,7 @@ class Recipe extends DataClass implements Insertable<Recipe> {
     mealSlot,
     prepMinutes,
     proteinGrams,
+    calories,
     tags,
     instructions,
     image,
@@ -6665,6 +6702,7 @@ class Recipe extends DataClass implements Insertable<Recipe> {
           other.mealSlot == this.mealSlot &&
           other.prepMinutes == this.prepMinutes &&
           other.proteinGrams == this.proteinGrams &&
+          other.calories == this.calories &&
           other.tags == this.tags &&
           other.instructions == this.instructions &&
           other.image == this.image);
@@ -6676,6 +6714,7 @@ class RecipesCompanion extends UpdateCompanion<Recipe> {
   final Value<String> mealSlot;
   final Value<int?> prepMinutes;
   final Value<int?> proteinGrams;
+  final Value<int?> calories;
   final Value<List<String>> tags;
   final Value<String?> instructions;
   final Value<String?> image;
@@ -6685,6 +6724,7 @@ class RecipesCompanion extends UpdateCompanion<Recipe> {
     this.mealSlot = const Value.absent(),
     this.prepMinutes = const Value.absent(),
     this.proteinGrams = const Value.absent(),
+    this.calories = const Value.absent(),
     this.tags = const Value.absent(),
     this.instructions = const Value.absent(),
     this.image = const Value.absent(),
@@ -6695,6 +6735,7 @@ class RecipesCompanion extends UpdateCompanion<Recipe> {
     required String mealSlot,
     this.prepMinutes = const Value.absent(),
     this.proteinGrams = const Value.absent(),
+    this.calories = const Value.absent(),
     required List<String> tags,
     this.instructions = const Value.absent(),
     this.image = const Value.absent(),
@@ -6707,6 +6748,7 @@ class RecipesCompanion extends UpdateCompanion<Recipe> {
     Expression<String>? mealSlot,
     Expression<int>? prepMinutes,
     Expression<int>? proteinGrams,
+    Expression<int>? calories,
     Expression<String>? tags,
     Expression<String>? instructions,
     Expression<String>? image,
@@ -6717,6 +6759,7 @@ class RecipesCompanion extends UpdateCompanion<Recipe> {
       if (mealSlot != null) 'meal_slot': mealSlot,
       if (prepMinutes != null) 'prep_minutes': prepMinutes,
       if (proteinGrams != null) 'protein_grams': proteinGrams,
+      if (calories != null) 'calories': calories,
       if (tags != null) 'tags': tags,
       if (instructions != null) 'instructions': instructions,
       if (image != null) 'image': image,
@@ -6729,6 +6772,7 @@ class RecipesCompanion extends UpdateCompanion<Recipe> {
     Value<String>? mealSlot,
     Value<int?>? prepMinutes,
     Value<int?>? proteinGrams,
+    Value<int?>? calories,
     Value<List<String>>? tags,
     Value<String?>? instructions,
     Value<String?>? image,
@@ -6739,6 +6783,7 @@ class RecipesCompanion extends UpdateCompanion<Recipe> {
       mealSlot: mealSlot ?? this.mealSlot,
       prepMinutes: prepMinutes ?? this.prepMinutes,
       proteinGrams: proteinGrams ?? this.proteinGrams,
+      calories: calories ?? this.calories,
       tags: tags ?? this.tags,
       instructions: instructions ?? this.instructions,
       image: image ?? this.image,
@@ -6763,6 +6808,9 @@ class RecipesCompanion extends UpdateCompanion<Recipe> {
     if (proteinGrams.present) {
       map['protein_grams'] = Variable<int>(proteinGrams.value);
     }
+    if (calories.present) {
+      map['calories'] = Variable<int>(calories.value);
+    }
     if (tags.present) {
       map['tags'] = Variable<String>(
         $RecipesTable.$convertertags.toSql(tags.value),
@@ -6785,6 +6833,7 @@ class RecipesCompanion extends UpdateCompanion<Recipe> {
           ..write('mealSlot: $mealSlot, ')
           ..write('prepMinutes: $prepMinutes, ')
           ..write('proteinGrams: $proteinGrams, ')
+          ..write('calories: $calories, ')
           ..write('tags: $tags, ')
           ..write('instructions: $instructions, ')
           ..write('image: $image')
@@ -17252,6 +17301,7 @@ typedef $$RecipesTableCreateCompanionBuilder =
       required String mealSlot,
       Value<int?> prepMinutes,
       Value<int?> proteinGrams,
+      Value<int?> calories,
       required List<String> tags,
       Value<String?> instructions,
       Value<String?> image,
@@ -17263,6 +17313,7 @@ typedef $$RecipesTableUpdateCompanionBuilder =
       Value<String> mealSlot,
       Value<int?> prepMinutes,
       Value<int?> proteinGrams,
+      Value<int?> calories,
       Value<List<String>> tags,
       Value<String?> instructions,
       Value<String?> image,
@@ -17346,6 +17397,11 @@ class $$RecipesTableFilterComposer
 
   ColumnFilters<int> get proteinGrams => $composableBuilder(
     column: $table.proteinGrams,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get calories => $composableBuilder(
+    column: $table.calories,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -17450,6 +17506,11 @@ class $$RecipesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get calories => $composableBuilder(
+    column: $table.calories,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get tags => $composableBuilder(
     column: $table.tags,
     builder: (column) => ColumnOrderings(column),
@@ -17493,6 +17554,9 @@ class $$RecipesTableAnnotationComposer
     column: $table.proteinGrams,
     builder: (column) => column,
   );
+
+  GeneratedColumn<int> get calories =>
+      $composableBuilder(column: $table.calories, builder: (column) => column);
 
   GeneratedColumnWithTypeConverter<List<String>, String> get tags =>
       $composableBuilder(column: $table.tags, builder: (column) => column);
@@ -17593,6 +17657,7 @@ class $$RecipesTableTableManager
                 Value<String> mealSlot = const Value.absent(),
                 Value<int?> prepMinutes = const Value.absent(),
                 Value<int?> proteinGrams = const Value.absent(),
+                Value<int?> calories = const Value.absent(),
                 Value<List<String>> tags = const Value.absent(),
                 Value<String?> instructions = const Value.absent(),
                 Value<String?> image = const Value.absent(),
@@ -17602,6 +17667,7 @@ class $$RecipesTableTableManager
                 mealSlot: mealSlot,
                 prepMinutes: prepMinutes,
                 proteinGrams: proteinGrams,
+                calories: calories,
                 tags: tags,
                 instructions: instructions,
                 image: image,
@@ -17613,6 +17679,7 @@ class $$RecipesTableTableManager
                 required String mealSlot,
                 Value<int?> prepMinutes = const Value.absent(),
                 Value<int?> proteinGrams = const Value.absent(),
+                Value<int?> calories = const Value.absent(),
                 required List<String> tags,
                 Value<String?> instructions = const Value.absent(),
                 Value<String?> image = const Value.absent(),
@@ -17622,6 +17689,7 @@ class $$RecipesTableTableManager
                 mealSlot: mealSlot,
                 prepMinutes: prepMinutes,
                 proteinGrams: proteinGrams,
+                calories: calories,
                 tags: tags,
                 instructions: instructions,
                 image: image,

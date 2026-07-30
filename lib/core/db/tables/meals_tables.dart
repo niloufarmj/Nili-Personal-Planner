@@ -22,6 +22,7 @@ class Recipes extends Table {
   TextColumn get mealSlot => text()(); // 'breakfast'|'lunch'|'dinner'|'any'
   IntColumn get prepMinutes => integer().nullable()();
   IntColumn get proteinGrams => integer().nullable()();
+  IntColumn get calories => integer().nullable()();
   TextColumn get tags => text().map(
     const StringListConverter(),
   )(); // JSON: ['quick','high-protein',...]

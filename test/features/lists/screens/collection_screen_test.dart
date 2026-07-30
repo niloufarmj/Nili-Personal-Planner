@@ -88,9 +88,9 @@ void main() {
     await _disposeAndFlush(tester);
   });
 
-  // ── shopping template — cost chip omitted ───────────────────────
+  // ── shopping template — cost chip shown, groceries template — cost chip omitted ──
 
-  testWidgets('shopping template: planned cost chip omitted', (tester) async {
+  testWidgets('shopping template shows cost chip and groceries template omits cost chip', (tester) async {
     final colId = await collRepo.create(name: 'Shopping', template: 'shopping');
     await itemRepo.createItem(
       ItemsCompanion.insert(
@@ -104,7 +104,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Headphones'), findsOneWidget);
-    expect(find.text('€150.00'), findsNothing);
+    expect(find.text('\$150.00'), findsOneWidget);
 
     await _disposeAndFlush(tester);
   });
