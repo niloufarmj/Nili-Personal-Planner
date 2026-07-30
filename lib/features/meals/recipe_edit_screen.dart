@@ -37,7 +37,7 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> {
     'quick',
     'prep-ahead',
     'high-protein',
-    'reza-shared',
+    'partner-shared',
     'needs-oven',
   ];
 

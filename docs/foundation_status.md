@@ -43,7 +43,7 @@ Database class: `lib/core/db/database.dart` with `appDatabaseProvider`.
 - Tabs: Today `/`, Calendar `/calendar`, Lists `/lists`, Track `/track`, More `/more`
 
 ### Step 5 — Tags & DayTags
-- `lib/core/db/repositories/day_repository.dart` — `seedDefaultTagsIfNeeded()` (6 defaults: linz, salzburg, travel, gym, work, reza-day), `watchTagsForRange()`, `setTag()`, `removeTag()`, `setTagByNameForRange()`
+- `lib/core/db/repositories/day_repository.dart` — `seedDefaultTagsIfNeeded()` (6 defaults: linz, salzburg, travel, gym, work, partner-day), `watchTagsForRange()`, `setTag()`, `removeTag()`, `setTagByNameForRange()`
 - `lib/features/more/tag_manager_screen.dart` — create/edit tags via bottom sheet
 - `lib/features/calendar/day_tag_picker.dart` — `FilterChip` per tag
 

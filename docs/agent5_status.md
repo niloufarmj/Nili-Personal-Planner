@@ -21,7 +21,7 @@ Branch: `feat/planning-meals`
 - `RemindersScreen` — list + create/edit sheet
 
 ### 4. Partner Schedule (`lib/features/partner/`)
-- `PartnerRepository` — Reza tag CRUD, partner event overlay
+- `PartnerRepository` — Partner tag CRUD, partner event overlay
 - `PartnerScreen` — read-only view of partner's weekly schedule
 
 ### 5. ConflictEngine (`lib/core/conflicts/`)
@@ -40,7 +40,7 @@ Branch: `feat/planning-meals`
 ### 7. MealSuggester (`lib/features/meals/meal_suggester.dart`)
 - Pure class, injectable `Random` for determinism in tests
 - Hard constraints: travel day → empty; gym day → high-protein only
-- Preference constraints: work lunch → quick, reza-day → reza-friendly
+- Preference constraints: work lunch → quick, partner-day → partner-friendly
 - History exclusion: no repeat within 3 days
 - Post-gym shake slot auto-injected
 

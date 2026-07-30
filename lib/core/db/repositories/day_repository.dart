@@ -10,7 +10,7 @@ const _defaultTags = [
   (name: 'travel', color: '#3EBF6F', kind: 'location'),
   (name: 'gym', color: '#EF6C00', kind: 'activity'),
   (name: 'work', color: '#1565C0', kind: 'activity'),
-  (name: 'reza-day', color: '#AB47BC', kind: 'special'),
+  (name: 'partner-day', color: '#AB47BC', kind: 'special'),
 ];
 
 /// Repository for day_tags and the tags catalogue.

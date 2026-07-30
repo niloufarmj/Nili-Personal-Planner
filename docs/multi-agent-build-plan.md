@@ -122,7 +122,7 @@ Bottom navigation: Today, Calendar, Lists, Track, More. Lists/Track/More show pl
 TESTS: widget test that all 5 tabs render and switch without exceptions.
 
 Step 5 — Tags & day_tags (commit: "feat(core): day tags with repository and editor")
-DayRepository with watchTagsForRange(start, end), setTag/removeTag(date, tagId, source). Seed default tags on first launch: linz, salzburg, travel (location); gym, work (activity); reza-day (special). Tag editor UI: tag manager in More tab (create/edit/archive tags, pick color and kind) and a per-day tag picker (used by day detail sheet).
+DayRepository with watchTagsForRange(start, end), setTag/removeTag(date, tagId, source). Seed default tags on first launch: linz, salzburg, travel (location); gym, work (activity); partner-day (special). Tag editor UI: tag manager in More tab (create/edit/archive tags, pick color and kind) and a per-day tag picker (used by day detail sheet).
 TESTS: repository unit tests (set, remove, watch emits updates, duplicate tag on same day is idempotent, source field respected).
 
 Step 6 — Events with recurrence (commit: "feat(core): events with RRULE expansion")
@@ -323,11 +323,11 @@ Suggestions are dismissible cards on Today — NEVER auto-modify data; every act
 TESTS: each rule unit-tested (fires, doesn't fire, action applies correctly, dismissal persists).
 
 Step 6 — Recipes & ingredients (commit: "feat(meals): recipe data layer")
-Repositories over ingredients/recipes/recipe_ingredients: CRUD, tag filtering, search. Recipe editor UI: name, slot, prep minutes, tag multi-select (quick, prep-ahead, high-protein, reza-shared, needs-oven + custom), ingredient rows (ingredient autocomplete-or-create, amount, unit), optional image, instructions. Macros columns exist but are hidden in v1 UI. Seed NOTHING — owner provides recipes later.
+Repositories over ingredients/recipes/recipe_ingredients: CRUD, tag filtering, search. Recipe editor UI: name, slot, prep minutes, tag multi-select (quick, prep-ahead, high-protein, partner-shared, needs-oven + custom), ingredient rows (ingredient autocomplete-or-create, amount, unit), optional image, instructions. Macros columns exist but are hidden in v1 UI. Seed NOTHING — owner provides recipes later.
 TESTS: CRUD, tag filter queries, ingredient dedup on autocomplete-create.
 
 Step 7 — Suggestion algorithm (commit: "feat(meals): weekly suggestions")
-Pure, fully unit-testable MealSuggester: input = 7 days of day_tags + recipe pool + recent meal history; constraints from design.md 4.4 (gym→high-protein dinner + post-gym-shake slot, work→prep-ahead/quick lunch, reza/linz→prefer reza-shared, no repeat within 3 days incl. previous week's tail); random pick among valid (injectable seed for tests); per-slot fallback when no recipe matches a constraint → relax preference-level constraints first, hard constraints produce an explicit "no match" the UI shows honestly.
+Pure, fully unit-testable MealSuggester: input = 7 days of day_tags + recipe pool + recent meal history; constraints from design.md 4.4 (gym→high-protein dinner + post-gym-shake slot, work→prep-ahead/quick lunch, partner/linz→prefer partner-shared, no repeat within 3 days incl. previous week's tail); random pick among valid (injectable seed for tests); per-slot fallback when no recipe matches a constraint → relax preference-level constraints first, hard constraints produce an explicit "no match" the UI shows honestly.
 TESTS: every constraint individually, combined-tags day, empty pool, fallback ordering, determinism under fixed seed, no-repeat window across week boundary.
 
 Step 8 — Weekly flow + meal UI (commit: "feat(meals): week grid and Sunday flow")

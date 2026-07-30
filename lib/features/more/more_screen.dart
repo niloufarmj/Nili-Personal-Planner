@@ -59,7 +59,7 @@ class MoreScreen extends ConsumerWidget {
               _MoreEntry(
                 icon: Icons.people_outline,
                 title: 'Partner Schedule',
-                subtitle: 'Reza\'s tags & shared events',
+                subtitle: 'Partner\'s tags & shared events',
                 color: DesignTokens.dustyBlue,
                 onTap: () => context.push('/partner'),
               ),

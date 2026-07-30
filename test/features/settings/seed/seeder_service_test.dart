@@ -136,7 +136,7 @@ void main() {
     expect(summary.habitsUpdated, equals(3));
     expect(summary.habitsInserted, equals(2));
 
-    // Verify debts: 1 inserted (Reza debt)
+    // Verify debts: 1 inserted (Partner debt)
     expect(summary.debtsInserted, equals(1));
   });
 

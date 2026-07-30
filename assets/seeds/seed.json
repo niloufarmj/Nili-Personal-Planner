@@ -7,7 +7,7 @@
     { "name": "travel", "color": "#BFD8C2", "kind": "location", "owner": "me" },
     { "name": "gym", "color": "#A8BFDD", "kind": "activity", "owner": "me" },
     { "name": "work", "color": "#C2BBF0", "kind": "activity", "owner": "me" },
-    { "name": "reza-day", "color": "#E7A6B7", "kind": "special", "owner": "me" }
+    { "name": "partner-day", "color": "#E7A6B7", "kind": "special", "owner": "me" }
   ],
   "collections": [
     {
@@ -312,6 +312,6 @@
     { "name": "Reading", "target_per_day": 1, "reminder_times": ["21:00"] }
   ],
   "debts": [
-    { "person": "Reza", "amount_cents": 170000, "direction": "i_owe", "note": "Verify current remaining amount before relying on this" }
+    { "person": "Partner", "amount_cents": 170000, "direction": "i_owe", "note": "Verify current remaining amount before relying on this" }
   ]
 }

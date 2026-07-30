@@ -134,11 +134,11 @@ void main() {
     expect(lunch?.recipe?.name, 'Any lunch');
   });
 
-  // ── Pref constraint: reza/linz day → reza-shared ─────────────────────────────
+  // ── Pref constraint: partner/linz day → partner-shared ─────────────────────────────
 
-  test('reza-day prefers reza-shared recipe', () {
+  test('partner-day prefers partner-shared recipe', () {
     final week = [
-      _day('2026-06-08', tags: ['reza-day']),
+      _day('2026-06-08', tags: ['partner-day']),
       ..._plainWeek().skip(1),
     ];
     final pool = [
@@ -146,7 +146,7 @@ void main() {
         id: 1,
         name: 'Shared pasta',
         slot: 'dinner',
-        tags: ['reza-shared'],
+        tags: ['partner-shared'],
       ),
       _recipe(id: 2, name: 'Solo steak', slot: 'dinner'),
     ];
@@ -156,7 +156,7 @@ void main() {
       recentHistory: [],
     );
     final dinner = result['2026-06-08']!['dinner'];
-    expect(dinner?.recipe?.tags, contains('reza-shared'));
+    expect(dinner?.recipe?.tags, contains('partner-shared'));
   });
 
   // ── Gym day: post-gym-shake slot added ────────────────────────────────────────

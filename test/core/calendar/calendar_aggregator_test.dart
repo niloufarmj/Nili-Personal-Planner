@@ -32,7 +32,7 @@ void main() {
 
     setUp(() async {
       db = _makeDb();
-      // Seed default tags (linz, salzburg, travel, gym, work, reza-day)
+      // Seed default tags (linz, salzburg, travel, gym, work, partner-day)
       await DayRepository(db).seedDefaultTagsIfNeeded();
     });
 

@@ -251,7 +251,7 @@ Future<void>  setTagByNameForRange(String tagName, DateTime start, DateTime end,
 |------|---------|
 | `'location'` | Full-cell overlay (linz / salzburg / travel) |
 | `'activity'` | Activity icon in cell (gym, work) |
-| `'special'` | Special marker (reza-day → heart icon) |
+| `'special'` | Special marker (partner-day → heart icon) |
 | `'partner'` | Partner-strip tag |
 
 ---

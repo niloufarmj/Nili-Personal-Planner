@@ -11,7 +11,8 @@ class DayContext {
 
   bool get isGymDay => tagNames.contains('gym');
   bool get isWorkDay => tagNames.contains('work');
-  bool get isRezaDay => tagNames.contains('reza-day');
+  bool get isPartnerDay => tagNames.contains('partner-day') || tagNames.contains('reza-day');
+  bool get isRezaDay => isPartnerDay;
   bool get isLinzDay => tagNames.contains('linz');
   bool get isTravelDay => tagNames.contains('travel');
 }
@@ -145,7 +146,7 @@ class MealSuggester {
   List<String> _prefTags(String slot, DayContext day) {
     final tags = <String>[];
     if (slot == 'lunch' && day.isWorkDay) tags.addAll(['prep-ahead', 'quick']);
-    if (day.isRezaDay || day.isLinzDay) tags.add('reza-shared');
+    if (day.isPartnerDay || day.isLinzDay) tags.addAll(['partner-shared', 'reza-shared']);
     return tags;
   }
 

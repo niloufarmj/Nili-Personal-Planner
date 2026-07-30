@@ -79,7 +79,7 @@ Rules live in code (not DB) for v1; ~5–10 rules expected.
 -- Tags define day types. Owner distinguishes user vs. partner overlays.
 CREATE TABLE tags (
   id          INTEGER PRIMARY KEY,
-  name        TEXT NOT NULL,            -- 'linz', 'salzburg', 'travel', 'gym', 'work', 'reza-day', ...
+  name        TEXT NOT NULL,            -- 'linz', 'salzburg', 'travel', 'gym', 'work', 'partner-day', ...
   color       TEXT NOT NULL,            -- hex; e.g. linz=#F5C518, salzburg=#7C5CBF, travel=#3EBF6F
   kind        TEXT NOT NULL,            -- 'location' | 'activity' | 'special' | 'partner'
   owner       TEXT NOT NULL DEFAULT 'me'  -- 'me' | 'partner'
@@ -245,7 +245,7 @@ CREATE TABLE recipes (
   name        TEXT NOT NULL,
   meal_slot   TEXT NOT NULL,            -- 'breakfast' | 'lunch' | 'dinner' | 'any'
   prep_minutes INTEGER,
-  tags        TEXT NOT NULL,            -- JSON: ['quick','prep-ahead','high-protein','reza-shared','needs-oven']
+  tags        TEXT NOT NULL,            -- JSON: ['quick','prep-ahead','high-protein','partner-shared','needs-oven']
   instructions TEXT,
   image       TEXT
 );
@@ -268,11 +268,11 @@ CREATE TABLE meal_slots (
 ```
 
 **Suggestion algorithm (no AI — pure filtering):**
-1. Sunday reminder: "Confirm next week's day tags" (linz/salzburg/gym/work/reza per day).
+1. Sunday reminder: "Confirm next week's day tags" (linz/salzburg/gym/work/partner per day).
 2. For each of 21 slots, derive constraints from day tags:
    - gym day → dinner must include `high-protein`; add `post-gym-shake` slot
    - work day → lunch must be `prep-ahead` or `quick`
-   - reza/linz day → prefer `reza-shared`
+   - partner/linz day → prefer `partner-shared`
    - salzburg-alone day → any
 3. Filter recipe pool per slot by constraints; exclude recipes used in the last 3 days; pick randomly.
 4. Show the week grid; user swaps any cell from the valid pool; accepts.
