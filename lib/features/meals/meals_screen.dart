@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -9,6 +8,7 @@ import 'package:intl/intl.dart';
 import '../../core/db/database.dart';
 import '../../core/db/repositories/day_repository.dart';
 import '../../core/design/design.dart';
+import '../../core/services/image_service.dart';
 import 'groceries_service.dart';
 import 'meal_slot_repository.dart';
 import 'meal_suggester.dart';
@@ -786,7 +786,7 @@ class RecipesScreen extends ConsumerWidget {
             separatorBuilder: (_, __) => const SizedBox(height: 8),
             itemBuilder: (_, i) {
               final r = recipes[i];
-              final hasImage = r.image != null && File(r.image!).existsSync();
+              final hasImage = hasDisplayableImage(r.image);
               final calStr = r.calories != null ? '🔥 ${r.calories} kcal  ' : '';
               final proteinStr =
                   r.proteinGrams != null ? '🥩 ${r.proteinGrams}g protein  ' : '';
@@ -802,7 +802,7 @@ class RecipesScreen extends ConsumerWidget {
                       height: 50,
                       color: DesignTokens.lineLight.withValues(alpha: 0.3),
                       child: hasImage
-                          ? Image.file(File(r.image!), fit: BoxFit.cover)
+                          ? Image(image: imageProviderFor(r.image)!, fit: BoxFit.cover)
                           : const Icon(
                               Icons.restaurant_menu,
                               color: DesignTokens.peach,

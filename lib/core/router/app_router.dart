@@ -10,6 +10,7 @@ import '../../features/finance/finance_screen.dart';
 import '../../features/finance/recurring_screen.dart';
 import '../../features/fitness/fitness_screen.dart';
 import '../../features/fitness/fitness_log_screen.dart';
+import '../db/database.dart';
 import '../../features/gym/gym_screen.dart';
 import '../../features/habits/habits_screen.dart';
 import '../../features/lists/lists_screen.dart';
@@ -118,7 +119,7 @@ final List<RouteBase> agentRoutes = [
     pageBuilder: (context, state) => _fadeThroughPage(
       context: context,
       state: state,
-      child: const FitnessLogScreen(),
+      child: FitnessLogScreen(existing: state.extra as Measurement?),
     ),
   ),
   GoRoute(

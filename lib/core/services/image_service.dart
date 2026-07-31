@@ -1,5 +1,8 @@
+import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/material.dart' show FileImage, ImageProvider, MemoryImage;
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -7,8 +10,33 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 
+/// Prefix marking an image stored inline as base64 (used on web, where
+/// there's no writable filesystem to save picked images to as files).
+const _dataUriPrefix = 'data:image';
+
+/// Whether [path] refers to an image that can actually be rendered on this
+/// platform. Native file paths only resolve to real files off web.
+bool hasDisplayableImage(String? path) {
+  if (path == null || path.isEmpty) return false;
+  if (path.startsWith(_dataUriPrefix)) return true;
+  if (kIsWeb) return false;
+  return File(path).existsSync();
+}
+
+/// Builds an [ImageProvider] for a path returned by [ImageService.pick] /
+/// [ImageService.saveBytes], or null if it can't be displayed here.
+ImageProvider? imageProviderFor(String? path) {
+  if (!hasDisplayableImage(path)) return null;
+  if (path!.startsWith(_dataUriPrefix)) {
+    return MemoryImage(base64Decode(path.substring(path.indexOf(',') + 1)));
+  }
+  return FileImage(File(path));
+}
+
 /// Manages picking, compressing, storing and deleting local images.
-/// All images are saved under appDocDir/images/.
+/// On native platforms, images are saved under appDocDir/images/. On web,
+/// where there's no writable filesystem, they're kept inline as base64
+/// data URIs and stored directly in the database column.
 class ImageService {
   ImageService();
 
@@ -17,8 +45,8 @@ class ImageService {
 
   // ── Pick ──────────────────────────────────────────────────────────────────
 
-  /// Open the image picker (gallery or camera) and return a saved local path,
-  /// or null if the user cancelled.
+  /// Open the image picker (gallery or camera) and return a saved local path
+  /// (or, on web, a data URI), or null if the user cancelled.
   Future<String?> pick({ImageSource source = ImageSource.gallery}) async {
     final xFile = await _picker.pickImage(
       source: source,
@@ -27,6 +55,10 @@ class ImageService {
       maxHeight: 2048,
     );
     if (xFile == null) return null;
+    if (kIsWeb) {
+      final bytes = await xFile.readAsBytes();
+      return '$_dataUriPrefix/jpeg;base64,${base64Encode(bytes)}';
+    }
     return _compressAndSave(xFile.path);
   }
 
@@ -58,6 +90,9 @@ class ImageService {
 
   /// Save raw bytes (e.g. from a backup restore) as a local image file.
   Future<String> saveBytes(List<int> bytes, {String? name}) async {
+    if (kIsWeb) {
+      return '$_dataUriPrefix/jpeg;base64,${base64Encode(bytes)}';
+    }
     final dir = await _imagesDir();
     final fileName = name ?? '${_uuid.v4()}.jpg';
     final file = File(p.join(dir.path, fileName));
@@ -69,6 +104,7 @@ class ImageService {
 
   /// Delete the image at [localPath]. Silently ignores missing files.
   Future<void> delete(String localPath) async {
+    if (kIsWeb || localPath.startsWith(_dataUriPrefix)) return;
     final file = File(localPath);
     if (await file.exists()) await file.delete();
   }
@@ -77,6 +113,7 @@ class ImageService {
 
   /// Returns all image paths currently stored in the images directory.
   Future<List<String>> listAll() async {
+    if (kIsWeb) return [];
     final dir = await _imagesDir();
     final entities = await dir.list().toList();
     return entities.whereType<File>().map((f) => f.path).toList();

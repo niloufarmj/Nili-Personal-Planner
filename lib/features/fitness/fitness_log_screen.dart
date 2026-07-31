@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,7 +10,10 @@ import '../../core/services/image_service.dart';
 import 'fitness_repository.dart';
 
 class FitnessLogScreen extends ConsumerStatefulWidget {
-  const FitnessLogScreen({super.key});
+  const FitnessLogScreen({super.key, this.existing});
+
+  /// The measurement being edited, or null when logging a new entry.
+  final Measurement? existing;
 
   @override
   ConsumerState<FitnessLogScreen> createState() => _FitnessLogScreenState();
@@ -28,8 +30,28 @@ class _FitnessLogScreenState extends ConsumerState<FitnessLogScreen> {
 
   DateTime _date = DateTime.now();
   final List<String> _photos = [];
+  final List<String> _originalPhotos = [];
   final List<String> _sessionPickedPhotos = [];
+  final List<String> _pendingDeletePhotos = [];
   bool _saved = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final existing = widget.existing;
+    if (existing != null) {
+      _date = DateTime.parse(existing.date);
+      _weightCtrl.text = existing.weightKg?.toString() ?? '';
+      final fields = existing.fields ?? {};
+      _waistCtrl.text = fields['waist_cm']?.toString() ?? '';
+      _chestCtrl.text = fields['chest_cm']?.toString() ?? '';
+      _hipCtrl.text = fields['hip_cm']?.toString() ?? '';
+      _bicepCtrl.text = fields['bicep_cm']?.toString() ?? '';
+      _thighCtrl.text = fields['thigh_cm']?.toString() ?? '';
+      _photos.addAll(existing.photos ?? []);
+      _originalPhotos.addAll(existing.photos ?? []);
+    }
+  }
 
   @override
   void dispose() {
@@ -57,7 +79,7 @@ class _FitnessLogScreenState extends ConsumerState<FitnessLogScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Log Measurements'),
+        title: Text(widget.existing == null ? 'Log Measurements' : 'Edit Entry'),
       ),
       body: Form(
         key: _formKey,
@@ -203,8 +225,8 @@ class _FitnessLogScreenState extends ConsumerState<FitnessLogScreen> {
                           children: [
                             ClipRRect(
                               borderRadius: BorderRadius.circular(12),
-                              child: Image.file(
-                                File(path),
+                              child: Image(
+                                image: imageProviderFor(path)!,
                                 width: 90,
                                 height: 90,
                                 fit: BoxFit.cover,
@@ -354,8 +376,14 @@ class _FitnessLogScreenState extends ConsumerState<FitnessLogScreen> {
     setState(() {
       _photos.remove(path);
     });
-    ref.read(imageServiceProvider).delete(path);
-    _sessionPickedPhotos.remove(path);
+    if (_sessionPickedPhotos.remove(path)) {
+      // Newly picked this session and never saved — safe to delete now.
+      ref.read(imageServiceProvider).delete(path);
+    } else if (_originalPhotos.contains(path)) {
+      // Was part of the saved entry — only delete the file once the removal
+      // is actually confirmed by saving, so cancelling leaves it intact.
+      _pendingDeletePhotos.add(path);
+    }
   }
 
   Future<void> _submit() async {
@@ -380,14 +408,32 @@ class _FitnessLogScreenState extends ConsumerState<FitnessLogScreen> {
 
     _saved = true; // Mark as saved so dispose doesn't clean up photos
 
-    await ref.read(fitnessRepositoryProvider).createMeasurement(
-          MeasurementsCompanion.insert(
-            date: dateStr,
-            weightKg: Value(weight),
-            fields: Value(fields.isEmpty ? null : fields),
-            photos: Value(_photos.isEmpty ? null : _photos),
-          ),
-        );
+    final imageService = ref.read(imageServiceProvider);
+    for (final path in _pendingDeletePhotos) {
+      await imageService.delete(path);
+    }
+
+    final repo = ref.read(fitnessRepositoryProvider);
+    final existing = widget.existing;
+    if (existing == null) {
+      await repo.createMeasurement(
+        MeasurementsCompanion.insert(
+          date: dateStr,
+          weightKg: Value(weight),
+          fields: Value(fields.isEmpty ? null : fields),
+          photos: Value(_photos.isEmpty ? null : _photos),
+        ),
+      );
+    } else {
+      await repo.updateMeasurement(
+        existing.copyWith(
+          date: dateStr,
+          weightKg: Value(weight),
+          fields: Value(fields.isEmpty ? null : fields),
+          photos: Value(_photos.isEmpty ? null : _photos),
+        ),
+      );
+    }
 
     if (mounted) Navigator.of(context).pop();
   }

@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -165,13 +163,16 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> {
                     color: isDark ? DesignTokens.lineDark : DesignTokens.lineLight,
                   ),
                 ),
-                child: _imagePath != null && File(_imagePath!).existsSync()
+                child: hasDisplayableImage(_imagePath)
                     ? ClipRRect(
                         borderRadius: BorderRadius.circular(16),
                         child: Stack(
                           fit: StackFit.expand,
                           children: [
-                            Image.file(File(_imagePath!), fit: BoxFit.cover),
+                            Image(
+                              image: imageProviderFor(_imagePath)!,
+                              fit: BoxFit.cover,
+                            ),
                             Positioned(
                               right: 12,
                               bottom: 12,

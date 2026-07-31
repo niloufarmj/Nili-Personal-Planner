@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../core/db/database.dart';
 import '../../core/design/design.dart';
+import '../../core/services/image_service.dart';
 import 'groceries_service.dart';
 import 'ingredient_repository.dart';
 
@@ -138,8 +137,7 @@ class _IngredientsScreenState extends ConsumerState<IngredientsScreen> {
                   separatorBuilder: (_, __) => const SizedBox(height: 8),
                   itemBuilder: (context, idx) {
                     final item = filtered[idx];
-                    final hasImage =
-                        item.image != null && File(item.image!).existsSync();
+                    final hasImage = hasDisplayableImage(item.image);
                     final estCostStr = item.estimatedCost != null
                         ? ' · Est. \$${item.estimatedCost!.toStringAsFixed(2)}'
                         : '';
@@ -166,7 +164,7 @@ class _IngredientsScreenState extends ConsumerState<IngredientsScreen> {
                               backgroundColor:
                                   DesignTokens.peach.withValues(alpha: 0.2),
                               backgroundImage:
-                                  hasImage ? FileImage(File(item.image!)) : null,
+                                  hasImage ? imageProviderFor(item.image) : null,
                               child: !hasImage
                                   ? Text(
                                       _categoryEmoji(item.category),
@@ -247,21 +245,18 @@ class _IngredientsScreenState extends ConsumerState<IngredientsScreen> {
                 // Image picker avatar
                 GestureDetector(
                   onTap: () async {
-                    final picker = ImagePicker();
-                    final picked =
-                        await picker.pickImage(source: ImageSource.gallery);
+                    final picked = await ref
+                        .read(imageServiceProvider)
+                        .pick(source: ImageSource.gallery);
                     if (picked != null) {
-                      setDialogState(() => imagePath = picked.path);
+                      setDialogState(() => imagePath = picked);
                     }
                   },
                   child: CircleAvatar(
                     radius: 32,
                     backgroundColor: DesignTokens.peach.withValues(alpha: 0.2),
-                    backgroundImage: imagePath != null &&
-                            File(imagePath!).existsSync()
-                        ? FileImage(File(imagePath!))
-                        : null,
-                    child: imagePath == null || !File(imagePath!).existsSync()
+                    backgroundImage: imageProviderFor(imagePath),
+                    child: !hasDisplayableImage(imagePath)
                         ? const Icon(Icons.add_a_photo, size: 24)
                         : null,
                   ),

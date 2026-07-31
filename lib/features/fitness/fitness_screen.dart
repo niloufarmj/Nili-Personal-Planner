@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:drift/drift.dart' show Value;
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
@@ -254,40 +253,44 @@ class _MeasurementsTab extends ConsumerWidget {
 
 // ── Weight chart ──────────────────────────────────────────────────────────────
 
-class _WeightChart extends StatelessWidget {
+class _MetricDef {
+  const _MetricDef(this.key, this.label, this.unit);
+  final String key;
+  final String label;
+  final String unit;
+}
+
+const _chartMetrics = [
+  _MetricDef('weightKg', 'Weight', 'kg'),
+  _MetricDef('waist_cm', 'Waist', 'cm'),
+  _MetricDef('chest_cm', 'Chest', 'cm'),
+  _MetricDef('hip_cm', 'Hip', 'cm'),
+  _MetricDef('bicep_cm', 'Bicep', 'cm'),
+  _MetricDef('thigh_cm', 'Thigh', 'cm'),
+];
+
+double? _metricValue(Measurement m, String key) {
+  if (key == 'weightKg') return m.weightKg;
+  return (m.fields?[key] as num?)?.toDouble();
+}
+
+class _WeightChart extends StatefulWidget {
   const _WeightChart({required this.measurements});
 
   final List<Measurement> measurements;
 
   @override
+  State<_WeightChart> createState() => _WeightChartState();
+}
+
+class _WeightChartState extends State<_WeightChart> {
+  _MetricDef _selected = _chartMetrics.first;
+
+  @override
   Widget build(BuildContext context) {
-    final points = measurements.reversed
-        .where((m) => m.weightKg != null)
+    final points = widget.measurements.reversed
+        .where((m) => _metricValue(m, _selected.key) != null)
         .toList();
-
-    if (points.length < 2) {
-      return const AppCard(
-        child: Padding(
-          padding: EdgeInsets.all(16),
-          child: Center(
-            child: Text(
-              'Add at least 2 logs to view weight trend chart.',
-              style: TextStyle(color: Colors.grey),
-            ),
-          ),
-        ),
-      );
-    }
-
-    final spots = points.indexed.map((e) {
-      final (i, m) = e;
-      return FlSpot(i.toDouble(), m.weightKg!);
-    }).toList();
-
-    final minW =
-        points.map((m) => m.weightKg!).reduce((a, b) => a < b ? a : b) - 2;
-    final maxW =
-        points.map((m) => m.weightKg!).reduce((a, b) => a > b ? a : b) + 2;
 
     return AppCard(
       child: Padding(
@@ -295,71 +298,116 @@ class _WeightChart extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: _chartMetrics.map((metric) {
+                  final selected = metric.key == _selected.key;
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 6),
+                    child: ChoiceChip(
+                      label: Text(metric.label),
+                      selected: selected,
+                      visualDensity: VisualDensity.compact,
+                      onSelected: (val) {
+                        if (val) setState(() => _selected = metric);
+                      },
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+            const SizedBox(height: 12),
             Text(
-              'Weight Trend (kg)',
+              '${_selected.label} Trend (${_selected.unit})',
               style: Theme.of(context).textTheme.titleSmall,
             ),
             const SizedBox(height: 16),
-            SizedBox(
-              height: 180,
-              child: LineChart(
-                LineChartData(
-                  minY: minW,
-                  maxY: maxW,
-                  lineBarsData: [
-                    LineChartBarData(
-                      spots: spots,
-                      isCurved: true,
-                      color: Theme.of(context).colorScheme.primary,
-                      barWidth: 3,
-                      dotData: const FlDotData(show: true),
-                      belowBarData: BarAreaData(
-                        show: true,
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.primary.withAlpha(20),
-                      ),
-                    ),
-                  ],
-                  titlesData: FlTitlesData(
-                    bottomTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                        showTitles: true,
-                        getTitlesWidget: (v, _) {
-                          final i = v.toInt();
-                          if (i < 0 || i >= points.length) {
-                            return const SizedBox.shrink();
-                          }
-                          final d = points[i].date;
-                          return Padding(
-                            padding: const EdgeInsets.only(top: 4),
-                            child: Text(
-                              d.substring(5, 10),
-                              style: const TextStyle(fontSize: 8),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    leftTitles: const AxisTitles(
-                      sideTitles: SideTitles(
-                        showTitles: true,
-                        reservedSize: 32,
-                      ),
-                    ),
-                    rightTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
-                    ),
-                    topTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
-                    ),
+            if (points.length < 2)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 24),
+                child: Center(
+                  child: Text(
+                    'Add at least 2 logs with ${_selected.label.toLowerCase()} data to view this trend.',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(color: Colors.grey),
                   ),
-                  gridData: const FlGridData(show: false),
-                  borderData: FlBorderData(show: false),
                 ),
+              )
+            else
+              _buildChart(context, points),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildChart(BuildContext context, List<Measurement> points) {
+    final spots = points.indexed.map((e) {
+      final (i, m) = e;
+      return FlSpot(i.toDouble(), _metricValue(m, _selected.key)!);
+    }).toList();
+
+    final values = points.map((m) => _metricValue(m, _selected.key)!);
+    final minV = values.reduce((a, b) => a < b ? a : b) - 2;
+    final maxV = values.reduce((a, b) => a > b ? a : b) + 2;
+
+    return SizedBox(
+      height: 180,
+      child: LineChart(
+        LineChartData(
+          minY: minV,
+          maxY: maxV,
+          lineBarsData: [
+            LineChartBarData(
+              spots: spots,
+              isCurved: true,
+              color: Theme.of(context).colorScheme.primary,
+              barWidth: 3,
+              dotData: const FlDotData(show: true),
+              belowBarData: BarAreaData(
+                show: true,
+                color: Theme.of(
+                  context,
+                ).colorScheme.primary.withAlpha(20),
               ),
             ),
           ],
+          titlesData: FlTitlesData(
+            bottomTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                getTitlesWidget: (v, _) {
+                  final i = v.toInt();
+                  if (i < 0 || i >= points.length) {
+                    return const SizedBox.shrink();
+                  }
+                  final d = points[i].date;
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      d.substring(5, 10),
+                      style: const TextStyle(fontSize: 8),
+                    ),
+                  );
+                },
+              ),
+            ),
+            leftTitles: const AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                reservedSize: 32,
+              ),
+            ),
+            rightTitles: const AxisTitles(
+              sideTitles: SideTitles(showTitles: false),
+            ),
+            topTitles: const AxisTitles(
+              sideTitles: SideTitles(showTitles: false),
+            ),
+          ),
+          gridData: const FlGridData(show: false),
+          borderData: FlBorderData(show: false),
         ),
       ),
     );
@@ -382,6 +430,7 @@ class _MeasurementCard extends ConsumerWidget {
 
     return AppCard(
       child: ListTile(
+        onTap: () => context.push(Routes.fitnessLog, extra: measurement),
         title: Text(formattedDate),
         subtitle: Padding(
           padding: const EdgeInsets.only(top: 4),
@@ -493,7 +542,10 @@ class _PhotosTab extends ConsumerWidget {
                 onTap: () => _viewPhoto(context, photo),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(8),
-                  child: Image.file(File(photo.path), fit: BoxFit.cover),
+                  child: Image(
+                    image: imageProviderFor(photo.path)!,
+                    fit: BoxFit.cover,
+                  ),
                 ),
               );
             },
@@ -510,7 +562,7 @@ class _PhotosTab extends ConsumerWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Image.file(File(photo.path)),
+            Image(image: imageProviderFor(photo.path)!),
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Text('Logged on ${photo.date}'),

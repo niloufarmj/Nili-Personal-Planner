@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,6 +5,7 @@ import 'package:intl/intl.dart';
 
 import '../../../core/db/database.dart';
 import '../../../core/design/design.dart';
+import '../../../core/services/image_service.dart';
 import '../../meals/groceries_service.dart';
 import '../repositories/collection_repository.dart';
 import '../repositories/item_repository.dart';
@@ -266,8 +265,7 @@ class _ItemTileState extends ConsumerState<_ItemTile> {
 
     final isDone = _isItemDone(item, template);
     final isGroceries = template.id == 'groceries' || widget.collection.name == 'Groceries';
-    final hasImage =
-        item.imageBefore != null && File(item.imageBefore!).existsSync();
+    final hasImage = hasDisplayableImage(item.imageBefore);
 
     return Dismissible(
       key: ValueKey(item.id),
@@ -392,7 +390,7 @@ class _ItemTileState extends ConsumerState<_ItemTile> {
                     padding: const EdgeInsets.only(left: 8),
                     child: CircleAvatar(
                       radius: 16,
-                      backgroundImage: FileImage(File(item.imageBefore!)),
+                      backgroundImage: imageProviderFor(item.imageBefore),
                     ),
                   ),
                 // Subtask expand toggle
