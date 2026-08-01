@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -109,9 +108,7 @@ class _WorktimeScreenState extends ConsumerState<WorktimeScreen> {
       appBar: AppBar(
         title: Text(
           'Work Time',
-          style: GoogleFonts.fraunces(
-            fontSize: DesignTokens.fontTitle,
-            fontWeight: FontWeight.w600,
+          style: theme.textTheme.headlineLarge?.copyWith(
             color: isDark ? DesignTokens.inkDark : DesignTokens.inkLight,
           ),
         ),
@@ -337,10 +334,10 @@ class _TimerCardState extends ConsumerState<_TimerCard> {
                 Center(
                   child: Text(
                     _formatDuration(_elapsed),
-                    style: GoogleFonts.fraunces(
+                    style: theme.textTheme.displayLarge?.copyWith(
                       fontSize: 48,
-                      fontWeight: FontWeight.w600,
                       color: inkColor,
+                      letterSpacing: 0,
                       fontFeatures: const [FontFeature.tabularFigures()],
                     ),
                   ),

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/db/database.dart';
@@ -23,9 +22,7 @@ class TravelPlannerScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(
           'Travel Planner',
-          style: GoogleFonts.fraunces(
-            fontSize: DesignTokens.fontTitle,
-            fontWeight: FontWeight.w600,
+          style: theme.textTheme.headlineLarge?.copyWith(
             color: isDark ? DesignTokens.inkDark : DesignTokens.inkLight,
           ),
         ),

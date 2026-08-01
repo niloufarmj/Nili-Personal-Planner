@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/calendar/calendar_aggregator.dart';
 import '../../core/calendar/calendar_day_data.dart';
@@ -348,11 +347,7 @@ class _CustomCalendarHeader extends StatelessWidget {
               headerTitle,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: GoogleFonts.fraunces(
-                fontSize: DesignTokens.fontTitle,
-                fontWeight: FontWeight.w600,
-                color: inkColor,
-              ),
+              style: theme.textTheme.headlineLarge?.copyWith(color: inkColor),
             ),
           ),
           Row(

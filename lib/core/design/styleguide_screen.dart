@@ -27,14 +27,14 @@ class StyleguideScreen extends StatelessWidget {
           _buildThemeSection(
             context,
             'Light Theme',
-            AppTheme.light,
+            AppTheme.light(),
             Colors.white,
           ),
           const SizedBox(height: 40),
           _buildThemeSection(
             context,
             'Dark Theme',
-            AppTheme.dark,
+            AppTheme.dark(),
             const Color(0xFF1E1E26),
           ),
         ],

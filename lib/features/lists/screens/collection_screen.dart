@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/db/database.dart';
@@ -51,16 +52,22 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
           );
         }
         final template = TemplateRegistry.get(collection.template);
-        final isGroceries = collection.template == 'groceries' || collection.name == 'Groceries';
+        final isGroceries =
+            collection.template == 'groceries' ||
+            collection.name == 'Groceries';
 
         // Auto-sync ingredients ONLY if this is a dedicated Groceries collection
         if (isGroceries) {
           Future.microtask(
             () => ref
                 .read(groceriesServiceProvider)
-                .syncAllIngredientsToGroceriesList(targetCollectionId: collection.id),
+                .syncAllIngredientsToGroceriesList(
+                  targetCollectionId: collection.id,
+                ),
           );
         }
+
+        final hasCover = hasDisplayableImage(collection.coverImage);
 
         return Scaffold(
           appBar: AppBar(
@@ -73,16 +80,38 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
                   onPressed: () async {
                     await ref
                         .read(groceriesServiceProvider)
-                        .syncAllIngredientsToGroceriesList(targetCollectionId: collection.id);
+                        .syncAllIngredientsToGroceriesList(
+                          targetCollectionId: collection.id,
+                        );
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                          content: Text('Synced all catalog ingredients into Groceries list!'),
+                          content: Text(
+                            'Synced all catalog ingredients into Groceries list!',
+                          ),
                         ),
                       );
                     }
                   },
                 ),
+              PopupMenuButton<String>(
+                icon: const Icon(Icons.more_vert),
+                onSelected: (val) =>
+                    _handleCoverAction(context, ref, collection, val),
+                itemBuilder: (_) => [
+                  PopupMenuItem(
+                    value: 'set_cover',
+                    child: Text(
+                      hasCover ? 'Change Header Photo' : 'Set Header Photo',
+                    ),
+                  ),
+                  if (hasCover)
+                    const PopupMenuItem(
+                      value: 'remove_cover',
+                      child: Text('Remove Header Photo'),
+                    ),
+                ],
+              ),
             ],
           ),
           floatingActionButton: FloatingActionButton(
@@ -90,91 +119,131 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
             onPressed: () => _openAddSheet(context, ref, collection, template),
             child: const Icon(Icons.add),
           ),
-          body: itemsAsync.when(
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (e, _) => Center(child: Text('Error: $e')),
-            data: (items) {
-              if (items.isEmpty) {
-                return EmptyState(
-                  icon: template.icon,
-                  message: 'No items yet',
-                  hint: isGroceries
-                      ? 'Tap "Populate All Ingredients" or + to add items.'
-                      : 'Tap + to add your first ${template.label.toLowerCase()} item.',
-                  action: () async {
-                    if (isGroceries) {
-                      await ref
-                          .read(groceriesServiceProvider)
-                          .syncAllIngredientsToGroceriesList(targetCollectionId: collection.id);
-                    } else {
-                      _openAddSheet(context, ref, collection, template);
+          body: Column(
+            children: [
+              if (hasCover)
+                _CollectionHeaderBanner(coverImage: collection.coverImage!),
+              Expanded(
+                child: itemsAsync.when(
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
+                  error: (e, _) => Center(child: Text('Error: $e')),
+                  data: (items) {
+                    if (items.isEmpty) {
+                      return EmptyState(
+                        icon: template.icon,
+                        message: 'No items yet',
+                        hint: isGroceries
+                            ? 'Tap "Populate All Ingredients" or + to add items.'
+                            : 'Tap + to add your first ${template.label.toLowerCase()} item.',
+                        action: () async {
+                          if (isGroceries) {
+                            await ref
+                                .read(groceriesServiceProvider)
+                                .syncAllIngredientsToGroceriesList(
+                                  targetCollectionId: collection.id,
+                                );
+                          } else {
+                            _openAddSheet(context, ref, collection, template);
+                          }
+                        },
+                        actionLabel: isGroceries
+                            ? 'Populate All Ingredients'
+                            : 'Add item',
+                      );
                     }
-                  },
-                  actionLabel: isGroceries
-                      ? 'Populate All Ingredients'
-                      : 'Add item',
-                );
-              }
 
-              // Apply stock filter for groceries collections only
-              final filteredItems = items.where((i) {
-                if (!isGroceries) return true;
-                final isDone = _isItemDone(i, template);
-                if (_stockFilter == 'need') return !isDone;
-                if (_stockFilter == 'have') return isDone;
-                return true;
-              }).toList();
+                    // Apply stock filter for groceries collections only
+                    final filteredItems = items.where((i) {
+                      if (!isGroceries) return true;
+                      final isDone = _isItemDone(i, template);
+                      if (_stockFilter == 'need') return !isDone;
+                      if (_stockFilter == 'have') return isDone;
+                      return true;
+                    }).toList();
 
-              return Column(
-                children: [
-                  if (isGroceries) ...[
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
-                      child: SegmentedButton<String>(
-                        segments: const [
-                          ButtonSegment<String>(
-                            value: 'all',
-                            label: Text('All'),
-                            icon: Icon(Icons.format_list_bulleted, size: 16),
-                          ),
-                          ButtonSegment<String>(
-                            value: 'need',
-                            label: Text('Need to buy 🛒'),
-                          ),
-                          ButtonSegment<String>(
-                            value: 'have',
-                            label: Text('In stock ✅'),
+                    return Column(
+                      children: [
+                        if (isGroceries) ...[
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
+                            child: SegmentedButton<String>(
+                              segments: const [
+                                ButtonSegment<String>(
+                                  value: 'all',
+                                  label: Text('All'),
+                                  icon: Icon(
+                                    Icons.format_list_bulleted,
+                                    size: 16,
+                                  ),
+                                ),
+                                ButtonSegment<String>(
+                                  value: 'need',
+                                  label: Text('Need to buy 🛒'),
+                                ),
+                                ButtonSegment<String>(
+                                  value: 'have',
+                                  label: Text('In stock ✅'),
+                                ),
+                              ],
+                              selected: {_stockFilter},
+                              onSelectionChanged: (sel) {
+                                setState(() => _stockFilter = sel.first);
+                              },
+                            ),
                           ),
                         ],
-                        selected: {_stockFilter},
-                        onSelectionChanged: (sel) {
-                          setState(() => _stockFilter = sel.first);
-                        },
-                      ),
-                    ),
-                  ],
-                  Expanded(
-                    child: filteredItems.isEmpty
-                        ? EmptyState(
-                            icon: Icons.shopping_bag_outlined,
-                            message: _stockFilter == 'need'
-                                ? 'Everything is in stock! 🎉'
-                                : 'No items matching filter',
-                            hint: 'Switch tab or tap + to add items',
-                          )
-                        : _ItemList(
-                            items: filteredItems,
-                            collection: collection,
-                            template: template,
-                          ),
-                  ),
-                ],
-              );
-            },
+                        Expanded(
+                          child: filteredItems.isEmpty
+                              ? EmptyState(
+                                  icon: Icons.shopping_bag_outlined,
+                                  message: _stockFilter == 'need'
+                                      ? 'Everything is in stock! 🎉'
+                                      : 'No items matching filter',
+                                  hint: 'Switch tab or tap + to add items',
+                                )
+                              : _ItemList(
+                                  items: filteredItems,
+                                  collection: collection,
+                                  template: template,
+                                ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
         );
       },
     );
+  }
+
+  Future<void> _handleCoverAction(
+    BuildContext context,
+    WidgetRef ref,
+    Collection collection,
+    String action,
+  ) async {
+    final repo = ref.read(collectionRepositoryProvider);
+    final imageService = ref.read(imageServiceProvider);
+    final oldCover = collection.coverImage;
+
+    if (action == 'set_cover') {
+      final picked = await imageService.pick(source: ImageSource.gallery);
+      if (picked == null) return;
+      await repo.setCoverImage(collection.id, picked);
+      if (oldCover != null) await imageService.delete(oldCover);
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Header photo updated')));
+      }
+    } else if (action == 'remove_cover') {
+      await repo.setCoverImage(collection.id, null);
+      if (oldCover != null) await imageService.delete(oldCover);
+    }
   }
 
   Future<void> _openAddSheet(
@@ -187,6 +256,32 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
       context: context,
       isScrollControlled: true,
       builder: (_) => ItemEditSheet(collection: collection, template: template),
+    );
+  }
+}
+
+// ── Header banner ─────────────────────────────────────────────────────────────
+
+/// Faint cover-photo banner shown at the top of a list's own screen.
+/// Height is fixed and modest so it never crowds out the item list on a
+/// phone-sized viewport.
+class _CollectionHeaderBanner extends StatelessWidget {
+  const _CollectionHeaderBanner({required this.coverImage});
+
+  final String coverImage;
+
+  @override
+  Widget build(BuildContext context) {
+    final image = imageProviderFor(coverImage);
+    if (image == null) return const SizedBox.shrink();
+
+    return SizedBox(
+      height: 110,
+      width: double.infinity,
+      child: Opacity(
+        opacity: 0.4,
+        child: Image(image: image, fit: BoxFit.cover),
+      ),
     );
   }
 }
@@ -264,7 +359,8 @@ class _ItemTileState extends ConsumerState<_ItemTile> {
     final repo = ref.read(itemRepositoryProvider);
 
     final isDone = _isItemDone(item, template);
-    final isGroceries = template.id == 'groceries' || widget.collection.name == 'Groceries';
+    final isGroceries =
+        template.id == 'groceries' || widget.collection.name == 'Groceries';
     final hasImage = hasDisplayableImage(item.imageBefore);
 
     return Dismissible(
@@ -295,7 +391,8 @@ class _ItemTileState extends ConsumerState<_ItemTile> {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         // For groceries template: tap ONLY toggles state
         // For standard shopping & other templates: tap opens edit/description sheet
-        onTap: () => isGroceries ? _handleStatusToggle() : _openEditSheet(context),
+        onTap: () =>
+            isGroceries ? _handleStatusToggle() : _openEditSheet(context),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -340,7 +437,10 @@ class _ItemTileState extends ConsumerState<_ItemTile> {
                         children: [
                           if (isGroceries)
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
                               decoration: BoxDecoration(
                                 color: isDone
                                     ? Colors.green.withValues(alpha: 0.15)
@@ -355,9 +455,13 @@ class _ItemTileState extends ConsumerState<_ItemTile> {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Icon(
-                                    isDone ? Icons.check_circle : Icons.remove_shopping_cart,
+                                    isDone
+                                        ? Icons.check_circle
+                                        : Icons.remove_shopping_cart,
                                     size: 10,
-                                    color: isDone ? Colors.green : Colors.orange,
+                                    color: isDone
+                                        ? Colors.green
+                                        : Colors.orange,
                                   ),
                                   const SizedBox(width: 3),
                                   Text(
@@ -365,7 +469,9 @@ class _ItemTileState extends ConsumerState<_ItemTile> {
                                     style: TextStyle(
                                       fontSize: 10,
                                       fontWeight: FontWeight.bold,
-                                      color: isDone ? Colors.green : Colors.orange,
+                                      color: isDone
+                                          ? Colors.green
+                                          : Colors.orange,
                                     ),
                                   ),
                                 ],
@@ -377,7 +483,8 @@ class _ItemTileState extends ConsumerState<_ItemTile> {
                             PriorityBadge(priority: item.priority!),
                           if (template.fields.dueDate && item.dueDate != null)
                             _DueDateChip(dueDate: item.dueDate!),
-                          if (template.fields.plannedCost && item.plannedCostCents != null)
+                          if (template.fields.plannedCost &&
+                              item.plannedCostCents != null)
                             _CostChip(cents: item.plannedCostCents!),
                         ],
                       ),
@@ -450,7 +557,9 @@ class _ItemTileState extends ConsumerState<_ItemTile> {
           context: context,
           builder: (ctx) => AlertDialog(
             title: const Text('Delete item?'),
-            content: Text('Are you sure you want to delete "${widget.item.title}"?'),
+            content: Text(
+              'Are you sure you want to delete "${widget.item.title}"?',
+            ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(ctx, false),
@@ -458,7 +567,10 @@ class _ItemTileState extends ConsumerState<_ItemTile> {
               ),
               TextButton(
                 onPressed: () => Navigator.pop(ctx, true),
-                child: const Text('Delete', style: TextStyle(color: Colors.red)),
+                child: const Text(
+                  'Delete',
+                  style: TextStyle(color: Colors.red),
+                ),
               ),
             ],
           ),
@@ -485,7 +597,9 @@ class _ItemTileState extends ConsumerState<_ItemTile> {
         action: SnackBarAction(
           label: 'Undo',
           onPressed: () {
-            ref.read(itemRepositoryProvider).updateItem(
+            ref
+                .read(itemRepositoryProvider)
+                .updateItem(
                   item.copyWith(
                     status: item.status,
                     doneDate: Value(item.doneDate),

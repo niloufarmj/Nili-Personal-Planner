@@ -1,7 +1,6 @@
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -218,10 +217,7 @@ class _WorktimeLogSheetState extends ConsumerState<WorktimeLogSheet> {
               children: [
                 Text(
                   isStopwatch ? 'Complete Session' : 'Log Time',
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    fontFamily: GoogleFonts.fraunces().fontFamily,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: theme.textTheme.headlineSmall,
                 ),
                 if (isStopwatch)
                   IconButton(

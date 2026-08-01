@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/design/design.dart';
 import '../models/forecast_result.dart';
@@ -105,9 +104,9 @@ class _ForecastCardData extends StatelessWidget {
                   const SizedBox(height: 8),
                   Text(
                     CurrencyFormatter.format(balance),
-                    style: GoogleFonts.fraunces(
+                    style: theme.textTheme.displayMedium?.copyWith(
                       fontSize: 32,
-                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0,
                       color: balanceColor,
                     ),
                   ),

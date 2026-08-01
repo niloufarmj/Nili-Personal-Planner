@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import 'font_options.dart';
 import 'tokens.dart';
 
 abstract final class AppTheme {
-  static ThemeData get light => _buildTheme(Brightness.light);
-  static ThemeData get dark => _buildTheme(Brightness.dark);
+  static ThemeData light([AppFontOption font = AppFontOption.classic]) =>
+      _buildTheme(Brightness.light, font);
+  static ThemeData dark([AppFontOption font = AppFontOption.classic]) =>
+      _buildTheme(Brightness.dark, font);
 
-  static ThemeData _buildTheme(Brightness brightness) {
+  static ThemeData _buildTheme(Brightness brightness, AppFontOption font) {
     final isDark = brightness == Brightness.dark;
 
     // Configure Google Fonts to be offline-only (no network calls)
@@ -56,9 +59,10 @@ abstract final class AppTheme {
         backgroundColor: isDark
             ? DesignTokens.surfaceDark
             : DesignTokens.surfaceLight,
-        labelStyle: GoogleFonts.nunitoSans(
+        labelStyle: GoogleFonts.getFont(
+          font.bodyFamily,
           fontSize: DesignTokens.fontCaption,
-          fontWeight: FontWeight.w600,
+          fontWeight: font.emphasisWeight,
           color: isDark ? DesignTokens.inkDark : DesignTokens.inkLight,
         ),
       ),
@@ -74,11 +78,13 @@ abstract final class AppTheme {
             : DesignTokens.inkSoftLight,
         type: BottomNavigationBarType.fixed,
         elevation: 0,
-        selectedLabelStyle: GoogleFonts.nunitoSans(
+        selectedLabelStyle: GoogleFonts.getFont(
+          font.bodyFamily,
           fontSize: 11,
-          fontWeight: FontWeight.w600,
+          fontWeight: font.emphasisWeight,
         ),
-        unselectedLabelStyle: GoogleFonts.nunitoSans(
+        unselectedLabelStyle: GoogleFonts.getFont(
+          font.bodyFamily,
           fontSize: 11,
           fontWeight: FontWeight.w400,
         ),
@@ -90,9 +96,10 @@ abstract final class AppTheme {
         foregroundColor: isDark ? DesignTokens.inkDark : DesignTokens.inkLight,
         elevation: 0,
         scrolledUnderElevation: 0,
-        titleTextStyle: GoogleFonts.fraunces(
+        titleTextStyle: GoogleFonts.getFont(
+          font.headlineFamily,
           fontSize: DesignTokens.fontTitle,
-          fontWeight: FontWeight.w600,
+          fontWeight: font.emphasisWeight,
           color: isDark ? DesignTokens.inkDark : DesignTokens.inkLight,
         ),
       ),
@@ -142,90 +149,108 @@ abstract final class AppTheme {
           ),
         ),
       ),
-      textTheme: _textTheme(isDark),
+      textTheme: _textTheme(isDark, font),
     );
   }
 
-  static TextTheme _textTheme(bool isDark) {
+  static TextTheme _textTheme(bool isDark, AppFontOption font) {
     final baseColor = isDark ? DesignTokens.inkDark : DesignTokens.inkLight;
     final secondaryColor = isDark
         ? DesignTokens.inkSoftDark
         : DesignTokens.inkSoftLight;
+    final headline = font.headlineFamily;
+    final body = font.bodyFamily;
+    final emphasis = font.emphasisWeight;
 
     return TextTheme(
-      displayLarge: GoogleFonts.fraunces(
+      displayLarge: GoogleFonts.getFont(
+        headline,
         fontSize: 36,
-        fontWeight: FontWeight.w600,
+        fontWeight: emphasis,
         color: baseColor,
         letterSpacing: -0.5,
       ),
-      displayMedium: GoogleFonts.fraunces(
+      displayMedium: GoogleFonts.getFont(
+        headline,
         fontSize: DesignTokens.fontDisplay,
-        fontWeight: FontWeight.w600,
+        fontWeight: emphasis,
         color: baseColor,
         letterSpacing: -0.5,
       ),
-      displaySmall: GoogleFonts.fraunces(
+      displaySmall: GoogleFonts.getFont(
+        headline,
         fontSize: DesignTokens.fontTitle,
-        fontWeight: FontWeight.w600,
+        fontWeight: emphasis,
         color: baseColor,
       ),
-      headlineLarge: GoogleFonts.fraunces(
+      headlineLarge: GoogleFonts.getFont(
+        headline,
         fontSize: DesignTokens.fontTitle,
-        fontWeight: FontWeight.w600,
+        fontWeight: emphasis,
         color: baseColor,
       ),
-      headlineMedium: GoogleFonts.fraunces(
+      headlineMedium: GoogleFonts.getFont(
+        headline,
         fontSize: DesignTokens.fontSection,
-        fontWeight: FontWeight.w600,
+        fontWeight: emphasis,
         color: baseColor,
       ),
-      headlineSmall: GoogleFonts.fraunces(
+      headlineSmall: GoogleFonts.getFont(
+        headline,
         fontSize: DesignTokens.fontSection,
-        fontWeight: FontWeight.w600,
+        fontWeight: emphasis,
         color: baseColor,
       ),
-      titleLarge: GoogleFonts.fraunces(
+      titleLarge: GoogleFonts.getFont(
+        headline,
         fontSize: DesignTokens.fontSection,
-        fontWeight: FontWeight.w600,
+        fontWeight: emphasis,
         color: baseColor,
       ),
-      titleMedium: GoogleFonts.nunitoSans(
+      titleMedium: GoogleFonts.getFont(
+        body,
         fontSize: DesignTokens.fontBody,
-        fontWeight: FontWeight.w600,
+        fontWeight: emphasis,
         color: baseColor,
       ),
-      titleSmall: GoogleFonts.nunitoSans(
+      titleSmall: GoogleFonts.getFont(
+        body,
         fontSize: DesignTokens.fontCaption,
-        fontWeight: FontWeight.w600,
+        fontWeight: emphasis,
         color: secondaryColor,
       ),
-      bodyLarge: GoogleFonts.nunitoSans(
+      bodyLarge: GoogleFonts.getFont(
+        body,
         fontSize: DesignTokens.fontBody,
         fontWeight: FontWeight.w400,
         color: baseColor,
       ),
-      bodyMedium: GoogleFonts.nunitoSans(
+      bodyMedium: GoogleFonts.getFont(
+        body,
         fontSize: DesignTokens.fontBody - 1, // 14
         fontWeight: FontWeight.w400,
         color: baseColor,
       ),
-      bodySmall: GoogleFonts.nunitoSans(
+      bodySmall: GoogleFonts.getFont(
+        body,
         fontSize: DesignTokens.fontCaption,
         fontWeight: FontWeight.w400,
         color: secondaryColor,
       ),
-      labelLarge: GoogleFonts.nunitoSans(
+      labelLarge: GoogleFonts.getFont(
+        body,
         fontSize: DesignTokens.fontCaption,
-        fontWeight: FontWeight.w600,
+        fontWeight: emphasis,
         color: baseColor,
       ),
-      labelMedium: GoogleFonts.nunitoSans(
+      labelMedium: GoogleFonts.getFont(
+        body,
         fontSize: DesignTokens.fontCaption - 1, // 12
-        fontWeight: FontWeight.w600,
+        fontWeight: emphasis,
         color: baseColor,
       ),
-      labelSmall: GoogleFonts.nunitoSans(
+      labelSmall: GoogleFonts.getFont(
+        body,
         fontSize: DesignTokens.fontOverline, // 11
         fontWeight: FontWeight.w700,
         letterSpacing: 1.2,

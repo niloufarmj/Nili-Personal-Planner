@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/design/design.dart';
 import 'gym_repository.dart';
@@ -270,11 +269,7 @@ class _GymProgramGuideScreenState extends ConsumerState<GymProgramGuideScreen>
       appBar: AppBar(
         title: Text(
           'Gym Program Guide',
-          style: GoogleFonts.fraunces(
-            fontSize: DesignTokens.fontTitle,
-            fontWeight: FontWeight.w600,
-            color: inkColor,
-          ),
+          style: theme.textTheme.headlineLarge?.copyWith(color: inkColor),
         ),
         bottom: TabBar(
           controller: _tabController,

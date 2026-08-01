@@ -2446,6 +2446,17 @@ class $CollectionsTable extends Collections
     ),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _coverImageMeta = const VerificationMeta(
+    'coverImage',
+  );
+  @override
+  late final GeneratedColumn<String> coverImage = GeneratedColumn<String>(
+    'cover_image',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -2455,6 +2466,7 @@ class $CollectionsTable extends Collections
     icon,
     sortOrder,
     archived,
+    coverImage,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -2511,6 +2523,12 @@ class $CollectionsTable extends Collections
         archived.isAcceptableOrUnknown(data['archived']!, _archivedMeta),
       );
     }
+    if (data.containsKey('cover_image')) {
+      context.handle(
+        _coverImageMeta,
+        coverImage.isAcceptableOrUnknown(data['cover_image']!, _coverImageMeta),
+      );
+    }
     return context;
   }
 
@@ -2548,6 +2566,10 @@ class $CollectionsTable extends Collections
         DriftSqlType.bool,
         data['${effectivePrefix}archived'],
       )!,
+      coverImage: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}cover_image'],
+      ),
     );
   }
 
@@ -2565,6 +2587,7 @@ class Collection extends DataClass implements Insertable<Collection> {
   final String? icon;
   final int? sortOrder;
   final bool archived;
+  final String? coverImage;
   const Collection({
     required this.id,
     required this.name,
@@ -2573,6 +2596,7 @@ class Collection extends DataClass implements Insertable<Collection> {
     this.icon,
     this.sortOrder,
     required this.archived,
+    this.coverImage,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2590,6 +2614,9 @@ class Collection extends DataClass implements Insertable<Collection> {
       map['sort_order'] = Variable<int>(sortOrder);
     }
     map['archived'] = Variable<bool>(archived);
+    if (!nullToAbsent || coverImage != null) {
+      map['cover_image'] = Variable<String>(coverImage);
+    }
     return map;
   }
 
@@ -2606,6 +2633,9 @@ class Collection extends DataClass implements Insertable<Collection> {
           ? const Value.absent()
           : Value(sortOrder),
       archived: Value(archived),
+      coverImage: coverImage == null && nullToAbsent
+          ? const Value.absent()
+          : Value(coverImage),
     );
   }
 
@@ -2622,6 +2652,7 @@ class Collection extends DataClass implements Insertable<Collection> {
       icon: serializer.fromJson<String?>(json['icon']),
       sortOrder: serializer.fromJson<int?>(json['sortOrder']),
       archived: serializer.fromJson<bool>(json['archived']),
+      coverImage: serializer.fromJson<String?>(json['coverImage']),
     );
   }
   @override
@@ -2635,6 +2666,7 @@ class Collection extends DataClass implements Insertable<Collection> {
       'icon': serializer.toJson<String?>(icon),
       'sortOrder': serializer.toJson<int?>(sortOrder),
       'archived': serializer.toJson<bool>(archived),
+      'coverImage': serializer.toJson<String?>(coverImage),
     };
   }
 
@@ -2646,6 +2678,7 @@ class Collection extends DataClass implements Insertable<Collection> {
     Value<String?> icon = const Value.absent(),
     Value<int?> sortOrder = const Value.absent(),
     bool? archived,
+    Value<String?> coverImage = const Value.absent(),
   }) => Collection(
     id: id ?? this.id,
     name: name ?? this.name,
@@ -2654,6 +2687,7 @@ class Collection extends DataClass implements Insertable<Collection> {
     icon: icon.present ? icon.value : this.icon,
     sortOrder: sortOrder.present ? sortOrder.value : this.sortOrder,
     archived: archived ?? this.archived,
+    coverImage: coverImage.present ? coverImage.value : this.coverImage,
   );
   Collection copyWithCompanion(CollectionsCompanion data) {
     return Collection(
@@ -2664,6 +2698,9 @@ class Collection extends DataClass implements Insertable<Collection> {
       icon: data.icon.present ? data.icon.value : this.icon,
       sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
       archived: data.archived.present ? data.archived.value : this.archived,
+      coverImage: data.coverImage.present
+          ? data.coverImage.value
+          : this.coverImage,
     );
   }
 
@@ -2676,14 +2713,23 @@ class Collection extends DataClass implements Insertable<Collection> {
           ..write('parentId: $parentId, ')
           ..write('icon: $icon, ')
           ..write('sortOrder: $sortOrder, ')
-          ..write('archived: $archived')
+          ..write('archived: $archived, ')
+          ..write('coverImage: $coverImage')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, name, template, parentId, icon, sortOrder, archived);
+  int get hashCode => Object.hash(
+    id,
+    name,
+    template,
+    parentId,
+    icon,
+    sortOrder,
+    archived,
+    coverImage,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2694,7 +2740,8 @@ class Collection extends DataClass implements Insertable<Collection> {
           other.parentId == this.parentId &&
           other.icon == this.icon &&
           other.sortOrder == this.sortOrder &&
-          other.archived == this.archived);
+          other.archived == this.archived &&
+          other.coverImage == this.coverImage);
 }
 
 class CollectionsCompanion extends UpdateCompanion<Collection> {
@@ -2705,6 +2752,7 @@ class CollectionsCompanion extends UpdateCompanion<Collection> {
   final Value<String?> icon;
   final Value<int?> sortOrder;
   final Value<bool> archived;
+  final Value<String?> coverImage;
   const CollectionsCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
@@ -2713,6 +2761,7 @@ class CollectionsCompanion extends UpdateCompanion<Collection> {
     this.icon = const Value.absent(),
     this.sortOrder = const Value.absent(),
     this.archived = const Value.absent(),
+    this.coverImage = const Value.absent(),
   });
   CollectionsCompanion.insert({
     this.id = const Value.absent(),
@@ -2722,6 +2771,7 @@ class CollectionsCompanion extends UpdateCompanion<Collection> {
     this.icon = const Value.absent(),
     this.sortOrder = const Value.absent(),
     this.archived = const Value.absent(),
+    this.coverImage = const Value.absent(),
   }) : name = Value(name),
        template = Value(template);
   static Insertable<Collection> custom({
@@ -2732,6 +2782,7 @@ class CollectionsCompanion extends UpdateCompanion<Collection> {
     Expression<String>? icon,
     Expression<int>? sortOrder,
     Expression<bool>? archived,
+    Expression<String>? coverImage,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -2741,6 +2792,7 @@ class CollectionsCompanion extends UpdateCompanion<Collection> {
       if (icon != null) 'icon': icon,
       if (sortOrder != null) 'sort_order': sortOrder,
       if (archived != null) 'archived': archived,
+      if (coverImage != null) 'cover_image': coverImage,
     });
   }
 
@@ -2752,6 +2804,7 @@ class CollectionsCompanion extends UpdateCompanion<Collection> {
     Value<String?>? icon,
     Value<int?>? sortOrder,
     Value<bool>? archived,
+    Value<String?>? coverImage,
   }) {
     return CollectionsCompanion(
       id: id ?? this.id,
@@ -2761,6 +2814,7 @@ class CollectionsCompanion extends UpdateCompanion<Collection> {
       icon: icon ?? this.icon,
       sortOrder: sortOrder ?? this.sortOrder,
       archived: archived ?? this.archived,
+      coverImage: coverImage ?? this.coverImage,
     );
   }
 
@@ -2788,6 +2842,9 @@ class CollectionsCompanion extends UpdateCompanion<Collection> {
     if (archived.present) {
       map['archived'] = Variable<bool>(archived.value);
     }
+    if (coverImage.present) {
+      map['cover_image'] = Variable<String>(coverImage.value);
+    }
     return map;
   }
 
@@ -2800,7 +2857,8 @@ class CollectionsCompanion extends UpdateCompanion<Collection> {
           ..write('parentId: $parentId, ')
           ..write('icon: $icon, ')
           ..write('sortOrder: $sortOrder, ')
-          ..write('archived: $archived')
+          ..write('archived: $archived, ')
+          ..write('coverImage: $coverImage')
           ..write(')'))
         .toString();
   }
@@ -14045,6 +14103,7 @@ typedef $$CollectionsTableCreateCompanionBuilder =
       Value<String?> icon,
       Value<int?> sortOrder,
       Value<bool> archived,
+      Value<String?> coverImage,
     });
 typedef $$CollectionsTableUpdateCompanionBuilder =
     CollectionsCompanion Function({
@@ -14055,6 +14114,7 @@ typedef $$CollectionsTableUpdateCompanionBuilder =
       Value<String?> icon,
       Value<int?> sortOrder,
       Value<bool> archived,
+      Value<String?> coverImage,
     });
 
 final class $$CollectionsTableReferences
@@ -14136,6 +14196,11 @@ class $$CollectionsTableFilterComposer
 
   ColumnFilters<bool> get archived => $composableBuilder(
     column: $table.archived,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get coverImage => $composableBuilder(
+    column: $table.coverImage,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -14227,6 +14292,11 @@ class $$CollectionsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get coverImage => $composableBuilder(
+    column: $table.coverImage,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$CollectionsTableOrderingComposer get parentId {
     final $$CollectionsTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -14277,6 +14347,11 @@ class $$CollectionsTableAnnotationComposer
 
   GeneratedColumn<bool> get archived =>
       $composableBuilder(column: $table.archived, builder: (column) => column);
+
+  GeneratedColumn<String> get coverImage => $composableBuilder(
+    column: $table.coverImage,
+    builder: (column) => column,
+  );
 
   $$CollectionsTableAnnotationComposer get parentId {
     final $$CollectionsTableAnnotationComposer composer = $composerBuilder(
@@ -14362,6 +14437,7 @@ class $$CollectionsTableTableManager
                 Value<String?> icon = const Value.absent(),
                 Value<int?> sortOrder = const Value.absent(),
                 Value<bool> archived = const Value.absent(),
+                Value<String?> coverImage = const Value.absent(),
               }) => CollectionsCompanion(
                 id: id,
                 name: name,
@@ -14370,6 +14446,7 @@ class $$CollectionsTableTableManager
                 icon: icon,
                 sortOrder: sortOrder,
                 archived: archived,
+                coverImage: coverImage,
               ),
           createCompanionCallback:
               ({
@@ -14380,6 +14457,7 @@ class $$CollectionsTableTableManager
                 Value<String?> icon = const Value.absent(),
                 Value<int?> sortOrder = const Value.absent(),
                 Value<bool> archived = const Value.absent(),
+                Value<String?> coverImage = const Value.absent(),
               }) => CollectionsCompanion.insert(
                 id: id,
                 name: name,
@@ -14388,6 +14466,7 @@ class $$CollectionsTableTableManager
                 icon: icon,
                 sortOrder: sortOrder,
                 archived: archived,
+                coverImage: coverImage,
               ),
           withReferenceMapper: (p0) => p0
               .map(

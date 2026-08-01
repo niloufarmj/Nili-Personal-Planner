@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../tokens.dart';
 
 /// Centered empty-state view with custom code-drawn blob atmosphere, icon, explainer, and sample hint.
@@ -50,9 +49,7 @@ class EmptyState extends StatelessWidget {
             const SizedBox(height: 16),
             Text(
               message,
-              style: GoogleFonts.fraunces(
-                fontSize: DesignTokens.fontSection,
-                fontWeight: FontWeight.w600,
+              style: theme.textTheme.headlineMedium?.copyWith(
                 color: isDark ? DesignTokens.inkDark : DesignTokens.inkLight,
               ),
               textAlign: TextAlign.center,

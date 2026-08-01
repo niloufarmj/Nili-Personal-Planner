@@ -83,6 +83,11 @@ class CollectionRepository {
         CollectionsCompanion(name: Value(newName)),
       );
 
+  Future<void> setCoverImage(int id, String? coverImage) =>
+      (_db.update(_db.collections)..where((c) => c.id.equals(id))).write(
+        CollectionsCompanion(coverImage: Value(coverImage)),
+      );
+
   Future<void> archive(int id) =>
       (_db.update(_db.collections)..where((c) => c.id.equals(id))).write(
         const CollectionsCompanion(archived: Value(true)),

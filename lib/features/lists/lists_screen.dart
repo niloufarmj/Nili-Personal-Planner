@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../core/db/database.dart';
 import '../../core/design/design.dart';
 import '../../core/router/routes.dart';
+import '../../core/services/image_service.dart';
 import 'repositories/collection_repository.dart';
 import 'templates/template_registry.dart';
 import 'widgets/collection_counts.dart';
@@ -91,9 +92,7 @@ class ListsScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(
           'Lists',
-          style: GoogleFonts.fraunces(
-            fontSize: DesignTokens.fontTitle,
-            fontWeight: FontWeight.w600,
+          style: theme.textTheme.headlineLarge?.copyWith(
             color: isDark ? DesignTokens.inkDark : DesignTokens.inkLight,
           ),
         ),
@@ -224,44 +223,63 @@ class _CollectionCard extends ConsumerWidget {
     final mainColor = getTemplateMainColor(collection.template, isDark);
     final inkColor = isDark ? DesignTokens.inkDark : DesignTokens.inkLight;
 
+    final hasCover = hasDisplayableImage(collection.coverImage);
+
     return GestureDetector(
       onLongPress: () => _showContextMenu(context, ref),
       child: AppCard(
         padding: const EdgeInsets.all(16),
         color: softBg,
         onTap: () => context.push(Routes.collectionPath(collection.id)),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Stack(
           children: [
-            Row(
-              children: [
-                Container(
-                  width: 32,
-                  height: 32,
-                  decoration: BoxDecoration(
-                    color: isDark ? DesignTokens.surfaceDark : Colors.white,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(template.icon, size: 16, color: mainColor),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    withCountryFlag(collection.name),
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: inkColor,
+            if (hasCover)
+              Positioned.fill(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: Opacity(
+                    opacity: 0.16,
+                    child: Image(
+                      image: imageProviderFor(collection.coverImage)!,
+                      fit: BoxFit.cover,
                     ),
-                    overflow: TextOverflow.ellipsis,
                   ),
+                ),
+              ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        color: isDark ? DesignTokens.surfaceDark : Colors.white,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(template.icon, size: 16, color: mainColor),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        withCountryFlag(collection.name),
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: inkColor,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+                const Spacer(),
+                CollectionProgressBar(
+                  collectionId: collection.id,
+                  template: template,
+                  mainColor: mainColor,
                 ),
               ],
-            ),
-            const Spacer(),
-            CollectionProgressBar(
-              collectionId: collection.id,
-              template: template,
-              mainColor: mainColor,
             ),
           ],
         ),
@@ -272,7 +290,10 @@ class _CollectionCard extends ConsumerWidget {
   Future<void> _showContextMenu(BuildContext context, WidgetRef ref) async {
     final action = await showModalBottomSheet<_CardAction>(
       context: context,
-      builder: (_) => _CollectionContextSheet(name: collection.name),
+      builder: (_) => _CollectionContextSheet(
+        name: collection.name,
+        hasCover: hasDisplayableImage(collection.coverImage),
+      ),
     );
     if (action == null || !context.mounted) return;
 
@@ -291,6 +312,22 @@ class _CollectionCard extends ConsumerWidget {
           confirmLabel: 'Archive',
         );
         if (confirmed) await repo.archive(collection.id);
+      case _CardAction.setCover:
+        final picked = await ref
+            .read(imageServiceProvider)
+            .pick(source: ImageSource.gallery);
+        if (picked == null) return;
+        final oldCover = collection.coverImage;
+        await repo.setCoverImage(collection.id, picked);
+        if (oldCover != null) {
+          await ref.read(imageServiceProvider).delete(oldCover);
+        }
+      case _CardAction.removeCover:
+        final oldCover = collection.coverImage;
+        await repo.setCoverImage(collection.id, null);
+        if (oldCover != null) {
+          await ref.read(imageServiceProvider).delete(oldCover);
+        }
     }
   }
 
@@ -323,12 +360,13 @@ class _CollectionCard extends ConsumerWidget {
   }
 }
 
-enum _CardAction { rename, archive }
+enum _CardAction { rename, archive, setCover, removeCover }
 
 class _CollectionContextSheet extends StatelessWidget {
-  const _CollectionContextSheet({required this.name});
+  const _CollectionContextSheet({required this.name, required this.hasCover});
 
   final String name;
+  final bool hasCover;
 
   @override
   Widget build(BuildContext context) {
@@ -350,6 +388,17 @@ class _CollectionContextSheet extends StatelessWidget {
             title: const Text('Rename'),
             onTap: () => Navigator.of(context).pop(_CardAction.rename),
           ),
+          ListTile(
+            leading: const Icon(Icons.image_outlined),
+            title: Text(hasCover ? 'Change Cover Photo' : 'Set Cover Photo'),
+            onTap: () => Navigator.of(context).pop(_CardAction.setCover),
+          ),
+          if (hasCover)
+            ListTile(
+              leading: const Icon(Icons.hide_image_outlined),
+              title: const Text('Remove Cover Photo'),
+              onTap: () => Navigator.of(context).pop(_CardAction.removeCover),
+            ),
           ListTile(
             leading: const Icon(Icons.archive_outlined),
             title: const Text('Archive'),
@@ -428,10 +477,7 @@ class _NewListSheetState extends State<_NewListSheet> {
       children: [
         Text(
           'New list',
-          style: theme.textTheme.headlineSmall?.copyWith(
-            fontFamily: GoogleFonts.fraunces().fontFamily,
-            fontWeight: FontWeight.w600,
-          ),
+          style: theme.textTheme.headlineSmall,
         ),
         const SizedBox(height: 16),
         TextField(
@@ -476,10 +522,7 @@ class _NewListSheetState extends State<_NewListSheet> {
             ),
             Text(
               'Choose a template',
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontFamily: GoogleFonts.fraunces().fontFamily,
-                fontWeight: FontWeight.bold,
-              ),
+              style: theme.textTheme.titleMedium,
             ),
           ],
         ),

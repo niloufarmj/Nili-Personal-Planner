@@ -1,7 +1,6 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:collection/collection.dart';
 
@@ -96,11 +95,7 @@ class _SportAnalyticsScreenState extends ConsumerState<SportAnalyticsScreen> {
       appBar: AppBar(
         title: Text(
           'Sport & Fitness Analytics',
-          style: GoogleFonts.fraunces(
-            fontSize: DesignTokens.fontTitle,
-            fontWeight: FontWeight.w600,
-            color: inkColor,
-          ),
+          style: theme.textTheme.headlineLarge?.copyWith(color: inkColor),
         ),
       ),
       body: activitiesAsync.when(
@@ -598,9 +593,8 @@ class _SportAnalyticsScreenState extends ConsumerState<SportAnalyticsScreen> {
       children: [
         Text(
           value,
-          style: GoogleFonts.fraunces(
+          style: theme.textTheme.headlineMedium?.copyWith(
             fontSize: 22,
-            fontWeight: FontWeight.w600,
             color: isDark ? DesignTokens.inkDark : DesignTokens.inkLight,
           ),
         ),

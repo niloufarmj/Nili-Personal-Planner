@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/db/database.dart';
@@ -21,9 +20,7 @@ class RemindersScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(
           'Reminders',
-          style: GoogleFonts.fraunces(
-            fontSize: DesignTokens.fontTitle,
-            fontWeight: FontWeight.w600,
+          style: theme.textTheme.headlineLarge?.copyWith(
             color: isDark ? DesignTokens.inkDark : DesignTokens.inkLight,
           ),
         ),

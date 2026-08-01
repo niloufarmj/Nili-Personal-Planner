@@ -35,11 +35,12 @@ class PersonalPlannerApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeMode = ref.watch(themeModeProvider);
+    final font = ref.watch(fontOptionProvider);
 
     return MaterialApp.router(
       title: 'Personal Planner',
-      theme: AppTheme.light,
-      darkTheme: AppTheme.dark,
+      theme: AppTheme.light(font),
+      darkTheme: AppTheme.dark(font),
       themeMode: themeMode,
       routerConfig: appRouter,
     );

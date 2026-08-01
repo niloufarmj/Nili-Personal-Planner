@@ -28,6 +28,7 @@ A comprehensive, beautifully designed, and offline-first personal organizer buil
 
 ### 🎒 4. Lists, Chores & Collections
 *   **Template-Driven Collections**: Create shopping lists, travel packing guides, custom todo lists, or job hunt trackers.
+*   **Header Photos**: Set a custom cover photo per list from its own screen (⋮ menu). Shown as a banner atop the list and faintly behind its card in the Lists grid.
 *   **Subtasks & Checklists**: Break down list items into smaller multi-step subtasks.
 *   **Periodic Chores**: Log periodic tasks (cleaning, laundry, plant watering) with history logs.
 *   **Shopping Actual Cost Prompts**: Mark items as "bought" to prompt for actual costs and automatically record them as shopping transactions.
@@ -49,7 +50,8 @@ A comprehensive, beautifully designed, and offline-first personal organizer buil
 *   **Month 3+ Gym Program Guide**: Full interactive guide detailing Month 3+ Plans A, B, and C (warmups, exercises, sets, reps, rest times, notes, and cardio finishers).
 *   **Sport Analytics & Charts**: Reactive Daily, Weekly, and Monthly stacked bar charts for duration and burned calories across all sports.
 *   **Session Scheduling & One-Tap Completion**: Plan upcoming gym or sport sessions for target dates, with 1-tap "Done" completion directly from the tracker dashboard.
-*   **Body Metrics Log**: Track weight, waist, chest, hip, bicep, and thigh dimensions. Supports goal-setting, metric directions (`gain` or `lose`), and progress state photo uploads.
+*   **Body Metrics Log**: Track weight, waist, chest, hip, bicep, and thigh dimensions. Supports goal-setting, metric directions (`gain` or `lose`), and progress state photo uploads. Tap any past log entry to edit its values or photos.
+*   **Selectable Trend Chart**: Switch the Log tab's chart between Weight, Waist, Chest, Hip, Bicep, or Thigh to see progress on any tracked measurement, not just weight.
 
 ### 🧘 8. Wellbeing & Mindfulness
 *   **Self-Care Catalog**: Choose wellbeing actions (reading, meditation, spa, stretching) and log completions.
@@ -73,6 +75,10 @@ A comprehensive, beautifully designed, and offline-first personal organizer buil
 *   **Linear Fill Bars**: Grid items display visual completion progress bars (e.g., 5/10 workouts is 50% filled).
 *   **Shareable Achievements**: Click any unlocked badge to open a stylized card and export it to share with friends.
 
+### 🎨 13. Personalization
+*   **Theme Mode**: Switch between Light, Dark, or System Default appearance from the More screen.
+*   **App Font**: Restyle the entire app's typeface from More > App Settings — choose between Classic (Fraunces/Nunito Sans), Comic, Times Classic, Mono, and Fredoka, each fully bundled offline.
+
 ---
 
 ## 🛠️ Technical Stack & Architecture
@@ -90,6 +96,8 @@ A comprehensive, beautifully designed, and offline-first personal organizer buil
     *   [period_tables.dart](file:///M:/Nili-Personal-Planner/lib/core/db/tables/period_tables.dart) (Period logs)
     *   [work_tables.dart](file:///M:/Nili-Personal-Planner/lib/core/db/tables/work_tables.dart) (Contexts, Time logs)
     *   [social_tables.dart](file:///M:/Nili-Personal-Planner/lib/core/db/tables/social_tables.dart) (Accounts, Social logs)
+*   **Cross-Platform Images**: [image_service.dart](file:///M:/Nili-Personal-Planner/lib/core/services/image_service.dart) stores picked photos as local files on native platforms and as inline base64 data on web (no writable filesystem there), behind shared `hasDisplayableImage`/`imageProviderFor` helpers used across the app.
+*   **Offline Google Fonts**: All app fonts (including the 5 selectable App Font options) are bundled locally under `assets/google_fonts/` — `GoogleFonts.config.allowRuntimeFetching` is disabled, so no font is ever fetched over the network.
 
 ---
 

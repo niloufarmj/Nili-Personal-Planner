@@ -2,6 +2,8 @@ export 'app_colors.dart';
 export 'app_theme.dart';
 export 'tokens.dart';
 export 'currency_formatter.dart';
+export 'font_options.dart';
+export 'font_provider.dart';
 export 'theme_provider.dart';
 export 'widgets/app_card.dart';
 export 'widgets/confirm_dialog.dart';

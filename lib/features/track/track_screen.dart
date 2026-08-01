@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:drift/drift.dart' hide Column;
 
 import '../../core/db/database.dart';
@@ -111,9 +110,7 @@ class TrackScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(
           'Track',
-          style: GoogleFonts.fraunces(
-            fontSize: DesignTokens.fontTitle,
-            fontWeight: FontWeight.w600,
+          style: theme.textTheme.headlineLarge?.copyWith(
             color: isDark ? DesignTokens.inkDark : DesignTokens.inkLight,
           ),
         ),

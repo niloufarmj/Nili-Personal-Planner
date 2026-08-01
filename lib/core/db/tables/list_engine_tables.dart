@@ -11,6 +11,7 @@ class Collections extends Table {
   TextColumn get icon => text().nullable()();
   IntColumn get sortOrder => integer().nullable()();
   BoolColumn get archived => boolean().withDefault(const Constant(false))();
+  TextColumn get coverImage => text().nullable()();
 }
 
 /// Items in a collection.

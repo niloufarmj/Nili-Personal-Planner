@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/db/database.dart';
 import '../../core/design/design.dart';
@@ -67,10 +66,7 @@ class _WorktimeSettingsSheetState extends ConsumerState<WorktimeSettingsSheet> {
                     children: [
                       Text(
                         'Work Settings',
-                        style: theme.textTheme.headlineSmall?.copyWith(
-                          fontFamily: GoogleFonts.fraunces().fontFamily,
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style: theme.textTheme.headlineSmall,
                       ),
                       IconButton(
                         icon: const Icon(Icons.close),

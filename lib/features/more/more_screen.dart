@@ -20,15 +20,14 @@ class MoreScreen extends ConsumerWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final themeMode = ref.watch(themeModeProvider);
+    final fontOption = ref.watch(fontOptionProvider);
     final isSeeding = ref.watch(_seedingProgressProvider);
 
     return Scaffold(
       appBar: AppBar(
         title: Text(
           'More',
-          style: GoogleFonts.fraunces(
-            fontSize: DesignTokens.fontTitle,
-            fontWeight: FontWeight.w600,
+          style: theme.textTheme.headlineLarge?.copyWith(
             color: isDark ? DesignTokens.inkDark : DesignTokens.inkLight,
           ),
         ),
@@ -391,6 +390,71 @@ class MoreScreen extends ConsumerWidget {
                     onChanged: (mode) {
                       if (mode != null) {
                         ref.read(themeModeProvider.notifier).setThemeMode(mode);
+                      }
+                    },
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              AppCard(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 4,
+                ),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButtonFormField<AppFontOption>(
+                    initialValue: fontOption,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: isDark
+                          ? DesignTokens.inkDark
+                          : DesignTokens.inkLight,
+                    ),
+                    decoration: InputDecoration(
+                      labelText: 'App Font',
+                      labelStyle: TextStyle(
+                        color: isDark
+                            ? DesignTokens.inkSoftDark
+                            : DesignTokens.inkSoftLight,
+                        fontSize: DesignTokens.fontCaption,
+                      ),
+                      border: InputBorder.none,
+                    ),
+                    dropdownColor: isDark
+                        ? DesignTokens.surfaceDark
+                        : DesignTokens.surfaceLight,
+                    items: AppFontOption.values.map((f) {
+                      return DropdownMenuItem(
+                        value: f,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              f.previewText,
+                              style: GoogleFonts.getFont(
+                                f.headlineFamily,
+                                fontWeight: f.emphasisWeight,
+                                fontSize: DesignTokens.fontBody,
+                                color: isDark
+                                    ? DesignTokens.inkDark
+                                    : DesignTokens.inkLight,
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Text(
+                              f.label,
+                              style: TextStyle(
+                                color: isDark
+                                    ? DesignTokens.inkDark
+                                    : DesignTokens.inkLight,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: (option) {
+                      if (option != null) {
+                        ref.read(fontOptionProvider.notifier).setFont(option);
                       }
                     },
                   ),
