@@ -10,8 +10,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 Widget _app(AppDatabase db) => ProviderScope(
   overrides: [appDatabaseProvider.overrideWithValue(db)],
   child: MaterialApp.router(
-    theme: AppTheme.light,
-    darkTheme: AppTheme.dark,
+    theme: AppTheme.light(),
+    darkTheme: AppTheme.dark(),
     routerConfig: buildAppRouter(),
   ),
 );

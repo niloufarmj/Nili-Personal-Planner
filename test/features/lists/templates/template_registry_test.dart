@@ -91,10 +91,35 @@ void main() {
       expect(t.statuses.any((s) => s.value == 'blocked'), isTrue);
     });
 
-    test('job template has 5 statuses including offer', () {
+    test('job template has 5 statuses and updated meta fields', () {
       final t = TemplateRegistry.get('job');
       expect(t.statuses.length, 5);
       expect(t.doneStatus, 'offer');
+      expect(t.metaFields.any((f) => f.key == 'city'), isTrue);
+      expect(
+        t.metaFields.any(
+          (f) => f.key == 'linkedin' && f.type == MetaFieldType.url,
+        ),
+        isTrue,
+      );
+      expect(
+        t.metaFields.any(
+          (f) => f.key == 'website' && f.type == MetaFieldType.url,
+        ),
+        isTrue,
+      );
+      expect(
+        t.metaFields.any((f) => f.key == 'link' && f.type == MetaFieldType.url),
+        isTrue,
+      );
+      expect(t.metaFields.any((f) => f.key == 'email'), isTrue);
+      expect(t.metaFields.any((f) => f.key == 'category'), isTrue);
+      expect(
+        t.metaFields.any(
+          (f) => f.key == 'has_open_position' && f.type == MetaFieldType.boolean,
+        ),
+        isTrue,
+      );
     });
 
     test('media template has kind select field', () {

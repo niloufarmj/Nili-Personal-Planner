@@ -71,7 +71,7 @@ Widget _testApp({
         seederServiceProvider.overrideWithValue(mockSeeder),
     ],
     child: MaterialApp(
-      theme: AppTheme.light,
+      theme: AppTheme.light(),
       home: DefaultAssetBundle(
         bundle: MockAssetBundle(),
         child: const Scaffold(body: MoreScreen()),

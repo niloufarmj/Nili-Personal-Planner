@@ -50,9 +50,8 @@ class _ItemEditSheetState extends ConsumerState<ItemEditSheet> {
     _plannedCostCents = item?.plannedCostCents;
 
     for (final f in widget.template.metaFields) {
-      final existing = (item?.meta != null)
-          ? item!.meta![f.key] as String?
-          : null;
+      final raw = (item?.meta != null) ? item!.meta![f.key] : null;
+      final existing = raw?.toString();
       _metaControllers[f.key] = TextEditingController(text: existing ?? '');
     }
   }
@@ -212,7 +211,13 @@ class _ItemEditSheetState extends ConsumerState<ItemEditSheet> {
     final meta = <String, dynamic>{};
     for (final f in widget.template.metaFields) {
       final v = _metaControllers[f.key]?.text.trim() ?? '';
-      if (v.isNotEmpty) meta[f.key] = v;
+      if (v.isNotEmpty) {
+        if (f.type == MetaFieldType.boolean) {
+          meta[f.key] = (v.toLowerCase() == 'true');
+        } else {
+          meta[f.key] = v;
+        }
+      }
     }
 
     if (_isEdit) {
@@ -407,6 +412,24 @@ class _MetaField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (def.type == MetaFieldType.boolean) {
+      return StatefulBuilder(
+        builder: (context, setState) {
+          final isChecked = controller.text.toLowerCase() == 'true';
+          return SwitchListTile(
+            title: Text(def.label),
+            value: isChecked,
+            onChanged: (val) {
+              setState(() {
+                controller.text = val ? 'true' : 'false';
+              });
+            },
+            contentPadding: EdgeInsets.zero,
+          );
+        },
+      );
+    }
+
     if (def.type == MetaFieldType.select && def.options != null) {
       return DropdownButtonFormField<String>(
         initialValue: controller.text.isEmpty ? null : controller.text,

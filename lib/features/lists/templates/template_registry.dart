@@ -4,7 +4,7 @@ import '../../../core/design/app_colors.dart';
 
 // ── Field types ───────────────────────────────────────────────────────────────
 
-enum MetaFieldType { text, url, number, select }
+enum MetaFieldType { text, url, number, select, boolean }
 
 class MetaFieldDef {
   const MetaFieldDef({
@@ -293,11 +293,19 @@ const _templates = [
     fields: VisibleFields(priority: true, dueDate: true, description: true),
     metaFields: [
       MetaFieldDef(key: 'company', label: 'Company', type: MetaFieldType.text),
-      MetaFieldDef(key: 'role', label: 'Role', type: MetaFieldType.text),
-      MetaFieldDef(key: 'link', label: 'Job Link', type: MetaFieldType.url),
+      MetaFieldDef(key: 'city', label: 'City', type: MetaFieldType.text),
+      MetaFieldDef(key: 'category', label: 'Category / Industry', type: MetaFieldType.text),
+      MetaFieldDef(
+        key: 'has_open_position',
+        label: 'Has Open Position',
+        type: MetaFieldType.boolean,
+      ),
+      MetaFieldDef(key: 'website', label: 'Company Website', type: MetaFieldType.url),
+      MetaFieldDef(key: 'linkedin', label: 'LinkedIn Profile', type: MetaFieldType.url),
+      MetaFieldDef(key: 'link', label: 'Job Link (Optional)', type: MetaFieldType.url),
       MetaFieldDef(
         key: 'email',
-        label: 'Contact Email',
+        label: 'Company Email',
         type: MetaFieldType.text,
       ),
       MetaFieldDef(
@@ -305,6 +313,7 @@ const _templates = [
         label: 'Contact Name',
         type: MetaFieldType.text,
       ),
+      MetaFieldDef(key: 'role', label: 'Role / Position', type: MetaFieldType.text),
     ],
   ),
 

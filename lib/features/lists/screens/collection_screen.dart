@@ -363,6 +363,21 @@ class _ItemTileState extends ConsumerState<_ItemTile> {
         template.id == 'groceries' || widget.collection.name == 'Groceries';
     final hasImage = hasDisplayableImage(item.imageBefore);
 
+    final meta = item.meta;
+    final city = meta?['city'] as String?;
+    final category = meta?['category'] as String?;
+    final hasOpenPosRaw = meta?['has_open_position'];
+    final bool? hasOpenPos = (hasOpenPosRaw is bool)
+        ? hasOpenPosRaw
+        : (hasOpenPosRaw?.toString().toLowerCase() == 'true'
+            ? true
+            : (hasOpenPosRaw?.toString().toLowerCase() == 'false'
+                ? false
+                : null));
+    final website = meta?['website'] as String?;
+    final linkedin = meta?['linkedin'] as String?;
+    final email = meta?['email'] as String?;
+
     return Dismissible(
       key: ValueKey(item.id),
       background: _swipeBackground(
@@ -486,6 +501,48 @@ class _ItemTileState extends ConsumerState<_ItemTile> {
                           if (template.fields.plannedCost &&
                               item.plannedCostCents != null)
                             _CostChip(cents: item.plannedCostCents!),
+                          if (template.id == 'job' && meta != null) ...[
+                            if (city != null && city.isNotEmpty)
+                              _MetaChip(
+                                icon: Icons.location_on_outlined,
+                                label: city,
+                                color: Colors.teal,
+                              ),
+                            if (category != null && category.isNotEmpty)
+                              _MetaChip(
+                                icon: Icons.category_outlined,
+                                label: category,
+                                color: Colors.indigo,
+                              ),
+                            if (hasOpenPos != null)
+                              _MetaChip(
+                                icon: hasOpenPos
+                                    ? Icons.check_circle_outline
+                                    : Icons.send_outlined,
+                                label: hasOpenPos
+                                    ? 'Open Position'
+                                    : 'Unsolicited Application',
+                                color: hasOpenPos ? Colors.green : Colors.blueGrey,
+                              ),
+                            if (website != null && website.isNotEmpty)
+                              _MetaChip(
+                                icon: Icons.language,
+                                label: 'Website',
+                                color: Colors.blue,
+                              ),
+                            if (linkedin != null && linkedin.isNotEmpty)
+                              _MetaChip(
+                                icon: Icons.link,
+                                label: 'LinkedIn',
+                                color: Colors.blue.shade700,
+                              ),
+                            if (email != null && email.isNotEmpty)
+                              _MetaChip(
+                                icon: Icons.email_outlined,
+                                label: email,
+                                color: Colors.deepOrange,
+                              ),
+                          ],
                         ],
                       ),
                     ],
@@ -712,6 +769,45 @@ class _CostChip extends StatelessWidget {
           color: Colors.purple,
           fontWeight: FontWeight.bold,
         ),
+      ),
+    );
+  }
+}
+
+class _MetaChip extends StatelessWidget {
+  const _MetaChip({
+    required this.icon,
+    required this.label,
+    required this.color,
+  });
+
+  final IconData icon;
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 10, color: color),
+          const SizedBox(width: 3),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 10,
+              color: color,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
       ),
     );
   }

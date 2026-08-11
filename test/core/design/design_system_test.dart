@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:personal_planner/core/design/design.dart';
 
 Widget _wrap(Widget child, {bool dark = false}) => MaterialApp(
-  theme: dark ? AppTheme.dark : AppTheme.light,
+  theme: dark ? AppTheme.dark() : AppTheme.light(),
   home: Scaffold(body: child),
 );
 
