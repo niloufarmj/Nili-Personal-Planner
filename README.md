@@ -26,8 +26,13 @@ A comprehensive, beautifully designed, and offline-first personal organizer buil
     The engine integrates current actual balances, future planned income, future recurring bills, and a pro-rated mean of historical variable spends.
 *   **Debts Center**: Track money owed (`i_owe`) or owed to you (`owes_me`). Supports interactive amount editing and auto-prompts to log matching payments/payoffs in your transaction ledger.
 
-### 🎒 4. Lists, Chores & Collections
+### 🎒 4. Lists, Chores & Collections & Job Hunt Tracker
 *   **Template-Driven Collections**: Create shopping lists, travel packing guides, custom todo lists, or job hunt trackers.
+*   **Job Hunt Tracker Engine**:
+    *   **Direct & Unsolicited Reach-Outs**: Tailored for direct company outreach with fields for Company Name, Company Website, City, Category / Industry, Open Position toggle (`✓ Open Position` vs `↗ Unsolicited Application`), LinkedIn Profile, Job Link, and Company Email.
+    *   **Status Color Tinting & 1-Tap Switching**: Cards feature visual background tinting corresponding to current state — Gray (`Researching`), Yellow (`Applied`), Blue (`Interview`), Red (`Rejected`), Green (`Offer`). Tap any status badge to switch state directly from the list tile.
+    *   **Automated Transition Timestamps**: State changes automatically capture transition dates (`applied_date`, `interview_date`, `rejected_date`, `offer_date`), preserving complete application timelines and displaying elapsed response days (e.g., `Applied: 1 Aug` | `Rejected: 11 Aug (+10d)`).
+    *   **Job Analytics & Charts Tab**: Dedicated Job Analytics dashboard in the list screen featuring total applications, offer rate %, rejection rate %, average response wait times, a **Daily Applications Bar Chart**, and a **Status Breakdown Pie Chart**.
 *   **Header Photos**: Set a custom cover photo per list from its own screen (⋮ menu). Shown as a banner atop the list and faintly behind its card in the Lists grid.
 *   **Subtasks & Checklists**: Break down list items into smaller multi-step subtasks.
 *   **Periodic Chores**: Log periodic tasks (cleaning, laundry, plant watering) with history logs.
@@ -162,7 +167,7 @@ flutter run
 
 ### 4. Running the Tests
 
-Execute the comprehensive unit and widget test suite (285+ tests):
+Execute the comprehensive unit and widget test suite (290+ tests):
 
 ```bash
 flutter test
