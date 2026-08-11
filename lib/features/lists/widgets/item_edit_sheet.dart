@@ -223,7 +223,7 @@ class _ItemEditSheetState extends ConsumerState<ItemEditSheet> {
     }
 
     final repo = ref.read(itemRepositoryProvider);
-    final meta = <String, dynamic>{};
+    final meta = Map<String, dynamic>.from(widget.item?.meta ?? {});
     for (final f in widget.template.metaFields) {
       final v = _metaControllers[f.key]?.text.trim() ?? '';
       if (v.isNotEmpty) {
@@ -232,6 +232,8 @@ class _ItemEditSheetState extends ConsumerState<ItemEditSheet> {
         } else {
           meta[f.key] = v;
         }
+      } else {
+        meta.remove(f.key);
       }
     }
 

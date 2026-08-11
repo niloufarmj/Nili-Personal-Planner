@@ -16,8 +16,19 @@ void main() {
       expect(meta['interview_date'], isNotNull);
 
       meta = JobStatusHelper.updateMetaForStatus(meta, 'rejected');
+      expect(meta['applied_date'], '2026-08-01');
       expect(meta['rejected_date'], isNotNull);
       expect((meta['status_history'] as List).length, 2);
+    });
+
+    test('updateMetaForStatus retains applied_date when transitioning to rejected', () {
+      final appliedMeta = JobStatusHelper.updateMetaForStatus({}, 'applied');
+      final appliedDate = appliedMeta['applied_date'];
+      expect(appliedDate, isNotNull);
+
+      final rejectedMeta = JobStatusHelper.updateMetaForStatus(appliedMeta, 'rejected');
+      expect(rejectedMeta['applied_date'], appliedDate);
+      expect(rejectedMeta['rejected_date'], isNotNull);
     });
 
     test('daysBetween computes day differences correctly', () {

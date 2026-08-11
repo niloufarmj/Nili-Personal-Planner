@@ -16,11 +16,14 @@ class JobStatusHelper {
 
     if (newStatus == 'applied' && meta['applied_date'] == null) {
       meta['applied_date'] = now;
-    } else if (newStatus == 'interview' && meta['interview_date'] == null) {
+    }
+    if (newStatus == 'interview' && meta['interview_date'] == null) {
       meta['interview_date'] = now;
-    } else if (newStatus == 'rejected' && meta['rejected_date'] == null) {
+    }
+    if (newStatus == 'rejected' && meta['rejected_date'] == null) {
       meta['rejected_date'] = now;
-    } else if (newStatus == 'offer' && meta['offer_date'] == null) {
+    }
+    if (newStatus == 'offer' && meta['offer_date'] == null) {
       meta['offer_date'] = now;
     }
 
