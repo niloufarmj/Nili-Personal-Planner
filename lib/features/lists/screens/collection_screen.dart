@@ -8,10 +8,12 @@ import '../../../core/db/database.dart';
 import '../../../core/design/design.dart';
 import '../../../core/services/image_service.dart';
 import '../../meals/groceries_service.dart';
+import '../helpers/job_status_helper.dart';
 import '../repositories/collection_repository.dart';
 import '../repositories/item_repository.dart';
 import '../templates/template_registry.dart';
 import '../widgets/item_edit_sheet.dart';
+import '../widgets/job_analytics_widget.dart';
 import '../widgets/subtask_list.dart';
 
 /// Helper to determine whether a list item is completed / in stock.
@@ -35,6 +37,8 @@ class CollectionScreen extends ConsumerStatefulWidget {
 class _CollectionScreenState extends ConsumerState<CollectionScreen> {
   // Filter for shopping template collections: 'all', 'need', 'have'
   String _stockFilter = 'all';
+  // Segmented view for job template: 0 = Items List, 1 = Analytics & Charts
+  int _jobSelectedTab = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -164,7 +168,7 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
 
                     return Column(
                       children: [
-                        if (isGroceries) ...[
+                         if (isGroceries) ...[
                           Padding(
                             padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
                             child: SegmentedButton<String>(
@@ -193,20 +197,45 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
                             ),
                           ),
                         ],
-                        Expanded(
-                          child: filteredItems.isEmpty
-                              ? EmptyState(
-                                  icon: Icons.shopping_bag_outlined,
-                                  message: _stockFilter == 'need'
-                                      ? 'Everything is in stock! 🎉'
-                                      : 'No items matching filter',
-                                  hint: 'Switch tab or tap + to add items',
-                                )
-                              : _ItemList(
-                                  items: filteredItems,
-                                  collection: collection,
-                                  template: template,
+                        if (template.id == 'job') ...[
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
+                            child: SegmentedButton<int>(
+                              segments: const [
+                                ButtonSegment<int>(
+                                  value: 0,
+                                  label: Text('Items List'),
+                                  icon: Icon(Icons.list_alt, size: 16),
                                 ),
+                                ButtonSegment<int>(
+                                  value: 1,
+                                  label: Text('Analytics & Charts'),
+                                  icon: Icon(Icons.bar_chart, size: 16),
+                                ),
+                              ],
+                              selected: {_jobSelectedTab},
+                              onSelectionChanged: (sel) {
+                                setState(() => _jobSelectedTab = sel.first);
+                              },
+                            ),
+                          ),
+                        ],
+                        Expanded(
+                          child: (template.id == 'job' && _jobSelectedTab == 1)
+                              ? JobAnalyticsWidget(items: items)
+                              : (filteredItems.isEmpty
+                                  ? EmptyState(
+                                      icon: template.icon,
+                                      message: _stockFilter == 'need'
+                                          ? 'Everything is in stock! 🎉'
+                                          : 'No items matching filter',
+                                      hint: 'Switch tab or tap + to add items',
+                                    )
+                                  : _ItemList(
+                                      items: filteredItems,
+                                      collection: collection,
+                                      template: template,
+                                    )),
                         ),
                       ],
                     );
@@ -378,6 +407,19 @@ class _ItemTileState extends ConsumerState<_ItemTile> {
     final linkedin = meta?['linkedin'] as String?;
     final email = meta?['email'] as String?;
 
+    final isJob = template.id == 'job';
+    final statusDef = template.statusDef(item.status);
+    final cardColor = isJob ? statusDef.color.withValues(alpha: 0.12) : null;
+
+    final appliedDate = meta?['applied_date'] as String?;
+    final interviewDate = meta?['interview_date'] as String?;
+    final rejectedDate = meta?['rejected_date'] as String?;
+    final offerDate = meta?['offer_date'] as String?;
+
+    final interviewDays = JobStatusHelper.daysBetween(appliedDate, interviewDate);
+    final rejectedDays = JobStatusHelper.daysBetween(appliedDate, rejectedDate);
+    final offerDays = JobStatusHelper.daysBetween(appliedDate, offerDate);
+
     return Dismissible(
       key: ValueKey(item.id),
       background: _swipeBackground(
@@ -403,6 +445,7 @@ class _ItemTileState extends ConsumerState<_ItemTile> {
       },
       onDismissed: (_) => repo.deleteItem(item.id),
       child: AppCard(
+        color: cardColor,
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         // For groceries template: tap ONLY toggles state
         // For standard shopping & other templates: tap opens edit/description sheet
@@ -493,7 +536,42 @@ class _ItemTileState extends ConsumerState<_ItemTile> {
                               ),
                             )
                           else
-                            StatusChip(status: item.status, compact: true),
+                            PopupMenuButton<String>(
+                              onSelected: (newStatus) async {
+                                final updatedMeta = JobStatusHelper.updateMetaForStatus(
+                                  item.meta,
+                                  newStatus,
+                                );
+                                final isDoneStatus = template.statusDef(newStatus).isDone;
+                                await repo.updateItem(
+                                  item.copyWith(
+                                    status: newStatus,
+                                    doneDate: Value(isDoneStatus ? _todayIso() : null),
+                                    meta: Value(updatedMeta),
+                                  ),
+                                );
+                              },
+                              itemBuilder: (ctx) => template.statuses.map((s) {
+                                return PopupMenuItem<String>(
+                                  value: s.value,
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        width: 10,
+                                        height: 10,
+                                        decoration: BoxDecoration(
+                                          color: s.color,
+                                          shape: BoxShape.circle,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(s.label),
+                                    ],
+                                  ),
+                                );
+                              }).toList(),
+                              child: StatusChip(status: item.status, compact: true),
+                            ),
                           if (template.fields.priority && item.priority != null)
                             PriorityBadge(priority: item.priority!),
                           if (template.fields.dueDate && item.dueDate != null)
@@ -541,6 +619,33 @@ class _ItemTileState extends ConsumerState<_ItemTile> {
                                 icon: Icons.email_outlined,
                                 label: email,
                                 color: Colors.deepOrange,
+                              ),
+                            if (appliedDate != null && appliedDate.isNotEmpty)
+                              _MetaChip(
+                                icon: Icons.calendar_today,
+                                label: 'Applied: ${_formatShortDate(appliedDate)}',
+                                color: Colors.amber.shade900,
+                              ),
+                            if (interviewDate != null && interviewDate.isNotEmpty)
+                              _MetaChip(
+                                icon: Icons.event,
+                                label:
+                                    'Interview: ${_formatShortDate(interviewDate)}${interviewDays != null ? ' (+$interviewDays d)' : ''}',
+                                color: Colors.blue.shade800,
+                              ),
+                            if (rejectedDate != null && rejectedDate.isNotEmpty)
+                              _MetaChip(
+                                icon: Icons.cancel_outlined,
+                                label:
+                                    'Rejected: ${_formatShortDate(rejectedDate)}${rejectedDays != null ? ' (+$rejectedDays d)' : ''}',
+                                color: Colors.red.shade800,
+                              ),
+                            if (offerDate != null && offerDate.isNotEmpty)
+                              _MetaChip(
+                                icon: Icons.verified_outlined,
+                                label:
+                                    'Offer: ${_formatShortDate(offerDate)}${offerDays != null ? ' (+$offerDays d)' : ''}',
+                                color: Colors.green.shade800,
                               ),
                           ],
                         ],
@@ -684,6 +789,15 @@ class _ItemTileState extends ConsumerState<_ItemTile> {
   static String _todayIso() {
     final d = DateTime.now();
     return '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+  }
+}
+
+String _formatShortDate(String isoDate) {
+  try {
+    final dt = DateTime.parse(isoDate);
+    return DateFormat('d MMM').format(dt);
+  } catch (_) {
+    return isoDate;
   }
 }
 

@@ -266,31 +266,31 @@ const _templates = [
       StatusDef(
         value: 'researching',
         label: 'Researching',
-        color: AppColors.statusOpen,
+        color: Color(0xFF9E9E9E), // Gray
       ),
       StatusDef(
         value: 'applied',
         label: 'Applied',
-        color: AppColors.statusPlanned,
+        color: Color(0xFFFBC02D), // Yellow
       ),
       StatusDef(
         value: 'interview',
         label: 'Interview',
-        color: Color(0xFFFFF9C4),
+        color: Color(0xFF1E88E5), // Blue
       ),
       StatusDef(
         value: 'rejected',
         label: 'Rejected',
-        color: AppColors.statusBlocked,
+        color: Color(0xFFE53935), // Red
       ),
       StatusDef(
         value: 'offer',
         label: 'Offer',
-        color: AppColors.statusDone,
+        color: Color(0xFF43A047), // Green
         isDone: true,
       ),
     ],
-    fields: VisibleFields(priority: true, dueDate: true, description: true),
+    fields: VisibleFields(priority: true, dueDate: false, description: true),
     metaFields: [
       MetaFieldDef(key: 'company', label: 'Company', type: MetaFieldType.text),
       MetaFieldDef(key: 'city', label: 'City', type: MetaFieldType.text),

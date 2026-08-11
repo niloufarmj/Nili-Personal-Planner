@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/db/database.dart';
 import '../../../core/design/design.dart';
 import '../../finance/services/projection_service.dart';
+import '../helpers/job_status_helper.dart';
 import '../repositories/item_repository.dart';
 import '../templates/template_registry.dart';
 
@@ -220,6 +221,14 @@ class _ItemEditSheetState extends ConsumerState<ItemEditSheet> {
       }
     }
 
+    Map<String, dynamic>? finalMeta = meta.isEmpty ? null : meta;
+    if (widget.template.id == 'job') {
+      final oldStatus = widget.item?.status;
+      if (!_isEdit || oldStatus != _status) {
+        finalMeta = JobStatusHelper.updateMetaForStatus(finalMeta, _status);
+      }
+    }
+
     if (_isEdit) {
       final updated = widget.item!.copyWith(
         title: _title.text.trim(),
@@ -230,7 +239,7 @@ class _ItemEditSheetState extends ConsumerState<ItemEditSheet> {
         priority: Value(_priority),
         dueDate: Value(_dueDate),
         plannedCostCents: Value(_plannedCostCents),
-        meta: Value(meta.isEmpty ? null : meta),
+        meta: Value(finalMeta),
       );
       await repo.updateItem(updated);
     } else {
@@ -245,7 +254,7 @@ class _ItemEditSheetState extends ConsumerState<ItemEditSheet> {
           priority: Value(_priority),
           dueDate: Value(_dueDate),
           plannedCostCents: Value(_plannedCostCents),
-          meta: Value(meta.isEmpty ? null : meta),
+          meta: Value(finalMeta),
         ),
       );
     }

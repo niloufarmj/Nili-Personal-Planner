@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:personal_planner/features/lists/templates/template_registry.dart';
 
@@ -91,10 +92,16 @@ void main() {
       expect(t.statuses.any((s) => s.value == 'blocked'), isTrue);
     });
 
-    test('job template has 5 statuses and updated meta fields', () {
+    test('job template has 5 statuses, no dueDate, and updated meta fields', () {
       final t = TemplateRegistry.get('job');
       expect(t.statuses.length, 5);
       expect(t.doneStatus, 'offer');
+      expect(t.fields.dueDate, isFalse);
+      expect(t.statusDef('researching').color, const Color(0xFF9E9E9E));
+      expect(t.statusDef('applied').color, const Color(0xFFFBC02D));
+      expect(t.statusDef('interview').color, const Color(0xFF1E88E5));
+      expect(t.statusDef('rejected').color, const Color(0xFFE53935));
+      expect(t.statusDef('offer').color, const Color(0xFF43A047));
       expect(t.metaFields.any((f) => f.key == 'city'), isTrue);
       expect(
         t.metaFields.any(
