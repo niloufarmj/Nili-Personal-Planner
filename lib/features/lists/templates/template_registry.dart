@@ -290,9 +290,10 @@ const _templates = [
         isDone: true,
       ),
     ],
-    fields: VisibleFields(priority: true, dueDate: false, description: true),
+    fields: VisibleFields(priority: false, dueDate: false, description: true),
     metaFields: [
-      MetaFieldDef(key: 'company', label: 'Company', type: MetaFieldType.text),
+      MetaFieldDef(key: 'company', label: 'Company Name', type: MetaFieldType.text),
+      MetaFieldDef(key: 'website', label: 'Company Website', type: MetaFieldType.url),
       MetaFieldDef(key: 'city', label: 'City', type: MetaFieldType.text),
       MetaFieldDef(key: 'category', label: 'Category / Industry', type: MetaFieldType.text),
       MetaFieldDef(
@@ -300,17 +301,11 @@ const _templates = [
         label: 'Has Open Position',
         type: MetaFieldType.boolean,
       ),
-      MetaFieldDef(key: 'website', label: 'Company Website', type: MetaFieldType.url),
       MetaFieldDef(key: 'linkedin', label: 'LinkedIn Profile', type: MetaFieldType.url),
       MetaFieldDef(key: 'link', label: 'Job Link (Optional)', type: MetaFieldType.url),
       MetaFieldDef(
         key: 'email',
         label: 'Company Email',
-        type: MetaFieldType.text,
-      ),
-      MetaFieldDef(
-        key: 'contact',
-        label: 'Contact Name',
         type: MetaFieldType.text,
       ),
       MetaFieldDef(key: 'role', label: 'Role / Position', type: MetaFieldType.text),

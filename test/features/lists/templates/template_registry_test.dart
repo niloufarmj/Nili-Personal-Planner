@@ -97,6 +97,8 @@ void main() {
       expect(t.statuses.length, 5);
       expect(t.doneStatus, 'offer');
       expect(t.fields.dueDate, isFalse);
+      expect(t.fields.priority, isFalse);
+      expect(t.metaFields.any((f) => f.key == 'contact'), isFalse);
       expect(t.statusDef('researching').color, const Color(0xFF9E9E9E));
       expect(t.statusDef('applied').color, const Color(0xFFFBC02D));
       expect(t.statusDef('interview').color, const Color(0xFF1E88E5));

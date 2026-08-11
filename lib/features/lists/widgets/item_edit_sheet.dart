@@ -87,31 +87,19 @@ class _ItemEditSheetState extends ConsumerState<ItemEditSheet> {
               ),
               const SizedBox(height: 16),
 
-              // Title
-              TextFormField(
-                controller: _title,
-                autofocus: !_isEdit,
-                decoration: const InputDecoration(
-                  labelText: 'Title *',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (v) =>
-                    (v == null || v.trim().isEmpty) ? 'Required' : null,
-              ),
-              const SizedBox(height: 12),
-
-              // Description
-              if (template.fields.description)
+              // Title (only for non-job templates where title is distinct from company)
+              if (template.id != 'job')
                 Padding(
                   padding: const EdgeInsets.only(bottom: 12),
                   child: TextFormField(
-                    controller: _description,
+                    controller: _title,
+                    autofocus: !_isEdit,
                     decoration: const InputDecoration(
-                      labelText: 'Description',
+                      labelText: 'Title *',
                       border: OutlineInputBorder(),
                     ),
-                    minLines: 1,
-                    maxLines: 3,
+                    validator: (v) =>
+                        (v == null || v.trim().isEmpty) ? 'Required' : null,
                   ),
                 ),
 
@@ -183,6 +171,21 @@ class _ItemEditSheetState extends ConsumerState<ItemEditSheet> {
                 ),
               ),
 
+              // Description / Notes (placed at the very end of the form)
+              if (template.fields.description)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: TextFormField(
+                    controller: _description,
+                    decoration: const InputDecoration(
+                      labelText: 'Description / Notes',
+                      border: OutlineInputBorder(),
+                    ),
+                    minLines: 2,
+                    maxLines: 4,
+                  ),
+                ),
+
               const SizedBox(height: 8),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -206,7 +209,18 @@ class _ItemEditSheetState extends ConsumerState<ItemEditSheet> {
   }
 
   Future<void> _save() async {
-    if (!_formKey.currentState!.validate()) return;
+    if (widget.template.id == 'job') {
+      final companyName = _metaControllers['company']?.text.trim() ?? '';
+      if (companyName.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Company Name is required')),
+        );
+        return;
+      }
+      _title.text = companyName;
+    } else {
+      if (!_formKey.currentState!.validate()) return;
+    }
 
     final repo = ref.read(itemRepositoryProvider);
     final meta = <String, dynamic>{};
