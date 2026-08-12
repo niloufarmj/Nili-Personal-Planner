@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:flutter/material.dart' show FileImage, ImageProvider, MemoryImage;
+import 'package:flutter/material.dart' show AssetImage, FileImage, ImageProvider, MemoryImage, NetworkImage;
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -14,11 +14,16 @@ import 'package:uuid/uuid.dart';
 /// there's no writable filesystem to save picked images to as files).
 const _dataUriPrefix = 'data:image';
 
+/// Prefix for bundled Flutter asset images.
+const _assetPrefix = 'asset://';
+
 /// Whether [path] refers to an image that can actually be rendered on this
 /// platform. Native file paths only resolve to real files off web.
 bool hasDisplayableImage(String? path) {
   if (path == null || path.isEmpty) return false;
   if (path.startsWith(_dataUriPrefix)) return true;
+  if (path.startsWith(_assetPrefix)) return true;
+  if (path.startsWith('http://') || path.startsWith('https://')) return true;
   if (kIsWeb) return false;
   return File(path).existsSync();
 }
@@ -26,11 +31,20 @@ bool hasDisplayableImage(String? path) {
 /// Builds an [ImageProvider] for a path returned by [ImageService.pick] /
 /// [ImageService.saveBytes], or null if it can't be displayed here.
 ImageProvider? imageProviderFor(String? path) {
-  if (!hasDisplayableImage(path)) return null;
-  if (path!.startsWith(_dataUriPrefix)) {
+  if (path == null || path.isEmpty) return null;
+  if (path.startsWith(_dataUriPrefix)) {
     return MemoryImage(base64Decode(path.substring(path.indexOf(',') + 1)));
   }
-  return FileImage(File(path));
+  if (path.startsWith(_assetPrefix)) {
+    return AssetImage(path.substring(_assetPrefix.length));
+  }
+  if (path.startsWith('http://') || path.startsWith('https://')) {
+    return NetworkImage(path);
+  }
+  if (kIsWeb) return null;
+  final file = File(path);
+  if (!file.existsSync()) return null;
+  return FileImage(file);
 }
 
 /// Manages picking, compressing, storing and deleting local images.

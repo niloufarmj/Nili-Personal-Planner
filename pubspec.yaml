@@ -81,4 +81,6 @@ flutter:
     - assets/google_fonts/
     - assets/seeds/
     - assets/icon/
+    - assets/images/movies/
+    - assets/images/ingredients/
 

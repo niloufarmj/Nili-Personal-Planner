@@ -1,5 +1,5 @@
 {
-  "version": 5,
+  "version": 9,
   "generated": "2026-06-12",
   "tags": [
     {
@@ -7354,207 +7354,343 @@
   "ingredients_master": [
     {
       "name": "روغن زیتون",
-      "category": "pantry"
+      "category": "pantry",
+      "image": "asset://assets/images/ingredients/olive_oil.png"
     },
     {
       "name": "اسپری روغن زیتون",
-      "category": "pantry"
+      "category": "pantry",
+      "image": "asset://assets/images/ingredients/olive_oil_spray.png"
     },
     {
       "name": "جو دوسر",
-      "category": "pantry"
+      "category": "pantry",
+      "image": "asset://assets/images/ingredients/oats.png"
     },
     {
       "name": "برنج",
-      "category": "pantry"
+      "category": "pantry",
+      "image": "asset://assets/images/ingredients/rice.png"
     },
     {
       "name": "ماکارونی",
-      "category": "pantry"
+      "category": "pantry",
+      "image": "asset://assets/images/ingredients/pasta.png"
     },
     {
       "name": "ورق لازانیا",
-      "category": "pantry"
+      "category": "pantry",
+      "image": "asset://assets/images/ingredients/lasagna_sheets.png"
     },
     {
       "name": "مرغ",
-      "category": "protein"
+      "category": "protein",
+      "image": "asset://assets/images/ingredients/chicken.png"
     },
     {
       "name": "ماهی",
-      "category": "protein"
+      "category": "protein",
+      "image": "asset://assets/images/ingredients/fish.png"
     },
     {
       "name": "گوشت چرخ‌کرده",
-      "category": "protein"
+      "category": "protein",
+      "image": "asset://assets/images/ingredients/ground_meat.png"
     },
     {
       "name": "سوسیس",
-      "category": "protein"
+      "category": "protein",
+      "image": "asset://assets/images/ingredients/sausage.png"
     },
     {
       "name": "تخم‌مرغ",
-      "category": "protein"
+      "category": "protein",
+      "image": "asset://assets/images/ingredients/eggs.png"
     },
     {
       "name": "تن ماهی",
-      "category": "protein"
+      "category": "protein",
+      "image": "asset://assets/images/ingredients/tuna.png"
     },
     {
       "name": "فلفل دلمه",
-      "category": "produce"
+      "category": "produce",
+      "image": "asset://assets/images/ingredients/bell_pepper.png"
     },
     {
       "name": "کلم بروکلی",
-      "category": "produce"
+      "category": "produce",
+      "image": "asset://assets/images/ingredients/broccoli.png"
     },
     {
       "name": "قارچ",
-      "category": "produce"
+      "category": "produce",
+      "image": "asset://assets/images/ingredients/mushroom.png"
     },
     {
       "name": "خیار",
-      "category": "produce"
+      "category": "produce",
+      "image": "asset://assets/images/ingredients/cucumber.png"
     },
     {
       "name": "هویج",
-      "category": "produce"
+      "category": "produce",
+      "image": "asset://assets/images/ingredients/carrot.png"
     },
     {
       "name": "سیر",
-      "category": "produce"
+      "category": "produce",
+      "image": "asset://assets/images/ingredients/garlic.png"
     },
     {
       "name": "پیاز",
-      "category": "produce"
+      "category": "produce",
+      "image": "asset://assets/images/ingredients/onion.png"
     },
     {
       "name": "سیب‌زمینی",
-      "category": "produce"
+      "category": "produce",
+      "image": "asset://assets/images/ingredients/potato.png"
     },
     {
       "name": "کاهو",
-      "category": "produce"
+      "category": "produce",
+      "image": "asset://assets/images/ingredients/lettuce.png"
     },
     {
       "name": "آووکادو",
-      "category": "produce"
+      "category": "produce",
+      "image": "asset://assets/images/ingredients/avocado.png"
     },
     {
       "name": "موز",
-      "category": "produce"
+      "category": "produce",
+      "image": "asset://assets/images/ingredients/banana.png"
     },
     {
       "name": "توت‌فرنگی",
-      "category": "produce"
+      "category": "produce",
+      "image": "asset://assets/images/ingredients/strawberry.png"
     },
     {
       "name": "شیر",
-      "category": "dairy"
+      "category": "dairy",
+      "image": "asset://assets/images/ingredients/milk.png"
     },
     {
       "name": "خامه",
-      "category": "dairy"
+      "category": "dairy",
+      "image": "asset://assets/images/ingredients/cream.png"
     },
     {
       "name": "کره",
-      "category": "dairy"
+      "category": "dairy",
+      "image": "asset://assets/images/ingredients/butter.png"
     },
     {
       "name": "ماست",
-      "category": "dairy"
+      "category": "dairy",
+      "image": "asset://assets/images/ingredients/yogurt.png"
     },
     {
       "name": "پنیر خامه‌ای",
-      "category": "dairy"
+      "category": "dairy",
+      "image": "asset://assets/images/ingredients/cream_cheese.png"
     },
     {
       "name": "پنیر پیتزا",
-      "category": "dairy"
+      "category": "dairy",
+      "image": "asset://assets/images/ingredients/pizza_cheese.png"
     },
     {
       "name": "پنیر پارمسان",
-      "category": "dairy"
+      "category": "dairy",
+      "image": "asset://assets/images/ingredients/parmesan.png"
     },
     {
       "name": "پنیر ورقه‌ای",
-      "category": "dairy"
+      "category": "dairy",
+      "image": "asset://assets/images/ingredients/sliced_cheese.png"
     },
     {
       "name": "رب گوجه",
-      "category": "pantry"
+      "category": "pantry",
+      "image": "asset://assets/images/ingredients/tomato_paste.png"
     },
     {
       "name": "سس پستو",
-      "category": "pantry"
+      "category": "pantry",
+      "image": "asset://assets/images/ingredients/pesto_sauce.png"
     },
     {
       "name": "سس گوجه",
-      "category": "pantry"
+      "category": "pantry",
+      "image": "asset://assets/images/ingredients/tomato_sauce.png"
     },
     {
       "name": "آبلیمو",
-      "category": "pantry"
+      "category": "pantry",
+      "image": "asset://assets/images/ingredients/lemon_juice.png"
     },
     {
       "name": "نمک",
-      "category": "pantry"
+      "category": "pantry",
+      "image": "asset://assets/images/ingredients/salt.png"
     },
     {
       "name": "فلفل",
-      "category": "pantry"
+      "category": "pantry",
+      "image": "asset://assets/images/ingredients/pepper.png"
     },
     {
       "name": "دارچین",
-      "category": "pantry"
+      "category": "pantry",
+      "image": "asset://assets/images/ingredients/cinnamon.png"
     },
     {
       "name": "دانه چیا",
-      "category": "pantry"
+      "category": "pantry",
+      "image": "asset://assets/images/ingredients/chia_seeds.png"
     },
     {
       "name": "زرشک",
-      "category": "pantry"
+      "category": "pantry",
+      "image": "asset://assets/images/ingredients/barberry.png"
     },
     {
       "name": "نون تست",
-      "category": "bakery"
+      "category": "bakery",
+      "image": "asset://assets/images/ingredients/toast.png"
     },
     {
       "name": "نون گرد",
-      "category": "bakery"
+      "category": "bakery",
+      "image": "asset://assets/images/ingredients/round_bread.png"
     },
     {
       "name": "نون سوخاری",
-      "category": "bakery"
+      "category": "bakery",
+      "image": "asset://assets/images/ingredients/breadcrumbs.png"
     },
     {
       "name": "نخود",
-      "category": "pantry"
+      "category": "pantry",
+      "image": "asset://assets/images/ingredients/chickpeas.png"
     },
     {
       "name": "ذرت",
-      "category": "pantry"
+      "category": "pantry",
+      "image": "asset://assets/images/ingredients/corn.png"
     },
     {
       "name": "زیتون",
-      "category": "pantry"
+      "category": "pantry",
+      "image": "asset://assets/images/ingredients/olives.png"
     },
     {
       "name": "خیارشور",
-      "category": "pantry"
+      "category": "pantry",
+      "image": "asset://assets/images/ingredients/pickles.png"
     },
     {
       "name": "عسل",
-      "category": "pantry"
+      "category": "pantry",
+      "image": "asset://assets/images/ingredients/honey.png"
     },
     {
       "name": "کره بادام‌زمینی",
-      "category": "pantry"
+      "category": "pantry",
+      "image": "asset://assets/images/ingredients/peanut_butter.png"
     },
     {
       "name": "نودل",
-      "category": "pantry"
+      "category": "pantry",
+      "image": "asset://assets/images/ingredients/noodles.png"
+    },
+    {
+      "name": "مربا",
+      "category": "pantry",
+      "image": "asset://assets/images/ingredients/jam.png"
+    },
+    {
+      "name": "کاغذ روغنی فر",
+      "category": "pantry",
+      "image": "asset://assets/images/ingredients/baking_paper.png"
+    },
+    {
+      "name": "شنیسل",
+      "category": "protein",
+      "image": "asset://assets/images/ingredients/schnitzel.png"
+    },
+    {
+      "name": "ناگت",
+      "category": "protein",
+      "image": "asset://assets/images/ingredients/nuggets.png"
+    },
+    {
+      "name": "کالباس",
+      "category": "protein",
+      "image": "asset://assets/images/ingredients/cold_cuts.png"
+    },
+    {
+      "name": "هم رول",
+      "category": "protein",
+      "image": "asset://assets/images/ingredients/ham_roll.png"
+    },
+    {
+      "name": "بستنی",
+      "category": "dairy",
+      "image": "asset://assets/images/ingredients/ice_cream.png"
+    },
+    {
+      "name": "بیسکوییت",
+      "category": "pantry",
+      "image": "asset://assets/images/ingredients/biscuit.png"
+    },
+    {
+      "name": "چایی",
+      "category": "pantry",
+      "image": "asset://assets/images/ingredients/tea.png"
+    },
+    {
+      "name": "میوه خشک",
+      "category": "pantry",
+      "image": "asset://assets/images/ingredients/dried_fruit.png"
+    },
+    {
+      "name": "کره پسته",
+      "category": "pantry",
+      "image": "asset://assets/images/ingredients/pistachio_butter.png"
+    },
+    {
+      "name": "پودر کاکائو",
+      "category": "pantry",
+      "image": "asset://assets/images/ingredients/cocoa_powder.png"
+    },
+    {
+      "name": "بادام‌زمینی",
+      "category": "pantry",
+      "image": "asset://assets/images/ingredients/peanuts.png"
+    },
+    {
+      "name": "سوپ آماده",
+      "category": "pantry",
+      "image": "asset://assets/images/ingredients/instant_soup.png"
+    },
+    {
+      "name": "سس سیر",
+      "category": "pantry",
+      "image": "asset://assets/images/ingredients/garlic_sauce.png"
+    },
+    {
+      "name": "سس سالاد",
+      "category": "pantry",
+      "image": "asset://assets/images/ingredients/salad_dressing.png"
+    },
+    {
+      "name": "چیپس",
+      "category": "pantry",
+      "image": "asset://assets/images/ingredients/chips.png"
     }
   ],
   "recipes_master": [

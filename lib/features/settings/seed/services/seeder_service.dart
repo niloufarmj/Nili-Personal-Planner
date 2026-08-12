@@ -298,6 +298,7 @@ class SeederService {
               status: m.status,
               doneDate: Value(expectedDoneDate),
               meta: Value({'kind': m.kind}),
+              imageBefore: Value(m.image ?? existingItem.imageBefore),
             );
             await itemRepo.updateItem(updatedItem);
             seededItemIds.add(existingItem.id);
@@ -316,6 +317,7 @@ class SeederService {
               status: Value(m.status),
               doneDate: Value(expectedDoneDate),
               meta: Value({'kind': m.kind}),
+              imageBefore: Value(m.image),
             ),
           );
           seededItemIds.add(newId);
@@ -443,14 +445,22 @@ class SeederService {
     for (final ing in data.ingredientsMaster) {
       final existing = await ingredientRepo.getByName(ing.name);
       if (existing != null) {
-        if (existing.category != ing.category) {
+        if (existing.category != ing.category ||
+            (ing.image != null && existing.image != ing.image)) {
           await ingredientRepo.update(
-            existing.copyWith(category: Value(ing.category)),
+            existing.copyWith(
+              category: Value(ing.category),
+              image: Value(ing.image ?? existing.image),
+            ),
           );
           ingredientsUpdated++;
         }
       } else {
-        await ingredientRepo.create(name: ing.name, category: ing.category);
+        await ingredientRepo.create(
+          name: ing.name,
+          category: ing.category,
+          image: ing.image,
+        );
         ingredientsInserted++;
       }
     }

@@ -25,11 +25,13 @@ class SeedItemMedia {
   final String title;
   final String kind;
   final String status;
+  final String? image;
 
   SeedItemMedia({
     required this.title,
     required this.kind,
     required this.status,
+    this.image,
   });
 
   factory SeedItemMedia.fromJson(Map<String, dynamic> json) {
@@ -37,6 +39,7 @@ class SeedItemMedia {
       title: json['title'] as String? ?? '',
       kind: json['kind'] as String? ?? '',
       status: json['status'] as String? ?? '',
+      image: json['image'] as String?,
     );
   }
 }
@@ -158,13 +161,15 @@ class SeedCollection {
 class SeedIngredient {
   final String name;
   final String category;
+  final String? image;
 
-  SeedIngredient({required this.name, required this.category});
+  SeedIngredient({required this.name, required this.category, this.image});
 
   factory SeedIngredient.fromJson(Map<String, dynamic> json) {
     return SeedIngredient(
       name: json['name'] as String? ?? '',
       category: json['category'] as String? ?? '',
+      image: json['image'] as String?,
     );
   }
 }
