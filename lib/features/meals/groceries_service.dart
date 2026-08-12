@@ -9,8 +9,58 @@ class GroceriesService {
 
   final AppDatabase _db;
 
+  /// Merges duplicate "Groceries" lists into a single master Groceries collection.
+  Future<void> deduplicateGroceriesCollections() async {
+    final groceriesCols = await (_db.select(_db.collections)
+          ..where(
+            (c) =>
+                c.template.equals('groceries') |
+                c.name.like('Groceries%'),
+          ))
+        .get();
+
+    if (groceriesCols.length <= 1) return;
+
+    // Pick the primary collection (prefer template == 'groceries' or id == 1)
+    groceriesCols.sort((a, b) {
+      if (a.template == 'groceries' && b.template != 'groceries') return -1;
+      if (b.template == 'groceries' && a.template != 'groceries') return 1;
+      return a.id.compareTo(b.id);
+    });
+
+    final primaryCol = groceriesCols.first;
+    final duplicates = groceriesCols.sublist(1);
+
+    // Get primary items titles
+    final primaryItems = await (_db.select(_db.items)
+          ..where((i) => i.collectionId.equals(primaryCol.id)))
+        .get();
+    final existingTitles =
+        primaryItems.map((i) => i.title.toLowerCase()).toSet();
+
+    for (final dup in duplicates) {
+      final dupItems = await (_db.select(_db.items)
+            ..where((i) => i.collectionId.equals(dup.id)))
+          .get();
+
+      for (final item in dupItems) {
+        if (existingTitles.contains(item.title.toLowerCase())) {
+          await (_db.delete(_db.items)..where((i) => i.id.equals(item.id))).go();
+        } else {
+          await (_db.update(_db.items)..where((i) => i.id.equals(item.id))).write(
+            ItemsCompanion(collectionId: Value(primaryCol.id)),
+          );
+          existingTitles.add(item.title.toLowerCase());
+        }
+      }
+
+      await (_db.delete(_db.collections)..where((c) => c.id.equals(dup.id))).go();
+    }
+  }
+
   /// Retrieves or creates the main Groceries collection in the Lists tab.
   Future<Collection> getOrCreateGroceriesCollection() async {
+    await deduplicateGroceriesCollections();
     final existing = await (_db.select(_db.collections)
           ..where(
             (c) =>
@@ -55,9 +105,46 @@ class GroceriesService {
     }
   }
 
+  /// Deletes duplicate items in all Groceries collections so every item title is unique.
+  Future<void> deduplicateGroceriesItems() async {
+    await deduplicateGroceriesCollections();
+
+    final groceriesCols = await (_db.select(_db.collections)
+          ..where(
+            (c) =>
+                c.template.equals('groceries') |
+                c.name.like('Groceries%'),
+          ))
+        .get();
+
+    for (final col in groceriesCols) {
+      final items = await (_db.select(_db.items)
+            ..where((i) => i.collectionId.equals(col.id))
+            ..orderBy([(i) => OrderingTerm.asc(i.id)]))
+          .get();
+
+      final Set<String> seen = {};
+      final List<int> toDelete = [];
+
+      for (final item in items) {
+        final norm = item.title.trim().toLowerCase();
+        if (seen.contains(norm)) {
+          toDelete.add(item.id);
+        } else {
+          seen.add(norm);
+        }
+      }
+
+      for (final id in toDelete) {
+        await (_db.delete(_db.items)..where((i) => i.id.equals(id))).go();
+      }
+    }
+  }
+
   /// Syncs/populates all catalog ingredients into a Groceries list in the Lists tab.
   /// If [targetCollectionId] is provided, syncs into that collection; otherwise syncs into default Groceries collection.
   Future<void> syncAllIngredientsToGroceriesList({int? targetCollectionId}) async {
+    await deduplicateGroceriesItems();
     await cleanAccidentalGroceriesFromShoppingLists();
 
     final collection = targetCollectionId != null
@@ -73,16 +160,17 @@ class GroceriesService {
           ..where((i) => i.collectionId.equals(collection.id)))
         .get();
 
+    final Map<String, Item> itemByTitle = {};
+    for (final item in existingItems) {
+      itemByTitle[item.title.trim().toLowerCase()] = item;
+    }
+
     for (final ing in catalog) {
-      final ingNameLower = ing.name.toLowerCase();
-      final existingItem = existingItems.cast<Item?>().firstWhere((i) {
-        if (i == null) return false;
-        final titleLower = i.title.toLowerCase();
-        return titleLower.contains(ingNameLower) || ingNameLower.contains(titleLower);
-      }, orElse: () => null);
+      final ingNameLower = ing.name.trim().toLowerCase();
+      final existingItem = itemByTitle[ingNameLower];
 
       if (existingItem == null) {
-        await _db.into(_db.items).insert(
+        final newId = await _db.into(_db.items).insert(
               ItemsCompanion.insert(
                 collectionId: collection.id,
                 title: ing.name,
@@ -90,6 +178,8 @@ class GroceriesService {
                 imageBefore: Value(ing.image),
               ),
             );
+        final insertedItem = await (_db.select(_db.items)..where((i) => i.id.equals(newId))).getSingle();
+        itemByTitle[ingNameLower] = insertedItem;
       } else if (ing.image != null && existingItem.imageBefore != ing.image) {
         await (_db.update(_db.items)..where((i) => i.id.equals(existingItem.id)))
             .write(ItemsCompanion(imageBefore: Value(ing.image)));

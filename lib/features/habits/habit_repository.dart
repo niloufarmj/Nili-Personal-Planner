@@ -139,6 +139,20 @@ class HabitRepository {
   // ── Seeding ────────────────────────────────────────────────────────────────
 
   Future<void> seedDefaultHabitsIfNeeded() async {
+    // Clean up redundant legacy short-name habits if full names exist
+    final all = await _db.select(_db.habits).get();
+    final hasFullWater = all.any((h) => h.name.toLowerCase().contains('water'));
+    final hasFullTeeth = all.any((h) => h.name.toLowerCase().contains('teeth'));
+
+    for (final h in all) {
+      if (hasFullWater && h.name.trim().toLowerCase() == 'water') {
+        await (_db.delete(_db.habits)..where((t) => t.id.equals(h.id))).go();
+      }
+      if (hasFullTeeth && h.name.trim().toLowerCase() == 'teeth') {
+        await (_db.delete(_db.habits)..where((t) => t.id.equals(h.id))).go();
+      }
+    }
+
     final existing = await _db.select(_db.habits).get();
 
     Future<void> insertIfMissing(String name, int target, List<String> times) async {
@@ -154,11 +168,11 @@ class HabitRepository {
       }
     }
 
-    await insertIfMissing('Water', 8, ['09:00', '13:00', '17:00', '21:00']);
+    await insertIfMissing('Drink water (glasses)', 10, ['09:00', '13:00', '17:00', '21:00']);
     await insertIfMissing('Skincare AM', 1, ['09:00']);
     await insertIfMissing('Skincare PM', 1, ['21:00']);
-    await insertIfMissing('Teeth', 2, ['09:00', '21:00']);
-    await insertIfMissing('Reading', 1, ['17:00']);
+    await insertIfMissing('Brush teeth', 2, ['08:00', '22:00']);
+    await insertIfMissing('Reading', 1, ['21:00']);
     await insertIfMissing('Taking daily multi vitamin', 1, ['09:00']);
     await insertIfMissing('Taking daily iron pills', 1, ['09:00']);
 

@@ -22,7 +22,7 @@ void main() {
       );
 
       final data = result.data!;
-      expect(data.version, equals(2));
+      expect(data.version, equals(5));
       expect(data.tags, isNotEmpty);
       expect(data.collections, isNotEmpty);
       expect(data.ingredientsMaster, isNotEmpty);

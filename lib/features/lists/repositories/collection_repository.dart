@@ -124,6 +124,67 @@ class CollectionRepository {
     await create(name: 'Spain', template: 'job', parentId: jobHuntId);
     await create(name: 'Australia', template: 'job', parentId: jobHuntId);
   }
+
+  /// Merges duplicate Job Hunt collections (e.g. "Germany" vs "Job Hunt — Germany").
+  Future<void> deduplicateJobHuntCollections() async {
+    final jobCols = await (_db.select(_db.collections)
+          ..where((c) => c.template.equals('job') | c.name.like('%Job Hunt%')))
+        .get();
+
+    if (jobCols.isEmpty) return;
+
+    final Map<String, List<Collection>> groups = {};
+    for (final col in jobCols) {
+      final norm = col.name
+          .replaceAll('Job Hunt', '')
+          .replaceAll('—', '')
+          .replaceAll('-', '')
+          .trim()
+          .toLowerCase();
+      if (norm.isEmpty) continue;
+      groups.putIfAbsent(norm, () => []).add(col);
+    }
+
+    for (final entry in groups.entries) {
+      final list = entry.value;
+      if (list.length <= 1) continue;
+
+      Collection primary = list.first;
+      int maxItems = -1;
+      for (final col in list) {
+        final items = await (_db.select(_db.items)
+              ..where((i) => i.collectionId.equals(col.id)))
+            .get();
+        if (items.length > maxItems) {
+          maxItems = items.length;
+          primary = col;
+        }
+      }
+
+      final duplicates = list.where((c) => c.id != primary.id).toList();
+      final primaryItems = await (_db.select(_db.items)
+            ..where((i) => i.collectionId.equals(primary.id)))
+          .get();
+      final existingTitles = primaryItems.map((i) => i.title.toLowerCase()).toSet();
+
+      for (final dup in duplicates) {
+        final dupItems = await (_db.select(_db.items)
+              ..where((i) => i.collectionId.equals(dup.id)))
+            .get();
+        for (final item in dupItems) {
+          if (existingTitles.contains(item.title.toLowerCase())) {
+            await (_db.delete(_db.items)..where((i) => i.id.equals(item.id))).go();
+          } else {
+            await (_db.update(_db.items)..where((i) => i.id.equals(item.id))).write(
+              ItemsCompanion(collectionId: Value(primary.id)),
+            );
+            existingTitles.add(item.title.toLowerCase());
+          }
+        }
+        await (_db.delete(_db.collections)..where((c) => c.id.equals(dup.id))).go();
+      }
+    }
+  }
 }
 
 // ── Riverpod provider ──────────────────────────────────────────────────────────

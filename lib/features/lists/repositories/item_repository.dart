@@ -58,6 +58,40 @@ class ItemRepository {
   Future<int> deleteItem(int id) =>
       (_db.delete(_db.items)..where((i) => i.id.equals(id))).go();
 
+  /// Purges all duplicate items across EVERY collection in the database.
+  /// Guarantees that within any collection, every item title is 100% unique.
+  Future<int> deduplicateAllItems() async {
+    final allCols = await _db.select(_db.collections).get();
+    int totalDeleted = 0;
+
+    for (final col in allCols) {
+      final items = await (_db.select(_db.items)
+            ..where((i) => i.collectionId.equals(col.id))
+            ..orderBy([(i) => OrderingTerm.asc(i.id)]))
+          .get();
+
+      final Set<String> seen = {};
+      final List<int> toDelete = [];
+
+      for (final item in items) {
+        final norm = item.title.trim().toLowerCase();
+        if (seen.contains(norm)) {
+          toDelete.add(item.id);
+        } else {
+          seen.add(norm);
+        }
+      }
+
+      if (toDelete.isNotEmpty) {
+        for (final id in toDelete) {
+          await (_db.delete(_db.items)..where((i) => i.id.equals(id))).go();
+        }
+        totalDeleted += toDelete.length;
+      }
+    }
+    return totalDeleted;
+  }
+
   // ── Status toggle (tick / untick) ────────────────────────────────
 
   /// Marks an item done: sets status to [doneStatus] and records today as done_date.

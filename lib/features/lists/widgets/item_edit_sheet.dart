@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/db/database.dart';
 import '../../../core/design/design.dart';
+import '../../../core/services/image_service.dart';
 import '../../finance/services/projection_service.dart';
 import '../helpers/job_status_helper.dart';
 import '../repositories/item_repository.dart';
@@ -35,6 +36,7 @@ class _ItemEditSheetState extends ConsumerState<ItemEditSheet> {
   int? _priority;
   String? _dueDate;
   int? _plannedCostCents;
+  String? _imageBefore;
   final Map<String, TextEditingController> _metaControllers = {};
 
   bool get _isEdit => widget.item != null;
@@ -49,6 +51,7 @@ class _ItemEditSheetState extends ConsumerState<ItemEditSheet> {
     _priority = item?.priority;
     _dueDate = item?.dueDate;
     _plannedCostCents = item?.plannedCostCents;
+    _imageBefore = item?.imageBefore;
 
     for (final f in widget.template.metaFields) {
       final raw = (item?.meta != null) ? item!.meta![f.key] : null;
@@ -171,6 +174,51 @@ class _ItemEditSheetState extends ConsumerState<ItemEditSheet> {
                 ),
               ),
 
+              // Poster / Image field if enabled for this template
+              if (template.fields.imageBefore)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Row(
+                    children: [
+                      if (hasDisplayableImage(_imageBefore))
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image(
+                            image: imageProviderFor(_imageBefore)!,
+                            width: 56,
+                            height: 56,
+                            fit: BoxFit.cover,
+                          ),
+                        )
+                      else
+                        Container(
+                          width: 56,
+                          height: 56,
+                          decoration: BoxDecoration(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .surfaceContainerHighest,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Icon(Icons.movie_outlined, size: 28),
+                        ),
+                      const SizedBox(width: 12),
+                      OutlinedButton.icon(
+                        onPressed: () async {
+                          final path = await ref.read(imageServiceProvider).pick();
+                          if (path != null) setState(() => _imageBefore = path);
+                        },
+                        icon: const Icon(Icons.photo_camera),
+                        label: Text(
+                          hasDisplayableImage(_imageBefore)
+                              ? 'Change Poster / Photo'
+                              : 'Add Poster / Photo',
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
               // Description / Notes (placed at the very end of the form)
               if (template.fields.description)
                 Padding(
@@ -255,6 +303,7 @@ class _ItemEditSheetState extends ConsumerState<ItemEditSheet> {
         priority: Value(_priority),
         dueDate: Value(_dueDate),
         plannedCostCents: Value(_plannedCostCents),
+        imageBefore: Value(_imageBefore),
         meta: Value(finalMeta),
       );
       await repo.updateItem(updated);
@@ -270,6 +319,7 @@ class _ItemEditSheetState extends ConsumerState<ItemEditSheet> {
           priority: Value(_priority),
           dueDate: Value(_dueDate),
           plannedCostCents: Value(_plannedCostCents),
+          imageBefore: Value(_imageBefore),
           meta: Value(finalMeta),
         ),
       );

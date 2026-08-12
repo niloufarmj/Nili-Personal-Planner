@@ -376,7 +376,7 @@ const _templates = [
         isDone: true,
       ),
     ],
-    fields: VisibleFields(description: true),
+    fields: VisibleFields(imageBefore: true, description: true),
     metaFields: [
       MetaFieldDef(
         key: 'kind',

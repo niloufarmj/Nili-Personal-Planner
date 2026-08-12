@@ -152,14 +152,11 @@ class _MealGrid extends ConsumerWidget {
   });
 
   final DateTime weekStart;
-
-  /// dateStr -> (slotStr -> MealSlot)
   final Map<String, Map<String, MealSlot>> slotMap;
   final List<Recipe> recipes;
 
   static const _slots = ['breakfast', 'lunch', 'dinner', 'post-gym-shake'];
-
-  static const _dayLabels = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+  static const _dayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -168,56 +165,94 @@ class _MealGrid extends ConsumerWidget {
       (i) => _dateStr(weekStart.add(Duration(days: i))),
     );
 
+    final today = _dateStr(DateTime.now());
+
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: SingleChildScrollView(
         child: Table(
-          defaultColumnWidth: const FixedColumnWidth(88),
+          defaultColumnWidth: const FixedColumnWidth(148),
+          columnWidths: const {
+            0: FixedColumnWidth(80),
+          },
           children: [
-            // Row 0: Day headers
+            // Row 0: Column Headers (Meal Slots)
             TableRow(
               children: [
-                const _Cell(child: Text('Slot')),
-                ...dates.asMap().entries.map((e) {
-                  final dayNum = weekStart
-                      .add(Duration(days: e.key))
-                      .day
-                      .toString();
-                  return _Cell(
-                    child: Center(
+                const _Cell(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: 8),
+                    child: Text(
+                      'Day',
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                    ),
+                  ),
+                ),
+                _MealHeaderCell(icon: Icons.wb_sunny_outlined, label: 'Breakfast', color: Colors.amber.shade800),
+                _MealHeaderCell(icon: Icons.lunch_dining, label: 'Lunch', color: Colors.orange.shade800),
+                _MealHeaderCell(icon: Icons.dinner_dining, label: 'Dinner', color: Colors.deepOrange.shade800),
+                _MealHeaderCell(icon: Icons.fitness_center, label: 'Shake / Snack', color: Colors.purple.shade700),
+              ],
+            ),
+            // Rows 1-7: Days of the week (Rows = Days)
+            ...dates.asMap().entries.map((e) {
+              final dateStr = e.value;
+              final dayDate = weekStart.add(Duration(days: e.key));
+              final dayName = _dayLabels[e.key];
+              final dayNum = dayDate.day.toString();
+              final isToday = dateStr == today;
+
+              return TableRow(
+                children: [
+                  // Row Header: Day (Leftmost column)
+                  _Cell(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
+                      decoration: BoxDecoration(
+                        color: isToday ? Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.4) : Colors.transparent,
+                        borderRadius: BorderRadius.circular(10),
+                        border: isToday ? Border.all(color: Theme.of(context).colorScheme.primary, width: 1.5) : null,
+                      ),
                       child: Column(
-                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            _dayLabels[e.key],
-                            style: const TextStyle(fontWeight: FontWeight.bold),
+                            dayName,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                              color: isToday ? Theme.of(context).colorScheme.primary : null,
+                            ),
                           ),
+                          const SizedBox(height: 2),
                           Text(
                             dayNum,
-                            style: Theme.of(context).textTheme.labelSmall,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: isToday ? Theme.of(context).colorScheme.primary : Colors.grey.shade600,
+                            ),
                           ),
+                          if (isToday) ...[
+                            const SizedBox(height: 4),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).colorScheme.primary,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: const Text(
+                                'TODAY',
+                                style: TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ],
                         ],
                       ),
                     ),
-                  );
-                }),
-              ],
-            ),
-            // Rows 1-4: Slots
-            ..._slots.map(
-              (slotStr) => TableRow(
-                children: [
-                  _Cell(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      child: Text(
-                        _slotLabel(slotStr),
-                        style: Theme.of(context).textTheme.labelSmall,
-                      ),
-                    ),
                   ),
-                  ...dates.map((dateStr) {
+                  // Meal Columns
+                  ..._slots.map((slotStr) {
                     final mealSlot = slotMap[dateStr]?[slotStr];
                     return _MealCell(
                       date: dateStr,
@@ -226,6 +261,45 @@ class _MealGrid extends ConsumerWidget {
                     );
                   }),
                 ],
+              );
+            }),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _MealHeaderCell extends StatelessWidget {
+  const _MealHeaderCell({
+    required this.icon,
+    required this.label,
+    required this.color,
+  });
+
+  final IconData icon;
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return _Cell(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 16, color: color),
+            const SizedBox(width: 4),
+            Expanded(
+              child: Text(
+                label,
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: color),
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],
@@ -233,14 +307,6 @@ class _MealGrid extends ConsumerWidget {
       ),
     );
   }
-
-  static String _slotLabel(String s) => switch (s) {
-    'breakfast' => 'Brkfast',
-    'lunch' => 'Lunch',
-    'dinner' => 'Dinner',
-    'post-gym-shake' => 'Shake',
-    _ => s,
-  };
 }
 
 class _Cell extends StatelessWidget {
@@ -249,7 +315,7 @@ class _Cell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(padding: const EdgeInsets.all(4), child: child);
+    return Padding(padding: const EdgeInsets.all(3), child: child);
   }
 }
 
@@ -266,26 +332,55 @@ class _MealCell extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final statusColor = mealSlot == null
-        ? Colors.transparent
+        ? Colors.grey
         : _statusColor(mealSlot!.status);
+
+    final recipeId = mealSlot?.recipeId;
 
     return GestureDetector(
       onTap: () => _showSlotActions(context, ref),
       child: Container(
         margin: const EdgeInsets.all(2),
-        padding: const EdgeInsets.all(6),
-        width: 80,
+        height: 110,
         decoration: BoxDecoration(
-          color: statusColor.withValues(alpha: 0.15),
-          border: Border.all(color: statusColor, width: 1.5),
-          borderRadius: BorderRadius.circular(6),
+          color: Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: mealSlot != null ? statusColor.withValues(alpha: 0.5) : Colors.grey.withValues(alpha: 0.25),
+            width: mealSlot != null ? 1.5 : 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
-        child: mealSlot?.recipeId != null
-            ? _RecipeName(recipeId: mealSlot!.recipeId!)
-            : Text(
-                mealSlot != null ? mealSlot!.status : '—',
-                style: Theme.of(context).textTheme.labelSmall,
-                overflow: TextOverflow.ellipsis,
+        child: recipeId != null
+            ? _RecipeCardContent(
+                recipeId: recipeId,
+                status: mealSlot!.status,
+                statusColor: statusColor,
+              )
+            : Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.add_circle_outline,
+                    size: 24,
+                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.6),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '+ Add Meal',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                ],
               ),
       ),
     );
@@ -479,64 +574,142 @@ class _MealCell extends ConsumerWidget {
   };
 }
 
-class _RecipeName extends ConsumerWidget {
-  const _RecipeName({required this.recipeId});
+class _RecipeCardContent extends ConsumerWidget {
+  const _RecipeCardContent({
+    required this.recipeId,
+    required this.status,
+    required this.statusColor,
+  });
+
   final int recipeId;
+  final String status;
+  final Color statusColor;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final recipeAsync = ref.watch(_recipeNameProvider(recipeId));
+    final recipeAsync = ref.watch(_recipeObjectProvider(recipeId));
     final missingAsync = ref.watch(_missingIngredientsProvider(recipeId));
     final missingNames = missingAsync.value ?? [];
 
     return recipeAsync.when(
-      loading: () => const SizedBox.shrink(),
-      error: (_, _) => const Text('?'),
-      data: (name) => Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            name ?? '?',
-            style: Theme.of(context).textTheme.labelSmall,
-            overflow: TextOverflow.ellipsis,
-            maxLines: 2,
-          ),
-          if (missingNames.isNotEmpty) ...[
-            const SizedBox(height: 2),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-              decoration: BoxDecoration(
-                color: Colors.red.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(4),
-                border: Border.all(color: Colors.redAccent.withValues(alpha: 0.5), width: 0.5),
+      loading: () => const Center(
+        child: SizedBox(
+          width: 16,
+          height: 16,
+          child: CircularProgressIndicator(strokeWidth: 2),
+        ),
+      ),
+      error: (_, __) => const Center(child: Text('?')),
+      data: (recipe) {
+        if (recipe == null) return const Center(child: Text('Unknown'));
+
+        final imgProvider = imageProviderFor(recipe.image);
+
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(11),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Recipe Image Thumbnail or Fallback Icon Header
+              Expanded(
+                flex: 5,
+                child: Container(
+                  color: statusColor.withValues(alpha: 0.15),
+                  child: imgProvider != null
+                      ? Image(
+                          image: imgProvider,
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          errorBuilder: (_, __, ___) => _defaultBannerIcon(),
+                        )
+                      : _defaultBannerIcon(),
+                ),
               ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.error_outline, size: 10, color: Colors.redAccent),
-                  const SizedBox(width: 2),
-                  Expanded(
-                    child: Text(
-                      'Need: ${missingNames.join(", ")}',
-                      style: const TextStyle(
-                        fontSize: 9,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.redAccent,
+              // Recipe Name & Details
+              Expanded(
+                flex: 6,
+                child: Padding(
+                  padding: const EdgeInsets.all(6),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        recipe.name,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 11,
+                          height: 1.15,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
-                    ),
+                      if (missingNames.isNotEmpty)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                          decoration: BoxDecoration(
+                            color: Colors.red.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            '🛒 Need ${missingNames.length}',
+                            style: const TextStyle(
+                              fontSize: 9,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.redAccent,
+                            ),
+                          ),
+                        )
+                      else
+                        Row(
+                          children: [
+                            Container(
+                              width: 6,
+                              height: 6,
+                              decoration: BoxDecoration(
+                                color: statusColor,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              status.toUpperCase(),
+                              style: TextStyle(
+                                fontSize: 9,
+                                fontWeight: FontWeight.bold,
+                                color: statusColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                    ],
                   ),
-                ],
+                ),
               ),
-            ),
-          ],
-        ],
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _defaultBannerIcon() {
+    return Center(
+      child: Icon(
+        Icons.restaurant_menu,
+        size: 20,
+        color: statusColor,
       ),
     );
   }
 }
+
+final _recipeObjectProvider = FutureProvider.autoDispose.family<Recipe?, int>((
+  ref,
+  id,
+) async {
+  return ref.watch(recipeRepositoryProvider).getById(id);
+});
 
 final _recipeNameProvider = FutureProvider.autoDispose.family<String?, int>((
   ref,

@@ -7,7 +7,9 @@ import '../../core/db/database.dart';
 import '../../core/design/design.dart';
 import '../../core/router/routes.dart';
 import '../../core/services/image_service.dart';
+import '../meals/groceries_service.dart';
 import 'repositories/collection_repository.dart';
+import 'repositories/item_repository.dart';
 import 'templates/template_registry.dart';
 import 'widgets/collection_counts.dart';
 
@@ -84,6 +86,11 @@ class ListsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    Future.microtask(() async {
+      await ref.read(itemRepositoryProvider).deduplicateAllItems();
+      await ref.read(groceriesServiceProvider).deduplicateGroceriesItems();
+      await ref.read(collectionRepositoryProvider).deduplicateJobHuntCollections();
+    });
     final collectionsAsync = ref.watch(_allCollectionsProvider);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
@@ -328,6 +335,32 @@ class _CollectionCard extends ConsumerWidget {
         if (oldCover != null) {
           await ref.read(imageServiceProvider).delete(oldCover);
         }
+      case _CardAction.delete:
+        final confirm = await showDialog<bool>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text('Delete List?'),
+            content: Text(
+              'Are you sure you want to delete "${collection.name}"? This will permanently remove all items inside this list.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                child: const Text(
+                  'Delete',
+                  style: TextStyle(color: Colors.red),
+                ),
+              ),
+            ],
+          ),
+        );
+        if (confirm == true) {
+          await repo.delete(collection.id);
+        }
     }
   }
 
@@ -360,7 +393,7 @@ class _CollectionCard extends ConsumerWidget {
   }
 }
 
-enum _CardAction { rename, archive, setCover, removeCover }
+enum _CardAction { rename, archive, setCover, removeCover, delete }
 
 class _CollectionContextSheet extends StatelessWidget {
   const _CollectionContextSheet({required this.name, required this.hasCover});
@@ -403,6 +436,11 @@ class _CollectionContextSheet extends StatelessWidget {
             leading: const Icon(Icons.archive_outlined),
             title: const Text('Archive'),
             onTap: () => Navigator.of(context).pop(_CardAction.archive),
+          ),
+          ListTile(
+            leading: const Icon(Icons.delete_outline, color: Colors.red),
+            title: const Text('Delete List', style: TextStyle(color: Colors.red)),
+            onTap: () => Navigator.of(context).pop(_CardAction.delete),
           ),
           const SizedBox(height: 8),
         ],

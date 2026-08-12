@@ -134,7 +134,19 @@ class SeederService {
     final currentVersion = int.tryParse(versionRow?.value ?? '') ?? 0;
 
     if (currentVersion >= data.version) {
-      return SeedSummary(alreadySeeded: true, warnings: warnings);
+      final nlInSeed = data.collections.any((c) => c.name.contains('Netherlands') && c.itemsJob.isNotEmpty);
+      if (!nlInSeed) {
+        return SeedSummary(alreadySeeded: true, warnings: warnings);
+      }
+      final nlCols = await (db.select(db.collections)..where((c) => c.name.like('%Netherlands%'))).get();
+      if (nlCols.isEmpty) {
+        return SeedSummary(alreadySeeded: true, warnings: warnings);
+      }
+      final colIds = nlCols.map((c) => c.id).toList();
+      final items = await (db.select(db.items)..where((i) => i.collectionId.isIn(colIds))).get();
+      if (items.length >= 50) {
+        return SeedSummary(alreadySeeded: true, warnings: warnings);
+      }
     }
 
     // 2. Load seeded record tracker
@@ -376,6 +388,14 @@ class SeederService {
           (item) => item.title.toLowerCase() == j.title.toLowerCase(),
         );
 
+        final Map<String, dynamic> jobMeta = {};
+        if (j.company != null && j.company!.isNotEmpty) jobMeta['company'] = j.company;
+        if (j.category != null && j.category!.isNotEmpty) jobMeta['category'] = j.category;
+        if (j.city != null && j.city!.isNotEmpty) jobMeta['city'] = j.city;
+        if (j.website != null && j.website!.isNotEmpty) jobMeta['website'] = j.website;
+        if (j.linkedin != null && j.linkedin!.isNotEmpty) jobMeta['linkedin'] = j.linkedin;
+        final finalMeta = jobMeta.isEmpty ? null : jobMeta;
+
         if (existingItem != null) {
           final isSeederCreated =
               seededItemIds.contains(existingItem.id) ||
@@ -390,6 +410,7 @@ class SeederService {
               priority: Value(j.priority),
               dueDate: Value(j.dueDate),
               description: Value(j.note),
+              meta: Value(finalMeta),
             );
             await itemRepo.updateItem(updatedItem);
             seededItemIds.add(existingItem.id);
@@ -409,6 +430,7 @@ class SeederService {
               status: Value(mappedStatus),
               dueDate: Value(j.dueDate),
               description: Value(j.note),
+              meta: Value(finalMeta),
             ),
           );
           seededItemIds.add(newId);
@@ -553,6 +575,68 @@ class SeederService {
       }
     }
 
+    // ── SPORT ACTIVITIES ──
+    for (final act in data.sportActivities) {
+      final existingOnDate = await (db.select(db.sportActivities)
+            ..where(
+              (s) =>
+                  s.date.equals(act.date) &
+                  s.durationMin.equals(act.durationMin),
+            ))
+          .get();
+
+      if (existingOnDate.isNotEmpty) {
+        final primary = existingOnDate.first;
+        await (db.update(db.sportActivities)
+              ..where((s) => s.id.equals(primary.id)))
+            .write(
+          SportActivitiesCompanion(
+            activityType: Value(act.activityType),
+            calories: Value(act.calories),
+            notes: Value(act.notes),
+          ),
+        );
+        for (var i = 1; i < existingOnDate.length; i++) {
+          await (db.delete(db.sportActivities)
+                ..where((s) => s.id.equals(existingOnDate[i].id)))
+              .go();
+        }
+      } else {
+        await db.into(db.sportActivities).insert(
+              SportActivitiesCompanion.insert(
+                date: act.date,
+                activityType: act.activityType,
+                durationMin: act.durationMin,
+                calories: Value(act.calories),
+                notes: Value(act.notes),
+              ),
+            );
+      }
+    }
+
+    // ── PERIOD LOGS ──
+    for (final p in data.periodLogs) {
+      final existing = await (db.select(db.periodLogs)
+            ..where((log) => log.startDate.equals(p.startDate)))
+          .get();
+      if (existing.isEmpty) {
+        await db.into(db.periodLogs).insert(
+              PeriodLogsCompanion.insert(
+                startDate: p.startDate,
+                durationDays: Value(p.durationDays),
+              ),
+            );
+      } else {
+        await (db.update(db.periodLogs)
+              ..where((log) => log.startDate.equals(p.startDate)))
+            .write(
+          PeriodLogsCompanion(
+            durationDays: Value(p.durationDays),
+          ),
+        );
+      }
+    }
+
     // ── FITNESS GOALS ──
     final allGoals = await fitnessRepo.getGoals();
     for (final g in data.fitness.goals) {
@@ -666,6 +750,72 @@ class SeederService {
         debtsInserted++;
       }
     }
+
+    // ── RECURRING TRANSACTIONS ──
+    for (final r in data.recurringTransactions) {
+      final existing = await (db.select(db.recurringTransactions)
+            ..where((t) => t.name.equals(r.name)))
+          .get();
+      if (existing.isEmpty) {
+        await db.into(db.recurringTransactions).insert(
+              RecurringTransactionsCompanion.insert(
+                name: r.name,
+                amountCents: r.amountCents,
+                direction: r.direction,
+                dayOfMonth: r.dayOfMonth,
+                startMonth: r.startMonth,
+                category: r.category,
+                active: const Value(true),
+              ),
+            );
+      } else {
+        await (db.update(db.recurringTransactions)
+              ..where((t) => t.name.equals(r.name)))
+            .write(
+          RecurringTransactionsCompanion(
+            amountCents: Value(r.amountCents),
+            direction: Value(r.direction),
+            dayOfMonth: Value(r.dayOfMonth),
+            startMonth: Value(r.startMonth),
+            category: Value(r.category),
+          ),
+        );
+      }
+    }
+
+    // ── INITIAL TRANSACTIONS ──
+    for (final tx in data.initialTransactions) {
+      final noteVal = tx.note ?? '';
+      final existing = await (db.select(db.transactions)
+            ..where((t) => t.note.equals(noteVal)))
+          .get();
+      if (existing.isEmpty) {
+        await db.into(db.transactions).insert(
+              TransactionsCompanion.insert(
+                date: tx.date,
+                amountCents: tx.amountCents,
+                direction: tx.direction,
+                status: tx.status,
+                category: tx.category,
+                note: Value(tx.note),
+              ),
+            );
+      } else {
+        await (db.update(db.transactions)
+              ..where((t) => t.note.equals(noteVal)))
+            .write(
+          TransactionsCompanion(
+            amountCents: Value(tx.amountCents),
+            direction: Value(tx.direction),
+            status: Value(tx.status),
+            category: Value(tx.category),
+          ),
+        );
+      }
+    }
+
+    // ── GLOBAL DEDUPLICATION ──
+    await itemRepo.deduplicateAllItems();
 
     // ── PERSIST TRACKER STATE ──
     final Map<String, dynamic> updatedMap = {

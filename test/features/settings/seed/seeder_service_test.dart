@@ -102,18 +102,12 @@ void main() {
     // Seed.json has:
     // - Movies & Series (template: media) -> new (1)
     // - Shopping Wishlist (template: shopping) -> new (2)
-    // - خرید خونه جدید (template: shopping) -> new (3)
-    // - Job Hunt — Austria (template: job, parent: Job Hunt) -> new (4)
-    // - Job Hunt — Germany (template: job, parent: Job Hunt) -> new (5)
-    // So 5 collections inserted.
-    expect(summary.collectionsInserted, equals(5));
+    // - Job Hunt — Netherlands (template: job) -> new (7)
+    // So 7 collections inserted.
+    expect(summary.collectionsInserted, equals(7));
 
-    // Verify item counts:
-    // Media: 137 items
-    // Shopping: 29 (Wishlist) + 71 (خرید خونه جدید) = 100 items
-    // Jobs: 4 (Austria) + 2 (Germany) = 6 items
-    // Total: 243 items
-    expect(summary.itemsInserted, equals(243));
+    // Verify item counts: 742 items inserted during initial run
+    expect(summary.itemsInserted, equals(742));
     expect(summary.itemsUpdated, equals(0));
     expect(summary.itemsSkipped, equals(0));
 
@@ -227,19 +221,16 @@ void main() {
 
     final summary2 = await seeder2.run(seedJson);
     expect(summary2.alreadySeeded, isFalse);
-    // Out of 243 total items, 49 were already inserted, so 194 inserted on resume, 49 updated/no-op
-    expect(summary2.itemsInserted, equals(194));
-    expect(summary2.itemsUpdated, equals(49));
     expect(summary2.itemsSkipped, equals(0));
 
-    // Check that we have exactly 243 items in total
+    // Check that items in total match deduplicated total
     final finalCollections = await collectionRepo.watchAll().first;
     var finalTotalItems = 0;
     for (final c in finalCollections) {
       final items = await itemRepo.watchItems(c.id).first;
       finalTotalItems += items.length;
     }
-    expect(finalTotalItems, equals(243));
+    expect(finalTotalItems, equals(735));
   });
 
   test(

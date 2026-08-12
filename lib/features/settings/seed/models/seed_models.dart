@@ -76,6 +76,11 @@ class SeedItemJob {
   final int? priority;
   final String? dueDate;
   final String? note;
+  final String? company;
+  final String? category;
+  final String? city;
+  final String? website;
+  final String? linkedin;
 
   SeedItemJob({
     required this.title,
@@ -83,6 +88,11 @@ class SeedItemJob {
     this.priority,
     this.dueDate,
     this.note,
+    this.company,
+    this.category,
+    this.city,
+    this.website,
+    this.linkedin,
   });
 
   factory SeedItemJob.fromJson(Map<String, dynamic> json) {
@@ -92,6 +102,11 @@ class SeedItemJob {
       priority: json['priority'] as int?,
       dueDate: json['due_date'] as String?,
       note: json['note'] as String?,
+      company: json['company'] as String?,
+      category: json['category'] as String?,
+      city: json['city'] as String?,
+      website: json['website'] as String?,
+      linkedin: json['linkedin'] as String?,
     );
   }
 }
@@ -355,6 +370,32 @@ class SeedRecipe {
   }
 }
 
+class SeedSportActivity {
+  final String date;
+  final String activityType;
+  final int durationMin;
+  final int? calories;
+  final String? notes;
+
+  SeedSportActivity({
+    required this.date,
+    required this.activityType,
+    required this.durationMin,
+    this.calories,
+    this.notes,
+  });
+
+  factory SeedSportActivity.fromJson(Map<String, dynamic> json) {
+    return SeedSportActivity(
+      date: json['date'] as String? ?? '',
+      activityType: json['activity_type'] as String? ?? 'Other',
+      durationMin: json['duration_min'] as int? ?? 0,
+      calories: json['calories'] as int?,
+      notes: json['notes'] as String?,
+    );
+  }
+}
+
 class SeedData {
   final int version;
   final String generated;
@@ -367,6 +408,7 @@ class SeedData {
   final List<SeedHabit> habits;
   final List<SeedDebt> debts;
   final List<SeedPeriodLog> periodLogs;
+  final List<SeedSportActivity> sportActivities;
 
   SeedData({
     required this.version,
@@ -380,6 +422,9 @@ class SeedData {
     required this.habits,
     required this.debts,
     required this.periodLogs,
+    required this.sportActivities,
+    required this.recurringTransactions,
+    required this.initialTransactions,
   });
 
   factory SeedData.fromJson(Map<String, dynamic> json) {
@@ -428,6 +473,82 @@ class SeedData {
               ?.map((e) => SeedPeriodLog.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
+      sportActivities:
+          (json['sport_activities'] as List?)
+              ?.map((e) => SeedSportActivity.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
+      recurringTransactions:
+          (json['recurring_transactions'] as List?)
+              ?.map((e) => SeedRecurringTransaction.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
+      initialTransactions:
+          (json['initial_transactions'] as List?)
+              ?.map((e) => SeedInitialTransaction.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
+    );
+  }
+
+  final List<SeedRecurringTransaction> recurringTransactions;
+  final List<SeedInitialTransaction> initialTransactions;
+}
+
+class SeedRecurringTransaction {
+  final String name;
+  final int amountCents;
+  final String direction;
+  final int dayOfMonth;
+  final String startMonth;
+  final String category;
+
+  SeedRecurringTransaction({
+    required this.name,
+    required this.amountCents,
+    required this.direction,
+    required this.dayOfMonth,
+    required this.startMonth,
+    required this.category,
+  });
+
+  factory SeedRecurringTransaction.fromJson(Map<String, dynamic> json) {
+    return SeedRecurringTransaction(
+      name: json['name'] as String? ?? '',
+      amountCents: json['amount_cents'] as int? ?? 0,
+      direction: json['direction'] as String? ?? 'out',
+      dayOfMonth: json['day_of_month'] as int? ?? 1,
+      startMonth: json['start_month'] as String? ?? '2026-01',
+      category: json['category'] as String? ?? 'other',
+    );
+  }
+}
+
+class SeedInitialTransaction {
+  final String date;
+  final int amountCents;
+  final String direction;
+  final String status;
+  final String category;
+  final String? note;
+
+  SeedInitialTransaction({
+    required this.date,
+    required this.amountCents,
+    required this.direction,
+    required this.status,
+    required this.category,
+    this.note,
+  });
+
+  factory SeedInitialTransaction.fromJson(Map<String, dynamic> json) {
+    return SeedInitialTransaction(
+      date: json['date'] as String? ?? '',
+      amountCents: json['amount_cents'] as int? ?? 0,
+      direction: json['direction'] as String? ?? 'in',
+      status: json['status'] as String? ?? 'actual',
+      category: json['category'] as String? ?? 'income',
+      note: json['note'] as String?,
     );
   }
 }

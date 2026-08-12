@@ -289,14 +289,43 @@ class _RecentSportActivitiesList extends ConsumerWidget {
                       ),
                     ),
                     if (act.notes != null && act.notes!.isNotEmpty)
-                      Text(
-                        act.notes!,
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontStyle: FontStyle.italic,
-                          color: isDark ? DesignTokens.inkSoftDark : DesignTokens.inkSoftLight,
+                      Padding(
+                        padding: const EdgeInsets.only(right: 4),
+                        child: Text(
+                          act.notes!,
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontStyle: FontStyle.italic,
+                            color: isDark ? DesignTokens.inkSoftDark : DesignTokens.inkSoftLight,
+                          ),
                         ),
                       ),
+                    IconButton(
+                      icon: const Icon(Icons.delete_outline, size: 18, color: Colors.red),
+                      tooltip: 'Delete activity',
+                      onPressed: () async {
+                        final confirm = await showDialog<bool>(
+                          context: context,
+                          builder: (ctx) => AlertDialog(
+                            title: const Text('Delete Sport Activity?'),
+                            content: Text('Remove this ${act.activityType} entry from ${act.date}?'),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(ctx, false),
+                                child: const Text('Cancel'),
+                              ),
+                              TextButton(
+                                onPressed: () => Navigator.pop(ctx, true),
+                                child: const Text('Delete', style: TextStyle(color: Colors.red)),
+                              ),
+                            ],
+                          ),
+                        );
+                        if (confirm == true) {
+                          await ref.read(sportRepositoryProvider).deleteActivity(act.id);
+                        }
+                      },
+                    ),
                   ],
                 ),
               ),

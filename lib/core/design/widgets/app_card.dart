@@ -10,12 +10,14 @@ class AppCard extends StatelessWidget {
     this.padding = const EdgeInsets.all(20),
     this.onTap,
     this.color,
+    this.borderColor,
   });
 
   final Widget child;
   final EdgeInsets padding;
   final VoidCallback? onTap;
   final Color? color;
+  final Color? borderColor;
 
   @override
   Widget build(BuildContext context) {
@@ -25,11 +27,11 @@ class AppCard extends StatelessWidget {
     final resolvedColor =
         color ??
         (isDark ? DesignTokens.surfaceDark : DesignTokens.surfaceLight);
-    final lineColor = isDark ? DesignTokens.lineDark : DesignTokens.lineLight;
+    final lineColor = borderColor ?? (isDark ? DesignTokens.lineDark : DesignTokens.lineLight);
     final inkColor = isDark ? DesignTokens.inkDark : DesignTokens.inkLight;
 
     final shape = SmoothRectangleBorder(
-      side: BorderSide(color: lineColor, width: 1),
+      side: BorderSide(color: lineColor, width: borderColor != null ? 1.5 : 1),
       borderRadius: const SmoothBorderRadius.all(
         SmoothRadius(
           cornerRadius: DesignTokens.radiusCard,
