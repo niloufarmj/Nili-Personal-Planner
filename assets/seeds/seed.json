@@ -1,5 +1,5 @@
 {
-  "version": 9,
+  "version": 18,
   "generated": "2026-06-12",
   "tags": [
     {
@@ -48,7 +48,8 @@
         {
           "title": "سوته‌دلان",
           "kind": "movie",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/سوتهدلان.jpg"
         },
         {
           "title": "جامه‌دران",
@@ -58,12 +59,14 @@
         {
           "title": "اینجا بدون من",
           "kind": "movie",
-          "status": "done"
+          "status": "done",
+          "image": "asset://assets/images/movies/اینجا_بدون_من.jpg"
         },
         {
           "title": "هت‌تریک",
           "kind": "movie",
-          "status": "done"
+          "status": "done",
+          "image": "asset://assets/images/movies/هتتریک.jpg"
         },
         {
           "title": "سیزده",
@@ -73,17 +76,20 @@
         {
           "title": "خانه‌ای در شن و مه",
           "kind": "movie",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/خانهای_در_شن_و_مه.jpg"
         },
         {
           "title": "درباره الی",
           "kind": "movie",
-          "status": "done"
+          "status": "done",
+          "image": "asset://assets/images/movies/D8AFD8B1D8A8D8A7D8B1D987_D8A7D984DB8C.jpg"
         },
         {
           "title": "عروس",
           "kind": "movie",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/عروس.jpg"
         },
         {
           "title": "زندان زنان",
@@ -93,52 +99,62 @@
         {
           "title": "طبیب",
           "kind": "movie",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/طبیب.jpg"
         },
         {
           "title": "قیصر",
           "kind": "movie",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/قیصر.jpg"
         },
         {
           "title": "لانتوری",
           "kind": "movie",
-          "status": "done"
+          "status": "done",
+          "image": "asset://assets/images/movies/لانتوری.jpg"
         },
         {
           "title": "شبی که ماه کامل شد",
           "kind": "movie",
-          "status": "done"
+          "status": "done",
+          "image": "asset://assets/images/movies/شبی_که_ماه_کامل_شد.jpg"
         },
         {
           "title": "هامون",
           "kind": "movie",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/هامون.jpg"
         },
         {
           "title": "کافه ترانزیت",
           "kind": "movie",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/کافه_ترانزیت.jpg"
         },
         {
           "title": "جان‌دار",
           "kind": "movie",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/جاندار.jpg"
         },
         {
           "title": "جهان با من برقص",
           "kind": "movie",
-          "status": "done"
+          "status": "done",
+          "image": "asset://assets/images/movies/جهان_با_من_برقص.jpg"
         },
         {
           "title": "هفت دقیقه تا پاییز",
           "kind": "movie",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/هفت_دقیقه_تا_پاییز.jpg"
         },
         {
           "title": "نفس عمیق",
           "kind": "movie",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/نفس_عمیق.jpg"
         },
         {
           "title": "لتیان",
@@ -148,77 +164,92 @@
         {
           "title": "علی سنتوری",
           "kind": "movie",
-          "status": "done"
+          "status": "done",
+          "image": "asset://assets/images/movies/علی_سنتوری.jpg"
         },
         {
           "title": "یکی از ما دو نفر",
           "kind": "movie",
-          "status": "done"
+          "status": "done",
+          "image": "asset://assets/images/movies/یکی_از_ما_دو_نفر.jpg"
         },
         {
           "title": "خانه‌ای در خیابان چهل‌ویکم",
           "kind": "movie",
-          "status": "done"
+          "status": "done",
+          "image": "asset://assets/images/movies/خانهای_در_خیابان_چهلویکم.jpg"
         },
         {
           "title": "چهارشنبه‌سوری",
           "kind": "movie",
-          "status": "done"
+          "status": "done",
+          "image": "asset://assets/images/movies/چهارشنبهسوری.jpg"
         },
         {
           "title": "درخونگاه",
           "kind": "movie",
-          "status": "done"
+          "status": "done",
+          "image": "asset://assets/images/movies/درخونگاه.jpg"
         },
         {
           "title": "طعم گیلاس",
           "kind": "movie",
-          "status": "done"
+          "status": "done",
+          "image": "asset://assets/images/movies/طعم_گیلاس.jpg"
         },
         {
           "title": "کاغذ بی‌خط",
           "kind": "movie",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/کاغذ_بیخط.jpg"
         },
         {
           "title": "انجمن شاعران مرده (Dead Poets Society)",
           "kind": "movie",
-          "status": "done"
+          "status": "done",
+          "image": "asset://assets/images/movies/انجمن_شاعران_مرده_dead_poets_societ.jpg"
         },
         {
           "title": "زندگی جدید امپراطور (The Emperor's New Groove)",
           "kind": "movie",
-          "status": "done"
+          "status": "done",
+          "image": "asset://assets/images/movies/زندگی_جدید_امپراطور_the_emperors_ne.jpg"
         },
         {
           "title": "جمشیدیه",
           "kind": "movie",
-          "status": "done"
+          "status": "done",
+          "image": "asset://assets/images/movies/جمشیدیه.jpg"
         },
         {
           "title": "شنای پروانه",
           "kind": "movie",
-          "status": "done"
+          "status": "done",
+          "image": "asset://assets/images/movies/شنای_پروانه.jpg"
         },
         {
           "title": "دزد دوچرخه (Bicycle Thieves)",
           "kind": "movie",
-          "status": "done"
+          "status": "done",
+          "image": "asset://assets/images/movies/دزد_دوچرخه_bicycle_thieves.jpg"
         },
         {
           "title": "مرد باایمان",
           "kind": "movie",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/مرد_باایمان.jpg"
         },
         {
           "title": "روسری آبی",
           "kind": "movie",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/روسری_آبی.jpg"
         },
         {
           "title": "گیلانه",
           "kind": "movie",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/گیلانه.jpg"
         },
         {
           "title": "تی‌تی",
@@ -228,37 +259,44 @@
         {
           "title": "تصور",
           "kind": "movie",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/تصور.jpg"
         },
         {
           "title": "رهایم کن",
           "kind": "movie",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/رهایم_کن.jpg"
         },
         {
           "title": "Gangs of New York",
           "kind": "movie",
-          "status": "done"
+          "status": "done",
+          "image": "asset://assets/images/movies/gangs_of_new_york.jpg"
         },
         {
           "title": "The Irishman",
           "kind": "movie",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/the_irishman.jpg"
         },
         {
           "title": "Raging Bull",
           "kind": "movie",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/raging_bull.jpg"
         },
         {
           "title": "Mr. Nobody",
           "kind": "movie",
-          "status": "done"
+          "status": "done",
+          "image": "asset://assets/images/movies/mr_nobody.jpg"
         },
         {
           "title": "Parasite",
           "kind": "movie",
-          "status": "done"
+          "status": "done",
+          "image": "asset://assets/images/movies/parasite.jpg"
         },
         {
           "title": "The Past",
@@ -268,37 +306,44 @@
         {
           "title": "Camp X-Ray",
           "kind": "movie",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/camp_x_ray.jpg"
         },
         {
           "title": "Taxi Driver",
           "kind": "movie",
-          "status": "done"
+          "status": "done",
+          "image": "asset://assets/images/movies/taxi_driver.jpg"
         },
         {
           "title": "Malèna",
           "kind": "movie",
-          "status": "done"
+          "status": "done",
+          "image": "asset://assets/images/movies/malèna.jpg"
         },
         {
           "title": "Fight Club",
           "kind": "movie",
-          "status": "done"
+          "status": "done",
+          "image": "asset://assets/images/movies/fight_club.jpg"
         },
         {
           "title": "Lion",
           "kind": "movie",
-          "status": "done"
+          "status": "done",
+          "image": "asset://assets/images/movies/lion.jpg"
         },
         {
           "title": "Requiem for a Dream",
           "kind": "movie",
-          "status": "done"
+          "status": "done",
+          "image": "asset://assets/images/movies/requiem_for_a_dream.jpg"
         },
         {
           "title": "You Were Never Really Here",
           "kind": "movie",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/you_were_never_really_here.jpg"
         },
         {
           "title": "The Mist",
@@ -313,117 +358,140 @@
         {
           "title": "Mother",
           "kind": "movie",
-          "status": "done"
+          "status": "done",
+          "image": "asset://assets/images/movies/mother.jpg"
         },
         {
           "title": "The Shining",
           "kind": "movie",
-          "status": "done"
+          "status": "done",
+          "image": "asset://assets/images/movies/the_shining.jpg"
         },
         {
           "title": "The Lives of Others",
           "kind": "movie",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/the_lives_of_others.jpg"
         },
         {
           "title": "The Big Lebowski",
           "kind": "movie",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/the_big_lebowski.jpg"
         },
         {
           "title": "Marriage Story",
           "kind": "movie",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/marriage_story.jpg"
         },
         {
           "title": "A Whisker Away",
           "kind": "movie",
-          "status": "done"
+          "status": "done",
+          "image": "asset://assets/images/movies/a_whisker_away.jpg"
         },
         {
           "title": "A Silent Voice",
           "kind": "movie",
-          "status": "done"
+          "status": "done",
+          "image": "asset://assets/images/movies/a_silent_voice.jpg"
         },
         {
           "title": "The Garden of Words",
           "kind": "movie",
-          "status": "done"
+          "status": "done",
+          "image": "asset://assets/images/movies/the_garden_of_words.jpg"
         },
         {
           "title": "Violet Evergarden",
           "kind": "series",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/violet_evergarden.jpg"
         },
         {
           "title": "Tenet",
           "kind": "movie",
-          "status": "done"
+          "status": "done",
+          "image": "asset://assets/images/movies/tenet.jpg"
         },
         {
           "title": "Buffalo '66",
           "kind": "movie",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/buffalo_66.jpg"
         },
         {
           "title": "Sound of Metal",
           "kind": "movie",
-          "status": "done"
+          "status": "done",
+          "image": "asset://assets/images/movies/sound_of_metal.jpg"
         },
         {
           "title": "Before Sunrise",
           "kind": "movie",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/before_sunrise.jpg"
         },
         {
           "title": "Eternal Sunshine of the Spotless Mind",
           "kind": "movie",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/eternal_sunshine_of_the_spotless_mind.jpg"
         },
         {
           "title": "Jojo Rabbit",
           "kind": "movie",
-          "status": "done"
+          "status": "done",
+          "image": "asset://assets/images/movies/jojo_rabbit.jpg"
         },
         {
           "title": "500 Days of Summer",
           "kind": "movie",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/500_days_of_summer.jpg"
         },
         {
           "title": "La vita è bella",
           "kind": "movie",
-          "status": "done"
+          "status": "done",
+          "image": "asset://assets/images/movies/la_vita_C3A8_bella.jpg"
         },
         {
           "title": "Songs from the Second Floor",
           "kind": "movie",
-          "status": "done"
+          "status": "done",
+          "image": "asset://assets/images/movies/songs_from_the_second_floor.jpg"
         },
         {
           "title": "Love and Death",
           "kind": "movie",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/love_and_death.jpg"
         },
         {
           "title": "House of Cards",
           "kind": "series",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/house_of_cards.jpg"
         },
         {
           "title": "Dances with Wolves",
           "kind": "movie",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/dances_with_wolves.jpg"
         },
         {
           "title": "The Green Mile",
           "kind": "movie",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/the_green_mile.jpg"
         },
         {
           "title": "The Devil's Advocate",
           "kind": "movie",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/the_devils_advocate.jpg"
         },
         {
           "title": "Invincible",
@@ -433,167 +501,200 @@
         {
           "title": "Hidden Figures",
           "kind": "movie",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/hidden_figures.jpg"
         },
         {
           "title": "The Killing",
           "kind": "series",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/the_killing.jpg"
         },
         {
           "title": "A Clockwork Orange",
           "kind": "movie",
-          "status": "done"
+          "status": "done",
+          "image": "asset://assets/images/movies/a_clockwork_orange.jpg"
         },
         {
           "title": "Irréversible",
           "kind": "movie",
-          "status": "done"
+          "status": "done",
+          "image": "asset://assets/images/movies/irréversible.jpg"
         },
         {
           "title": "The Silence of the Lambs",
           "kind": "movie",
-          "status": "done"
+          "status": "done",
+          "image": "asset://assets/images/movies/the_silence_of_the_lambs.jpg"
         },
         {
           "title": "Unfaithful",
           "kind": "movie",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/unfaithful.jpg"
         },
         {
           "title": "Salt",
           "kind": "movie",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/salt.jpg"
         },
         {
           "title": "Before We Go",
           "kind": "movie",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/before_we_go.jpg"
         },
         {
           "title": "Before We Are Gone (?)",
           "kind": "movie",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/before_we_are_gone.jpg"
         },
         {
           "title": "Alice in Borderland",
           "kind": "series",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/alice_in_borderland.jpg"
         },
         {
           "title": "American Psycho",
           "kind": "movie",
-          "status": "done"
+          "status": "done",
+          "image": "asset://assets/images/movies/american_psycho.jpg"
         },
         {
           "title": "The Fighter",
           "kind": "movie",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/the_fighter.jpg"
         },
         {
           "title": "Dallas Buyers Club",
           "kind": "movie",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/dallas_buyers_club.jpg"
         },
         {
           "title": "One Flew Over the Cuckoo's Nest",
           "kind": "movie",
-          "status": "done"
+          "status": "done",
+          "image": "asset://assets/images/movies/one_flew_over_the_cuckoo27s_nest.jpg"
         },
         {
           "title": "The Call",
           "kind": "movie",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/the_call.jpg"
         },
         {
           "title": "Last Christmas",
           "kind": "movie",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/last_christmas.jpg"
         },
         {
           "title": "Perfect Strangers",
           "kind": "movie",
-          "status": "done"
+          "status": "done",
+          "image": "asset://assets/images/movies/perfect_strangers.jpg"
         },
         {
           "title": "Mulholland Drive",
           "kind": "movie",
-          "status": "done"
+          "status": "done",
+          "image": "asset://assets/images/movies/mulholland_drive.jpg"
         },
         {
           "title": "Cloud Atlas",
           "kind": "movie",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/cloud_atlas.jpg"
         },
         {
           "title": "Oldboy",
           "kind": "movie",
-          "status": "done"
+          "status": "done",
+          "image": "asset://assets/images/movies/oldboy.jpg"
         },
         {
           "title": "Se7en",
           "kind": "movie",
-          "status": "done"
+          "status": "done",
+          "image": "asset://assets/images/movies/se7en.jpg"
         },
         {
           "title": "Blood Diamond",
           "kind": "movie",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/blood_diamond.jpg"
         },
         {
           "title": "I Want to Eat Your Pancreas",
           "kind": "movie",
-          "status": "done"
+          "status": "done",
+          "image": "asset://assets/images/movies/i_want_to_eat_your_pancreas.jpg"
         },
         {
           "title": "To the Forest of Firefly Lights",
           "kind": "movie",
-          "status": "done"
+          "status": "done",
+          "image": "asset://assets/images/movies/to_the_forest_of_firefly_lights.jpg"
         },
         {
           "title": "Incendies",
           "kind": "movie",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/incendies.jpg"
         },
         {
           "title": "Scent of a Woman",
           "kind": "movie",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/scent_of_a_woman.jpg"
         },
         {
           "title": "Shoplifters",
           "kind": "movie",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/shoplifters.jpg"
         },
         {
           "title": "The Help",
           "kind": "movie",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/the_help.jpg"
         },
         {
           "title": "The Lighthouse",
           "kind": "movie",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/the_lighthouse.jpg"
         },
         {
           "title": "C'mon C'mon",
           "kind": "movie",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/cmon_cmon.jpg"
         },
         {
           "title": "Fantasy Island",
           "kind": "movie",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/fantasy_island.jpg"
         },
         {
           "title": "CODA",
           "kind": "movie",
-          "status": "done"
+          "status": "done",
+          "image": "asset://assets/images/movies/coda.jpg"
         },
         {
           "title": "Inside",
           "kind": "movie",
-          "status": "done"
+          "status": "done",
+          "image": "asset://assets/images/movies/inside.jpg"
         },
         {
           "title": "Twin Peaks",
@@ -603,42 +704,50 @@
         {
           "title": "House of the Dragon",
           "kind": "series",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/house_of_the_dragon.jpg"
         },
         {
           "title": "3-Iron",
           "kind": "movie",
-          "status": "done"
+          "status": "done",
+          "image": "asset://assets/images/movies/3_iron.jpg"
         },
         {
           "title": "Like Someone in Love",
           "kind": "movie",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/like_someone_in_love.jpg"
         },
         {
           "title": "In the Mood for Love",
           "kind": "movie",
-          "status": "done"
+          "status": "done",
+          "image": "asset://assets/images/movies/in_the_mood_for_love.jpg"
         },
         {
           "title": "All Quiet on the Western Front",
           "kind": "movie",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/all_quiet_on_the_western_front.jpg"
         },
         {
           "title": "Vertigo",
           "kind": "movie",
-          "status": "done"
+          "status": "done",
+          "image": "asset://assets/images/movies/vertigo.jpg"
         },
         {
           "title": "Midsommar",
           "kind": "movie",
-          "status": "done"
+          "status": "done",
+          "image": "asset://assets/images/movies/midsommar.jpg"
         },
         {
           "title": "The Number 23",
           "kind": "movie",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/the_number_23.jpg"
         },
         {
           "title": "Persona",
@@ -648,57 +757,68 @@
         {
           "title": "Secret Window",
           "kind": "movie",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/secret_window.jpg"
         },
         {
           "title": "Atonement",
           "kind": "movie",
-          "status": "done"
+          "status": "done",
+          "image": "asset://assets/images/movies/atonement.jpg"
         },
         {
           "title": "Naked",
           "kind": "movie",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/naked.jpg"
         },
         {
           "title": "Devotion",
           "kind": "movie",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/devotion.jpg"
         },
         {
           "title": "Anchorman: The Legend of Ron Burgundy",
           "kind": "movie",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/anchorman_the_legend_of_ron_burgund.jpg"
         },
         {
           "title": "Predestination",
           "kind": "movie",
-          "status": "done"
+          "status": "done",
+          "image": "asset://assets/images/movies/predestination.jpg"
         },
         {
           "title": "Fall",
           "kind": "movie",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/fall.jpg"
         },
         {
           "title": "Stonehearst Asylum",
           "kind": "movie",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/stonehearst_asylum.jpg"
         },
         {
           "title": "Once",
           "kind": "movie",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/once.jpg"
         },
         {
           "title": "Martyrs (2008)",
           "kind": "movie",
-          "status": "done"
+          "status": "done",
+          "image": "asset://assets/images/movies/martyrs_2008.jpg"
         },
         {
           "title": "Get Out",
           "kind": "movie",
-          "status": "done"
+          "status": "done",
+          "image": "asset://assets/images/movies/get_out.jpg"
         },
         {
           "title": "Clone Wars",
@@ -708,27 +828,32 @@
         {
           "title": "The Substance",
           "kind": "movie",
-          "status": "done"
+          "status": "done",
+          "image": "asset://assets/images/movies/the_substance.jpg"
         },
         {
           "title": "Saw",
           "kind": "movie",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/saw.jpg"
         },
         {
           "title": "The Wave",
           "kind": "movie",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/the_wave.jpg"
         },
         {
           "title": "The Dreamers",
           "kind": "movie",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/the_dreamers.jpg"
         },
         {
           "title": "The Game",
           "kind": "movie",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/the_game.jpg"
         }
       ]
     },
@@ -5264,42 +5389,50 @@
         {
           "title": "Atomic Habits",
           "kind": "book",
-          "status": "done"
+          "status": "done",
+          "image": "asset://assets/images/movies/atomic_habits.jpg"
         },
         {
           "title": "Deep Work",
           "kind": "book",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/deep_work.jpg"
         },
         {
           "title": "The Design of Everyday Things",
           "kind": "book",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/the_design_of_everyday_things.jpg"
         },
         {
           "title": "Show Your Work!",
           "kind": "book",
-          "status": "done"
+          "status": "done",
+          "image": "asset://assets/images/movies/show_your_work21.jpg"
         },
         {
           "title": "Designing Data-Intensive Applications",
           "kind": "book",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/designing_data-intensive_applications.jpg"
         },
         {
           "title": "Clean Code",
           "kind": "book",
-          "status": "done"
+          "status": "done",
+          "image": "asset://assets/images/movies/clean_code.jpg"
         },
         {
           "title": "Psychology of Money",
           "kind": "book",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/psychology_of_money.jpg"
         },
         {
           "title": "Thinking, Fast and Slow",
           "kind": "book",
-          "status": "backlog"
+          "status": "backlog",
+          "image": "asset://assets/images/movies/thinking2C_fast_and_slow.jpg"
         }
       ]
     },
