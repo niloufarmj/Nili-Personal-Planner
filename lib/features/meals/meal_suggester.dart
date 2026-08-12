@@ -125,17 +125,21 @@ class MealSuggester {
 
     // Try: hard + pref.
     var candidates = _filterByTags(slotPool, [...hardTags, ...prefTags]);
-    if (candidates.isNotEmpty) return SlotSuggestion.recipe(_pick(candidates));
+    if (candidates.isNotEmpty) {
+      return SlotSuggestion.recipe(_pick(candidates, slot: slot, day: day));
+    }
 
     // Relax preferences: hard only.
     candidates = _filterByTags(slotPool, hardTags);
-    if (candidates.isNotEmpty) return SlotSuggestion.recipe(_pick(candidates));
+    if (candidates.isNotEmpty) {
+      return SlotSuggestion.recipe(_pick(candidates, slot: slot, day: day));
+    }
 
     // Hard constraints not satisfiable → noMatch.
     if (hardTags.isNotEmpty) return const SlotSuggestion.noMatch();
 
     // No hard constraints → pick from full slot pool.
-    return SlotSuggestion.recipe(_pick(slotPool));
+    return SlotSuggestion.recipe(_pick(slotPool, slot: slot, day: day));
   }
 
   List<String> _hardTags(String slot, DayContext day) {
@@ -146,7 +150,28 @@ class MealSuggester {
 
   List<String> _prefTags(String slot, DayContext day) {
     final tags = <String>[];
-    if (day.isPartnerDay || day.isLinzDay) tags.addAll(['partner-shared', 'reza-shared']);
+    final dateObj = DateTime.tryParse(day.date);
+    final isWeekend = dateObj != null &&
+        (dateObj.weekday == DateTime.saturday ||
+            dateObj.weekday == DateTime.sunday);
+
+    if (slot == 'lunch') {
+      if (day.isWorkDay || !isWeekend) {
+        tags.addAll(['prep-ahead', 'meal-prep', 'quick', 'pasta', 'bento']);
+      } else if (isWeekend) {
+        tags.addAll(['special', 'persian', 'weekend', 'fresh']);
+      }
+    } else if (slot == 'dinner') {
+      if (isWeekend) {
+        tags.addAll(['special', 'favorite', 'baked', 'persian', 'weekend']);
+      } else {
+        tags.addAll(['soup', 'salad', 'light', '30%veggies', 'steamed']);
+      }
+    }
+
+    if (day.isPartnerDay || day.isLinzDay) {
+      tags.addAll(['partner-shared', 'reza-shared']);
+    }
     return tags;
   }
 
@@ -155,9 +180,84 @@ class MealSuggester {
     return pool.where((r) => required.any((t) => r.tags.contains(t))).toList();
   }
 
-  Recipe _pick(List<Recipe> candidates) {
+  Recipe _pick(List<Recipe> candidates, {String? slot, DayContext? day}) {
+    if (candidates.length == 1) return candidates.first;
+    if (slot == null || day == null) {
+      final rng = _random ?? Random();
+      return candidates[rng.nextInt(candidates.length)];
+    }
+
+    final scored = candidates.map((recipe) {
+      double score = 10.0;
+      final tags = recipe.tags.map((t) => t.toLowerCase()).toList();
+      final name = recipe.name.toLowerCase();
+      final calories = recipe.calories ?? 450;
+      final protein = recipe.proteinGrams ?? 25;
+
+      // 1. Gym day high-protein & calories vs Rest day moderate balance
+      if (day.isGymDay) {
+        if (protein >= 30) score += 15.0;
+        if (calories >= 450) score += 10.0;
+      } else {
+        if (calories <= 550) score += 8.0;
+      }
+
+      // 2. Workday meal-prep context vs Weekend cooking context
+      final dateObj = DateTime.tryParse(day.date);
+      final isWeekend = dateObj != null &&
+          (dateObj.weekday == DateTime.saturday ||
+              dateObj.weekday == DateTime.sunday);
+
+      if (slot == 'lunch') {
+        if (day.isWorkDay || !isWeekend) {
+          if (tags.contains('prep-ahead') ||
+              tags.contains('meal-prep') ||
+              tags.contains('pasta') ||
+              name.contains('rice') ||
+              name.contains('bento') ||
+              name.contains('pesto')) {
+            score += 15.0;
+          }
+        }
+      } else if (slot == 'dinner') {
+        if (isWeekend) {
+          if (tags.contains('special') ||
+              tags.contains('favorite') ||
+              tags.contains('baked') ||
+              name.contains('lasagna') ||
+              name.contains('zereshk')) {
+            score += 20.0;
+          }
+        } else {
+          if (tags.contains('soup') ||
+              tags.contains('salad') ||
+              tags.contains('light') ||
+              tags.contains('30%veggies') ||
+              name.contains('salad') ||
+              name.contains('soup') ||
+              name.contains('broccoli')) {
+            score += 15.0;
+          }
+        }
+      }
+
+      // 3. Exact slot matching
+      if (recipe.mealSlot == slot) {
+        score += 8.0;
+      }
+
+      return MapEntry(recipe, score);
+    }).toList();
+
+    scored.sort((a, b) => b.value.compareTo(a.value));
+    final maxScore = scored.first.value;
+    final topCandidates = scored
+        .where((e) => (maxScore - e.value) < 3.0)
+        .map((e) => e.key)
+        .toList();
+
     final rng = _random ?? Random();
-    return candidates[rng.nextInt(candidates.length)];
+    return topCandidates[rng.nextInt(topCandidates.length)];
   }
 
   // ── No-repeat window ─────────────────────────────────────────────

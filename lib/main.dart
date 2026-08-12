@@ -8,6 +8,9 @@ import 'core/router/app_router.dart';
 import 'features/gym/gym_repository.dart';
 import 'features/habits/habit_repository.dart';
 import 'features/lists/repositories/collection_repository.dart';
+import 'features/meals/ingredient_repository.dart';
+import 'features/meals/meal_slot_repository.dart';
+import 'features/meals/recipe_repository.dart';
 import 'features/wellbeing/wellbeing_repository.dart';
 
 Future<void> main() async {
@@ -20,6 +23,10 @@ Future<void> main() async {
   await CollectionRepository(db).seedDefaultCollectionsIfNeeded();
   await HabitRepository(db).seedDefaultHabitsIfNeeded();
   await WellbeingRepository(db).seedDefaultActionsIfNeeded();
+  await RecipeRepository(db).seedDefaultRecipesIfNeeded(
+    IngredientRepository(db),
+    MealSlotRepository(db),
+  );
 
   runApp(
     ProviderScope(
