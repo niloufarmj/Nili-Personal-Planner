@@ -11,6 +11,8 @@ import 'package:personal_planner/features/habits/habit_repository.dart';
 import 'package:personal_planner/features/lists/repositories/collection_repository.dart';
 import 'package:personal_planner/features/lists/repositories/item_repository.dart';
 import 'package:personal_planner/features/meals/ingredient_repository.dart';
+import 'package:personal_planner/features/meals/meal_slot_repository.dart';
+import 'package:personal_planner/features/meals/recipe_repository.dart';
 import 'package:personal_planner/features/settings/seed/services/seeder_service.dart';
 
 class CrashingItemRepository extends ItemRepository {
@@ -36,6 +38,8 @@ void main() {
   late CollectionRepository collectionRepo;
   late ItemRepository itemRepo;
   late IngredientRepository ingredientRepo;
+  late RecipeRepository recipeRepo;
+  late MealSlotRepository mealSlotRepo;
   late WorkoutPlanRepository planRepo;
   late FitnessRepository fitnessRepo;
   late HabitRepository habitRepo;
@@ -48,6 +52,8 @@ void main() {
     collectionRepo = CollectionRepository(db);
     itemRepo = ItemRepository(db);
     ingredientRepo = IngredientRepository(db);
+    recipeRepo = RecipeRepository(db);
+    mealSlotRepo = MealSlotRepository(db);
     planRepo = WorkoutPlanRepository(db);
     fitnessRepo = FitnessRepository(db);
     habitRepo = HabitRepository(db);
@@ -74,6 +80,8 @@ void main() {
       collectionRepo: collectionRepo,
       itemRepo: itemRepo,
       ingredientRepo: ingredientRepo,
+      recipeRepo: recipeRepo,
+      mealSlotRepo: mealSlotRepo,
       planRepo: planRepo,
       fitnessRepo: fitnessRepo,
       habitRepo: habitRepo,
@@ -109,8 +117,8 @@ void main() {
     expect(summary.itemsUpdated, equals(0));
     expect(summary.itemsSkipped, equals(0));
 
-    // Verify ingredients: 47 master ingredients from seed.json
-    expect(summary.ingredientsInserted, equals(47));
+    // Verify ingredients: 51 master ingredients from seed.json
+    expect(summary.ingredientsInserted, equals(51));
 
     // Verify plans: A/B/C updated, 1 new inserted ("راهنما و تغذیه")
     expect(summary.plansInserted, equals(1));
@@ -147,6 +155,8 @@ void main() {
       collectionRepo: collectionRepo,
       itemRepo: itemRepo,
       ingredientRepo: ingredientRepo,
+      recipeRepo: recipeRepo,
+      mealSlotRepo: mealSlotRepo,
       planRepo: planRepo,
       fitnessRepo: fitnessRepo,
       habitRepo: habitRepo,
@@ -173,6 +183,8 @@ void main() {
       collectionRepo: collectionRepo,
       itemRepo: crashingItemRepo,
       ingredientRepo: ingredientRepo,
+      recipeRepo: recipeRepo,
+      mealSlotRepo: mealSlotRepo,
       planRepo: planRepo,
       fitnessRepo: fitnessRepo,
       habitRepo: habitRepo,
@@ -205,6 +217,8 @@ void main() {
       collectionRepo: collectionRepo,
       itemRepo: itemRepo,
       ingredientRepo: ingredientRepo,
+      recipeRepo: recipeRepo,
+      mealSlotRepo: mealSlotRepo,
       planRepo: planRepo,
       fitnessRepo: fitnessRepo,
       habitRepo: habitRepo,
@@ -275,6 +289,8 @@ void main() {
         collectionRepo: collectionRepo,
         itemRepo: itemRepo,
         ingredientRepo: ingredientRepo,
+        recipeRepo: recipeRepo,
+        mealSlotRepo: mealSlotRepo,
         planRepo: planRepo,
         fitnessRepo: fitnessRepo,
         habitRepo: habitRepo,

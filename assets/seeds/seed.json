@@ -255,10 +255,11 @@
     }
   ],
   "ingredients_master": [
-    { "name": "روغن زیتون", "category": "pantry" }, { "name": "جو دوسر", "category": "pantry" },
+    { "name": "روغن زیتون", "category": "pantry" }, { "name": "اسپری روغن زیتون", "category": "pantry" }, { "name": "جو دوسر", "category": "pantry" },
     { "name": "برنج", "category": "pantry" }, { "name": "ماکارونی", "category": "pantry" },
     { "name": "ورق لازانیا", "category": "pantry" }, { "name": "مرغ", "category": "protein" },
     { "name": "ماهی", "category": "protein" }, { "name": "گوشت چرخ‌کرده", "category": "protein" },
+    { "name": "سوسیس", "category": "protein" },
     { "name": "تخم‌مرغ", "category": "protein" }, { "name": "تن ماهی", "category": "protein" },
     { "name": "فلفل دلمه", "category": "produce" }, { "name": "کلم بروکلی", "category": "produce" },
     { "name": "قارچ", "category": "produce" }, { "name": "خیار", "category": "produce" },
@@ -274,11 +275,156 @@
     { "name": "سس گوجه", "category": "pantry" }, { "name": "آبلیمو", "category": "pantry" },
     { "name": "نمک", "category": "pantry" }, { "name": "فلفل", "category": "pantry" },
     { "name": "دارچین", "category": "pantry" }, { "name": "دانه چیا", "category": "pantry" },
+    { "name": "زرشک", "category": "pantry" },
     { "name": "نون تست", "category": "bakery" }, { "name": "نون گرد", "category": "bakery" },
+    { "name": "نون سوخاری", "category": "bakery" },
     { "name": "نخود", "category": "pantry" }, { "name": "ذرت", "category": "pantry" },
     { "name": "زیتون", "category": "pantry" }, { "name": "خیارشور", "category": "pantry" },
     { "name": "عسل", "category": "pantry" }, { "name": "کره بادام‌زمینی", "category": "pantry" },
     { "name": "نودل", "category": "pantry" }
+  ],
+  "recipes_master": [
+    {
+      "name": "Fried Egg & Toast with Sausage",
+      "meal_slot": "breakfast",
+      "prep_minutes": 10,
+      "protein_grams": 22,
+      "calories": 380,
+      "tags": ["breakfast", "high-protein", "quick"],
+      "instructions": "Spray pan with olive oil spray. Fry egg sunny-side up. Toast 1 slice of bread. Serve fried egg over toast alongside pan-seared sausage slice.",
+      "ingredients": [
+        { "name": "تخم‌مرغ", "amount": 2, "unit": "pcs" },
+        { "name": "نون تست", "amount": 1, "unit": "slice" },
+        { "name": "سوسیس", "amount": 50, "unit": "g" },
+        { "name": "اسپری روغن زیتون", "amount": 1, "unit": "spray" }
+      ]
+    },
+    {
+      "name": "Chicken Caesar Salad",
+      "meal_slot": "lunch",
+      "prep_minutes": 15,
+      "protein_grams": 38,
+      "calories": 420,
+      "tags": ["lunch", "salad", "high-protein", "30%veggies"],
+      "instructions": "Season chicken breast cubes and cook with olive oil spray. Chop fresh lettuce into bowl. Add croutons, warm chicken cubes, and sprinkle grated parmesan cheese.",
+      "ingredients": [
+        { "name": "مرغ", "amount": 150, "unit": "g" },
+        { "name": "کاهو", "amount": 150, "unit": "g" },
+        { "name": "نون سوخاری", "amount": 30, "unit": "g" },
+        { "name": "پنیر پارمسان", "amount": 15, "unit": "g" },
+        { "name": "اسپری روغن زیتون", "amount": 1, "unit": "spray" }
+      ]
+    },
+    {
+      "name": "Salmon & Herb Rice with Steamed Broccoli",
+      "meal_slot": "dinner",
+      "prep_minutes": 25,
+      "protein_grams": 36,
+      "calories": 520,
+      "tags": ["dinner", "seafood", "omega3", "40carb-30prot-30veg"],
+      "instructions": "Cook seasoned rice with diced carrots and bell peppers. Pan-sear salmon fillet with olive oil spray and herbs. Serve in bento with fresh steamed broccoli florets and green olives.",
+      "ingredients": [
+        { "name": "ماهی", "amount": 160, "unit": "g" },
+        { "name": "برنج", "amount": 80, "unit": "g" },
+        { "name": "کلم بروکلی", "amount": 100, "unit": "g" },
+        { "name": "زیتون", "amount": 40, "unit": "g" },
+        { "name": "هویج", "amount": 30, "unit": "g" },
+        { "name": "فلفل دلمه", "amount": 30, "unit": "g" },
+        { "name": "اسپری روغن زیتون", "amount": 1, "unit": "spray" }
+      ]
+    },
+    {
+      "name": "Barilla Pesto Chicken Pasta",
+      "meal_slot": "lunch",
+      "prep_minutes": 20,
+      "protein_grams": 35,
+      "calories": 480,
+      "tags": ["lunch", "pasta", "pesto"],
+      "instructions": "Boil pasta and broccoli. Sauté diced chicken breast and garlic with olive oil spray. Toss cooked pasta with Barilla pesto, sliced ring peppers, broccoli, and chicken.",
+      "ingredients": [
+        { "name": "ماکارونی", "amount": 80, "unit": "g" },
+        { "name": "مرغ", "amount": 140, "unit": "g" },
+        { "name": "سس پستو", "amount": 30, "unit": "g" },
+        { "name": "کلم بروکلی", "amount": 60, "unit": "g" },
+        { "name": "فلفل دلمه", "amount": 40, "unit": "g" },
+        { "name": "سیر", "amount": 1, "unit": "clove" },
+        { "name": "اسپری روغن زیتون", "amount": 1, "unit": "spray" }
+      ]
+    },
+    {
+      "name": "Boiled Egg & Sausage Salad",
+      "meal_slot": "breakfast",
+      "prep_minutes": 12,
+      "protein_grams": 24,
+      "calories": 340,
+      "tags": ["breakfast", "egg-salad", "low-carb"],
+      "instructions": "Boil eggs for 9 minutes. Slice boiled eggs and sausage, serve over fresh lettuce and ring peppers.",
+      "ingredients": [
+        { "name": "تخم‌مرغ", "amount": 2, "unit": "pcs" },
+        { "name": "سوسیس", "amount": 40, "unit": "g" },
+        { "name": "کاهو", "amount": 50, "unit": "g" },
+        { "name": "فلفل دلمه", "amount": 30, "unit": "g" }
+      ]
+    },
+    {
+      "name": "Baked Beef & Veggie Lasagna",
+      "meal_slot": "dinner",
+      "prep_minutes": 45,
+      "protein_grams": 42,
+      "calories": 650,
+      "tags": ["dinner", "favorite", "baked", "special"],
+      "instructions": "Sauté minced beef with garlic, bell peppers, carrots, and tomato sauce. Layer lasagna sheets with beef mixture, top with mozzarella cheese, and bake at 190°C for 30 min.",
+      "ingredients": [
+        { "name": "ورق لازانیا", "amount": 100, "unit": "g" },
+        { "name": "گوشت چرخ‌کرده", "amount": 150, "unit": "g" },
+        { "name": "فلفل دلمه", "amount": 50, "unit": "g" },
+        { "name": "هویج", "amount": 40, "unit": "g" },
+        { "name": "رب گوجه", "amount": 100, "unit": "g" },
+        { "name": "پنیر پیتزا", "amount": 50, "unit": "g" },
+        { "name": "سیر", "amount": 1, "unit": "clove" }
+      ]
+    },
+    {
+      "name": "Zereshk Polo ba Morgh (Saffron Barberry Chicken Rice)",
+      "meal_slot": "lunch",
+      "prep_minutes": 40,
+      "protein_grams": 38,
+      "calories": 510,
+      "tags": ["lunch", "persian", "special", "chicken-breast"],
+      "instructions": "Simmer chicken breast in saffron-tomato sauce. Gently saute barberries in 1 spray olive oil. Serve tender chicken over steamed saffron basmati rice.",
+      "ingredients": [
+        { "name": "مرغ", "amount": 160, "unit": "g" },
+        { "name": "برنج", "amount": 90, "unit": "g" },
+        { "name": "زرشک", "amount": 20, "unit": "g" },
+        { "name": "اسپری روغن زیتون", "amount": 1, "unit": "spray" }
+      ]
+    },
+    {
+      "name": "Fresh Banana & Mango Berry Milk Shake",
+      "meal_slot": "shake",
+      "prep_minutes": 5,
+      "protein_grams": 14,
+      "calories": 280,
+      "tags": ["shake", "post-workout", "snack"],
+      "instructions": "Combine chilled milk, 1 banana, sliced mango, and fresh berries in blender. Blend until smooth.",
+      "ingredients": [
+        { "name": "شیر", "amount": 250, "unit": "ml" },
+        { "name": "موز", "amount": 1, "unit": "pc" },
+        { "name": "میوه (موز و توت‌فرنگی)", "amount": 50, "unit": "g" }
+      ]
+    },
+    {
+      "name": "Daily Sweetened Iced Coffee",
+      "meal_slot": "snack",
+      "prep_minutes": 3,
+      "protein_grams": 4,
+      "calories": 90,
+      "tags": ["coffee", "daily"],
+      "instructions": "Brew fresh espresso shot. Mix with cold milk, 1 tsp sugar, and pour over ice cubes.",
+      "ingredients": [
+        { "name": "شیر", "amount": 150, "unit": "ml" }
+      ]
+    }
   ],
   "workout_plans": [
     {

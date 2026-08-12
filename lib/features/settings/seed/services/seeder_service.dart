@@ -13,6 +13,8 @@ import '../../../habits/habit_repository.dart';
 import '../../../lists/repositories/collection_repository.dart';
 import '../../../lists/repositories/item_repository.dart';
 import '../../../meals/ingredient_repository.dart';
+import '../../../meals/meal_slot_repository.dart';
+import '../../../meals/recipe_repository.dart';
 import '../parser/seed_parser.dart';
 
 class SeedSummary {
@@ -94,6 +96,8 @@ class SeederService {
   final CollectionRepository collectionRepo;
   final ItemRepository itemRepo;
   final IngredientRepository ingredientRepo;
+  final RecipeRepository recipeRepo;
+  final MealSlotRepository mealSlotRepo;
   final WorkoutPlanRepository planRepo;
   final FitnessRepository fitnessRepo;
   final HabitRepository habitRepo;
@@ -105,6 +109,8 @@ class SeederService {
     required this.collectionRepo,
     required this.itemRepo,
     required this.ingredientRepo,
+    required this.recipeRepo,
+    required this.mealSlotRepo,
     required this.planRepo,
     required this.fitnessRepo,
     required this.habitRepo,
@@ -427,6 +433,94 @@ class SeederService {
       }
     }
 
+    // ── RECIPES & MEAL SLOTS ──
+    for (final r in data.recipesMaster) {
+      final existing = await recipeRepo.search(r.name);
+      final exactMatch = existing.firstWhereOrNull(
+        (item) => item.name.toLowerCase() == r.name.toLowerCase(),
+      );
+      if (exactMatch == null) {
+        final recipeId = await recipeRepo.create(
+          name: r.name,
+          mealSlot: r.mealSlot,
+          prepMinutes: r.prepMinutes,
+          proteinGrams: r.proteinGrams,
+          calories: r.calories,
+          tags: r.tags,
+          instructions: r.instructions,
+        );
+
+        final rows = <RecipeIngredientRow>[];
+        for (final ingRef in r.ingredients) {
+          final ing = await ingredientRepo.getByName(ingRef.name);
+          if (ing != null) {
+            rows.add(
+              RecipeIngredientRow(
+                ingredient: ing,
+                amount: ingRef.amount,
+                unit: ingRef.unit,
+              ),
+            );
+          }
+        }
+        if (rows.isNotEmpty) {
+          await recipeRepo.setIngredients(recipeId, rows);
+        }
+      }
+    }
+
+    final allRecipes = await recipeRepo.getAll();
+    if (allRecipes.isNotEmpty) {
+      final now = DateTime.now();
+      for (int i = 0; i < 7; i++) {
+        final date = now.add(Duration(days: i));
+        final dateIso =
+            '${date.year.toString().padLeft(4, '0')}-'
+            '${date.month.toString().padLeft(2, '0')}-'
+            '${date.day.toString().padLeft(2, '0')}';
+        final existingSlots = await mealSlotRepo.getForDate(dateIso);
+        if (existingSlots.isEmpty) {
+          final bf =
+              allRecipes.firstWhereOrNull((r) => r.mealSlot == 'breakfast') ??
+              allRecipes[0];
+          final lu =
+              allRecipes.firstWhereOrNull((r) => r.mealSlot == 'lunch') ??
+              allRecipes[1 % allRecipes.length];
+          final di =
+              allRecipes.firstWhereOrNull((r) => r.mealSlot == 'dinner') ??
+              allRecipes[2 % allRecipes.length];
+          final sh =
+              allRecipes.firstWhereOrNull((r) => r.mealSlot == 'shake') ??
+              allRecipes[3 % allRecipes.length];
+
+          await mealSlotRepo.upsert(
+            date: dateIso,
+            slot: 'breakfast',
+            recipeId: bf.id,
+            status: 'accepted',
+          );
+          await mealSlotRepo.upsert(
+            date: dateIso,
+            slot: 'lunch',
+            recipeId: lu.id,
+            status: 'accepted',
+          );
+          await mealSlotRepo.upsert(
+            date: dateIso,
+            slot: 'dinner',
+            recipeId: di.id,
+            status: 'accepted',
+          );
+          await mealSlotRepo.upsert(
+            date: dateIso,
+            slot: 'shake',
+            recipeId: sh.id,
+            status: 'accepted',
+          );
+        }
+      }
+    }
+
     // ── WORKOUT PLANS ──
     final allPlans = await planRepo.watchAll().first;
     for (final p in data.workoutPlans) {
@@ -688,6 +782,8 @@ final seederServiceProvider = Provider<SeederService>((ref) {
     collectionRepo: ref.watch(collectionRepositoryProvider),
     itemRepo: ref.watch(itemRepositoryProvider),
     ingredientRepo: ref.watch(ingredientRepositoryProvider),
+    recipeRepo: ref.watch(recipeRepositoryProvider),
+    mealSlotRepo: ref.watch(mealSlotRepositoryProvider),
     planRepo: ref.watch(workoutPlanRepositoryProvider),
     fitnessRepo: ref.watch(fitnessRepositoryProvider),
     habitRepo: ref.watch(habitRepositoryProvider),

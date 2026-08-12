@@ -294,12 +294,74 @@ class SeedPeriodLog {
   }
 }
 
+class SeedRecipeIngredient {
+  final String name;
+  final double amount;
+  final String unit;
+
+  SeedRecipeIngredient({
+    required this.name,
+    required this.amount,
+    required this.unit,
+  });
+
+  factory SeedRecipeIngredient.fromJson(Map<String, dynamic> json) {
+    return SeedRecipeIngredient(
+      name: json['name'] as String? ?? '',
+      amount: (json['amount'] as num?)?.toDouble() ?? 1.0,
+      unit: json['unit'] as String? ?? 'g',
+    );
+  }
+}
+
+class SeedRecipe {
+  final String name;
+  final String mealSlot;
+  final int? prepMinutes;
+  final int? proteinGrams;
+  final int? calories;
+  final List<String> tags;
+  final String? instructions;
+  final List<SeedRecipeIngredient> ingredients;
+
+  SeedRecipe({
+    required this.name,
+    required this.mealSlot,
+    this.prepMinutes,
+    this.proteinGrams,
+    this.calories,
+    required this.tags,
+    this.instructions,
+    required this.ingredients,
+  });
+
+  factory SeedRecipe.fromJson(Map<String, dynamic> json) {
+    return SeedRecipe(
+      name: json['name'] as String? ?? '',
+      mealSlot: json['meal_slot'] as String? ?? 'any',
+      prepMinutes: json['prep_minutes'] as int?,
+      proteinGrams: json['protein_grams'] as int?,
+      calories: json['calories'] as int?,
+      tags: (json['tags'] as List?)?.map((e) => e as String).toList() ?? [],
+      instructions: json['instructions'] as String?,
+      ingredients:
+          (json['ingredients'] as List?)
+              ?.map(
+                (e) => SeedRecipeIngredient.fromJson(e as Map<String, dynamic>),
+              )
+              .toList() ??
+          [],
+    );
+  }
+}
+
 class SeedData {
   final int version;
   final String generated;
   final List<SeedTag> tags;
   final List<SeedCollection> collections;
   final List<SeedIngredient> ingredientsMaster;
+  final List<SeedRecipe> recipesMaster;
   final List<SeedWorkoutPlan> workoutPlans;
   final SeedFitness fitness;
   final List<SeedHabit> habits;
@@ -312,6 +374,7 @@ class SeedData {
     required this.tags,
     required this.collections,
     required this.ingredientsMaster,
+    required this.recipesMaster,
     required this.workoutPlans,
     required this.fitness,
     required this.habits,
@@ -337,6 +400,11 @@ class SeedData {
       ingredientsMaster:
           (json['ingredients_master'] as List?)
               ?.map((e) => SeedIngredient.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
+      recipesMaster:
+          (json['recipes_master'] as List?)
+              ?.map((e) => SeedRecipe.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
       workoutPlans:
