@@ -55,8 +55,10 @@ class ItemRepository {
 
   Future<void> updateItem(Item item) => _db.update(_db.items).replace(item);
 
-  Future<int> deleteItem(int id) =>
-      (_db.delete(_db.items)..where((i) => i.id.equals(id))).go();
+  Future<int> deleteItem(int id) async {
+    await (_db.delete(_db.subtasks)..where((s) => s.itemId.equals(id))).go();
+    return (_db.delete(_db.items)..where((i) => i.id.equals(id))).go();
+  }
 
   /// Purges all duplicate items across EVERY collection in the database.
   /// Guarantees that within any collection, every item title is 100% unique.

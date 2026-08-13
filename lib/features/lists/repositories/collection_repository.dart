@@ -63,6 +63,7 @@ class CollectionRepository {
     int? parentId,
     String? icon,
     int? sortOrder,
+    String? coverImage,
   }) => _db
       .into(_db.collections)
       .insert(
@@ -72,6 +73,7 @@ class CollectionRepository {
           parentId: Value(parentId),
           icon: Value(icon),
           sortOrder: Value(sortOrder),
+          coverImage: Value(coverImage),
         ),
       );
 
@@ -107,22 +109,82 @@ class CollectionRepository {
     if (existing.isNotEmpty) return;
 
     // Seed top-level collections
-    await create(name: 'Chores', template: 'chore');
-    await create(name: 'Shopping', template: 'shopping');
-    await create(name: 'Tech Wishlist', template: 'shopping');
-    await create(name: 'Life Upgrades', template: 'upgrade');
-    await create(name: 'University', template: 'task');
-    await create(name: 'Personal Projects', template: 'task');
-    await create(name: 'Personal Growth', template: 'growth');
-    await create(name: 'Hobbies', template: 'media');
-    await create(name: 'Probable Plans', template: 'probable');
+    await create(
+      name: 'Chores',
+      template: 'chore',
+      coverImage: 'asset://assets/images/headers/header_chores.jpg',
+    );
+    await create(
+      name: 'Shopping',
+      template: 'shopping',
+      coverImage: 'asset://assets/images/headers/header_groceries.jpg',
+    );
+    await create(
+      name: 'Tech Wishlist',
+      template: 'shopping',
+      coverImage: 'asset://assets/images/headers/header_shopping.jpg',
+    );
+    await create(
+      name: 'Life Upgrades',
+      template: 'upgrade',
+      coverImage: 'asset://assets/images/headers/header_chores.jpg',
+    );
+    await create(
+      name: 'University',
+      template: 'task',
+      coverImage: 'asset://assets/images/headers/header_hobbies.jpg',
+    );
+    await create(
+      name: 'Personal Projects',
+      template: 'task',
+      coverImage: 'asset://assets/images/headers/header_projects.jpg',
+    );
+    await create(
+      name: 'Personal Growth',
+      template: 'growth',
+      coverImage: 'asset://assets/images/headers/header_hobbies.jpg',
+    );
+    await create(
+      name: 'Hobbies',
+      template: 'media',
+      coverImage: 'asset://assets/images/headers/header_hobbies.jpg',
+    );
+    await create(
+      name: 'Probable Plans',
+      template: 'probable',
+      coverImage: 'asset://assets/images/headers/header_projects.jpg',
+    );
 
     // Job Hunt parent with Germany/Netherlands/Spain/Australia children
-    final jobHuntId = await create(name: 'Job Hunt', template: 'job');
-    await create(name: 'Germany', template: 'job', parentId: jobHuntId);
-    await create(name: 'Netherlands', template: 'job', parentId: jobHuntId);
-    await create(name: 'Spain', template: 'job', parentId: jobHuntId);
-    await create(name: 'Australia', template: 'job', parentId: jobHuntId);
+    final jobHuntId = await create(
+      name: 'Job Hunt',
+      template: 'job',
+      coverImage: 'asset://assets/images/headers/header_job.jpg',
+    );
+    await create(
+      name: 'Germany',
+      template: 'job',
+      parentId: jobHuntId,
+      coverImage: 'asset://assets/images/headers/header_job.jpg',
+    );
+    await create(
+      name: 'Netherlands',
+      template: 'job',
+      parentId: jobHuntId,
+      coverImage: 'asset://assets/images/headers/header_job.jpg',
+    );
+    await create(
+      name: 'Spain',
+      template: 'job',
+      parentId: jobHuntId,
+      coverImage: 'asset://assets/images/headers/header_job.jpg',
+    );
+    await create(
+      name: 'Australia',
+      template: 'job',
+      parentId: jobHuntId,
+      coverImage: 'asset://assets/images/headers/header_job.jpg',
+    );
   }
 
   /// Merges duplicate Job Hunt collections (e.g. "Germany" vs "Job Hunt — Germany").

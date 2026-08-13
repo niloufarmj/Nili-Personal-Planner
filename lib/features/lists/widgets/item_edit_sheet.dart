@@ -84,9 +84,20 @@ class _ItemEditSheetState extends ConsumerState<ItemEditSheet> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(
-                _isEdit ? 'Edit item' : 'New item',
-                style: Theme.of(context).textTheme.titleLarge,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    _isEdit ? 'Edit item' : 'New item',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  if (_isEdit)
+                    IconButton(
+                      tooltip: 'Delete item',
+                      icon: const Icon(Icons.delete_outline, color: Colors.red),
+                      onPressed: _confirmDelete,
+                    ),
+                ],
               ),
               const SizedBox(height: 16),
 
@@ -188,6 +199,8 @@ class _ItemEditSheetState extends ConsumerState<ItemEditSheet> {
                             width: 56,
                             height: 56,
                             fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) =>
+                                const Icon(Icons.movie_outlined, size: 28),
                           ),
                         )
                       else
@@ -236,8 +249,18 @@ class _ItemEditSheetState extends ConsumerState<ItemEditSheet> {
 
               const SizedBox(height: 8),
               Row(
-                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
+                  if (_isEdit)
+                    OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.red,
+                        side: const BorderSide(color: Colors.redAccent),
+                      ),
+                      onPressed: _confirmDelete,
+                      icon: const Icon(Icons.delete_outline, size: 18),
+                      label: const Text('Delete'),
+                    ),
+                  const Spacer(),
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(),
                     child: const Text('Cancel'),
@@ -254,6 +277,43 @@ class _ItemEditSheetState extends ConsumerState<ItemEditSheet> {
         ),
       ),
     );
+  }
+
+  Future<void> _confirmDelete() async {
+    final item = widget.item;
+    if (item == null) return;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete Item'),
+        content: Text('Are you sure you want to delete "${item.title}"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: Colors.red),
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      await ref.read(itemRepositoryProvider).deleteItem(item.id);
+      if (mounted) {
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Deleted "${item.title}"'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
   }
 
   Future<void> _save() async {

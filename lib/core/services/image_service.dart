@@ -28,6 +28,51 @@ bool hasDisplayableImage(String? path) {
   return File(path).existsSync();
 }
 
+/// Returns a guaranteed displayable header cover image path for a collection.
+/// Uses custom assigned cover image if present, or falls back to category pattern asset.
+String getCoverImageForCollection({
+  required String collectionName,
+  required String template,
+  String? coverImage,
+}) {
+  if (hasDisplayableImage(coverImage)) {
+    return coverImage!;
+  }
+  final name = collectionName.toLowerCase();
+  if (template == 'groceries' ||
+      name.contains('groc') ||
+      name.contains('food') ||
+      name.contains('خرید خونه')) {
+    return 'asset://assets/images/headers/header_house.jpg';
+  }
+  if (name.contains('groc') || name.contains('food') || name.contains('خرید')) {
+    return 'asset://assets/images/headers/header_groceries.jpg';
+  }
+  if (template == 'shopping' || name.contains('shop') || name.contains('wish')) {
+    return 'asset://assets/images/headers/header_shopping.jpg';
+  }
+  if (template == 'job' || name.contains('job') || name.contains('work')) {
+    return 'asset://assets/images/headers/header_job.jpg';
+  }
+  if (template == 'chore' || name.contains('chore') || name.contains('clean')) {
+    return 'asset://assets/images/headers/header_chores.jpg';
+  }
+  if (template == 'media' || name.contains('movie') || name.contains('film') || name.contains('show')) {
+    return 'asset://assets/images/headers/header_movies.jpg';
+  }
+  if (name.contains('book') || name.contains('read') || name.contains('کتاب')) {
+    return 'asset://assets/images/headers/header_books.jpg';
+  }
+  if (template == 'growth' ||
+      template == 'upgrade' ||
+      name.contains('growth') ||
+      name.contains('hobby') ||
+      name.contains('uni')) {
+    return 'asset://assets/images/headers/header_hobbies.jpg';
+  }
+  return 'asset://assets/images/headers/header_projects.jpg';
+}
+
 /// Builds an [ImageProvider] for a path returned by [ImageService.pick] /
 /// [ImageService.saveBytes], or null if it can't be displayed here.
 ImageProvider? imageProviderFor(String? path) {

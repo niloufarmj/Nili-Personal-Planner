@@ -69,7 +69,12 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
           () => ref.read(itemRepositoryProvider).deduplicateAllItems(),
         );
 
-        final hasCover = hasDisplayableImage(collection.coverImage);
+        final coverPath = getCoverImageForCollection(
+          collectionName: collection.name,
+          template: collection.template,
+          coverImage: collection.coverImage,
+        );
+        final hasCover = hasDisplayableImage(coverPath);
 
         return Scaffold(
           appBar: AppBar(
@@ -147,8 +152,7 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
           ),
           body: Column(
             children: [
-              if (hasCover)
-                _CollectionHeaderBanner(coverImage: collection.coverImage!),
+              if (hasCover) _CollectionHeaderBanner(coverImage: coverPath),
               Expanded(
                 child: itemsAsync.when(
                   loading: () =>
@@ -490,7 +494,12 @@ class _CollectionHeaderBanner extends StatelessWidget {
       width: double.infinity,
       child: Opacity(
         opacity: 0.4,
-        child: Image(image: image, fit: BoxFit.cover),
+        child: Image(
+          image: image,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) =>
+              const SizedBox.shrink(),
+        ),
       ),
     );
   }

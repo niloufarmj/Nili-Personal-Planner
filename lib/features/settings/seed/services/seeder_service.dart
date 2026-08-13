@@ -263,6 +263,13 @@ class SeederService {
       if (existing != null) {
         colId = existing.id;
         collectionIdByName[col.name.toLowerCase()] = colId;
+        if (col.coverImage != null || col.icon != null) {
+          final updatedCol = existing.copyWith(
+            coverImage: Value(col.coverImage ?? existing.coverImage),
+            icon: Value(col.icon ?? existing.icon),
+          );
+          await collectionRepo.update(updatedCol);
+        }
         collectionsUpdated++;
       } else {
         colId = await collectionRepo.create(
@@ -270,6 +277,7 @@ class SeederService {
           template: col.template,
           parentId: parentId,
           icon: col.icon,
+          coverImage: col.coverImage,
         );
         collectionIdByName[col.name.toLowerCase()] = colId;
         seededCollectionIds.add(colId);

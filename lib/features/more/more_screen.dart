@@ -41,6 +41,7 @@ class MoreScreen extends ConsumerWidget {
               const SizedBox(height: 12),
               _MoreEntry(
                 icon: Icons.flight_takeoff,
+                imageAsset: 'assets/images/more/travel.jpg',
                 title: 'Travel Planner',
                 subtitle: 'Trips, packing lists & travel budget',
                 color: DesignTokens.sage,
@@ -49,6 +50,7 @@ class MoreScreen extends ConsumerWidget {
               const SizedBox(height: 12),
               _MoreEntry(
                 icon: Icons.notifications_outlined,
+                imageAsset: 'assets/images/more/reminders.jpg',
                 title: 'Reminders',
                 subtitle: 'Windowed alerts & recurring nudges',
                 color: DesignTokens.rose,
@@ -57,6 +59,7 @@ class MoreScreen extends ConsumerWidget {
               const SizedBox(height: 12),
               _MoreEntry(
                 icon: Icons.people_outline,
+                imageAsset: 'assets/images/more/partner.jpg',
                 title: 'Partner Schedule',
                 subtitle: 'Partner\'s tags & shared events',
                 color: DesignTokens.dustyBlue,
@@ -65,6 +68,7 @@ class MoreScreen extends ConsumerWidget {
               const SizedBox(height: 12),
               _MoreEntry(
                 icon: Icons.kitchen_outlined,
+                imageAsset: 'assets/images/more/ingredients.jpg',
                 title: 'Ingredients Catalog',
                 subtitle: 'Manage pantry ingredients & measurements',
                 color: DesignTokens.peach,
@@ -73,6 +77,7 @@ class MoreScreen extends ConsumerWidget {
               const SizedBox(height: 12),
               _MoreEntry(
                 icon: Icons.trending_up,
+                imageAsset: 'assets/images/more/growth.jpg',
                 title: 'Personal Growth',
                 subtitle: 'Track your personal goals & habits',
                 color: DesignTokens.lavender,
@@ -91,6 +96,7 @@ class MoreScreen extends ConsumerWidget {
 
               _MoreEntry(
                 icon: Icons.emoji_events_outlined,
+                imageAsset: 'assets/images/more/badges.jpg',
                 title: 'Achievements & Badges',
                 subtitle: 'Unlock rewards for keeping up with goals',
                 color: DesignTokens.butter,
@@ -466,6 +472,7 @@ class MoreScreen extends ConsumerWidget {
                 const SizedBox(height: 12),
                 _MoreEntry(
                   icon: Icons.data_usage_rounded,
+                  imageAsset: 'assets/images/more/debug.jpg',
                   title: 'Load seed data',
                   subtitle: 'Populate app with initial seed data',
                   color: DesignTokens.butter,
@@ -555,6 +562,7 @@ class MoreScreen extends ConsumerWidget {
 class _MoreEntry extends StatelessWidget {
   const _MoreEntry({
     required this.icon,
+    required this.imageAsset,
     required this.title,
     required this.subtitle,
     required this.color,
@@ -562,6 +570,7 @@ class _MoreEntry extends StatelessWidget {
   });
 
   final IconData icon;
+  final String imageAsset;
   final String title;
   final String subtitle;
   final Color color;
@@ -581,10 +590,18 @@ class _MoreEntry extends StatelessWidget {
       child: ListTile(
         contentPadding: EdgeInsets.zero,
         leading: Container(
-          width: 40,
-          height: 40,
+          width: 44,
+          height: 44,
           decoration: BoxDecoration(color: badgeBg, shape: BoxShape.circle),
-          child: Icon(icon, color: iconColor, size: 20),
+          clipBehavior: Clip.antiAlias,
+          child: Image.asset(
+            imageAsset,
+            width: 44,
+            height: 44,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) =>
+                Icon(icon, color: iconColor, size: 20),
+          ),
         ),
         title: Text(
           title,

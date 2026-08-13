@@ -120,6 +120,7 @@ class TrackScreen extends ConsumerWidget {
         children: [
           _TrackEntry(
             icon: Icons.account_balance_wallet_outlined,
+            imageAsset: 'assets/images/track/finance.jpg',
             title: 'Finance',
             subtitle: 'Transactions, budget forecast & debts',
             route: '/finance',
@@ -145,6 +146,7 @@ class TrackScreen extends ConsumerWidget {
           const SizedBox(height: 16),
           _TrackEntry(
             icon: Icons.access_time,
+            imageAsset: 'assets/images/track/worktime.jpg',
             title: 'Work Time',
             subtitle: 'Log hours, run timer & track overtime',
             route: '/worktime',
@@ -153,6 +155,7 @@ class TrackScreen extends ConsumerWidget {
           const SizedBox(height: 16),
           _TrackEntry(
             icon: Icons.share,
+            imageAsset: 'assets/images/track/social.jpg',
             title: 'Social',
             subtitle: 'Social media usage & post streaks',
             route: '/social',
@@ -161,6 +164,7 @@ class TrackScreen extends ConsumerWidget {
           const SizedBox(height: 16),
           _TrackEntry(
             icon: Icons.fitness_center,
+            imageAsset: 'assets/images/track/gym.jpg',
             title: 'Gym & Sports',
             subtitle: 'Gym, swimming, biking, plans & analytics',
             route: '/gym',
@@ -183,6 +187,7 @@ class TrackScreen extends ConsumerWidget {
           const SizedBox(height: 16),
           _TrackEntry(
             icon: Icons.monitor_weight_outlined,
+            imageAsset: 'assets/images/track/fitness.jpg',
             title: 'Fitness',
             subtitle: 'Measurements, goals & charts',
             route: '/fitness',
@@ -191,6 +196,7 @@ class TrackScreen extends ConsumerWidget {
           const SizedBox(height: 16),
           _TrackEntry(
             icon: Icons.water_drop_outlined,
+            imageAsset: 'assets/images/track/habits.jpg',
             title: 'Habits',
             subtitle: 'Water, skincare, reading & more',
             route: '/habits',
@@ -206,6 +212,7 @@ class TrackScreen extends ConsumerWidget {
           const SizedBox(height: 16),
           _TrackEntry(
             icon: Icons.self_improvement,
+            imageAsset: 'assets/images/track/wellbeing.jpg',
             title: 'Feeling Better',
             subtitle: 'Self-care actions & history',
             route: '/wellbeing',
@@ -214,6 +221,7 @@ class TrackScreen extends ConsumerWidget {
           const SizedBox(height: 16),
           _TrackEntry(
             icon: Icons.restaurant,
+            imageAsset: 'assets/images/track/meals.jpg',
             title: 'Meals',
             subtitle: 'Weekly meal grid & shopping list',
             route: '/meals',
@@ -222,6 +230,7 @@ class TrackScreen extends ConsumerWidget {
           const SizedBox(height: 16),
           _TrackEntry(
             icon: Icons.calendar_today_outlined,
+            imageAsset: 'assets/images/track/period.jpg',
             title: 'Period Tracker',
             subtitle: 'Cycle prediction, ovulation & stats',
             route: '/period',
@@ -236,6 +245,7 @@ class TrackScreen extends ConsumerWidget {
 class _TrackEntry extends StatelessWidget {
   const _TrackEntry({
     required this.icon,
+    required this.imageAsset,
     required this.title,
     required this.subtitle,
     required this.route,
@@ -244,6 +254,7 @@ class _TrackEntry extends StatelessWidget {
   });
 
   final IconData icon;
+  final String imageAsset;
   final String title;
   final String subtitle;
   final String route;
@@ -264,12 +275,20 @@ class _TrackEntry extends StatelessWidget {
       onTap: () => context.push(route),
       child: Row(
         children: [
-          // Circular Pastel Badge
+          // Circular Badge with Custom Cute Illustration Asset
           Container(
-            width: 44,
-            height: 44,
+            width: 46,
+            height: 46,
             decoration: BoxDecoration(color: bg, shape: BoxShape.circle),
-            child: Icon(icon, color: fg, size: 20),
+            clipBehavior: Clip.antiAlias,
+            child: Image.asset(
+              imageAsset,
+              width: 46,
+              height: 46,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) =>
+                  Icon(icon, color: fg, size: 20),
+            ),
           ),
           const SizedBox(width: 16),
           // Title & Subtitle

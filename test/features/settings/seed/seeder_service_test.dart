@@ -106,13 +106,13 @@ void main() {
     // So 7 collections inserted.
     expect(summary.collectionsInserted, equals(7));
 
-    // Verify item counts: 742 items inserted during initial run
-    expect(summary.itemsInserted, equals(742));
+    // Verify item counts: 938 items inserted during initial run
+    expect(summary.itemsInserted, equals(938));
     expect(summary.itemsUpdated, equals(0));
     expect(summary.itemsSkipped, equals(0));
 
-    // Verify ingredients: 51 master ingredients from seed.json
-    expect(summary.ingredientsInserted, equals(51));
+    // Verify ingredients: 68 master ingredients from seed.json
+    expect(summary.ingredientsInserted, equals(68));
 
     // Verify plans: A/B/C updated, 1 new inserted ("راهنما و تغذیه")
     expect(summary.plansInserted, equals(1));
@@ -230,7 +230,7 @@ void main() {
       final items = await itemRepo.watchItems(c.id).first;
       finalTotalItems += items.length;
     }
-    expect(finalTotalItems, equals(735));
+    expect(finalTotalItems, equals(931));
   });
 
   test(

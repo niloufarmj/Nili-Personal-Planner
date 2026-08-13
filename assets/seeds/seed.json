@@ -1,5 +1,5 @@
 {
-  "version": 18,
+  "version": 21,
   "generated": "2026-06-12",
   "tags": [
     {
@@ -855,7 +855,8 @@
           "status": "backlog",
           "image": "asset://assets/images/movies/the_game.jpg"
         }
-      ]
+      ],
+      "cover_image": "asset://assets/images/headers/header_movies.jpg"
     },
     {
       "name": "Shopping Wishlist",
@@ -1033,7 +1034,8 @@
           "cost_cents": 17000,
           "cost_note": "listed as $170 in Notion — verify currency"
         }
-      ]
+      ],
+      "cover_image": "asset://assets/images/headers/header_shopping.jpg"
     },
     {
       "name": "خرید خونه جدید",
@@ -1324,7 +1326,8 @@
           "title": "خوش‌بوکننده اتاق",
           "status": "wanted"
         }
-      ]
+      ],
+      "cover_image": "asset://assets/images/headers/header_house.jpg"
     },
     {
       "name": "Job Hunt — Austria",
@@ -1347,7 +1350,8 @@
           "title": "vrisch (Vienna)",
           "status": "researching"
         }
-      ]
+      ],
+      "cover_image": "asset://assets/images/headers/header_job.jpg"
     },
     {
       "name": "Job Hunt — Germany",
@@ -5379,7 +5383,8 @@
           "category": "Game Studio (Flight Sim)",
           "city": "Germany"
         }
-      ]
+      ],
+      "cover_image": "asset://assets/images/headers/header_job.jpg"
     },
     {
       "name": "Reading List — Books",
@@ -5434,7 +5439,8 @@
           "status": "backlog",
           "image": "asset://assets/images/movies/thinking2C_fast_and_slow.jpg"
         }
-      ]
+      ],
+      "cover_image": "asset://assets/images/headers/header_books.jpg"
     },
     {
       "name": "Job Hunt — Netherlands",
@@ -7481,7 +7487,1774 @@
             "linkedin": ""
           }
         }
-      ]
+      ],
+      "items_job": [
+        {
+          "title": "Guerrilla Games",
+          "company": "Guerrilla Games",
+          "status": "researching",
+          "category": "AAA Game Studio (PlayStation)",
+          "city": "Amsterdam",
+          "website": "https://www.guerrilla-games.com",
+          "linkedin": "https://www.linkedin.com/company/guerrilla-games"
+        },
+        {
+          "title": "Vertigo Games",
+          "company": "Vertigo Games",
+          "status": "researching",
+          "category": "AAA VR Game Studio / Publisher",
+          "city": "Rotterdam",
+          "website": "https://www.vertigo-games.com",
+          "linkedin": "https://www.linkedin.com/company/vertigo-games"
+        },
+        {
+          "title": "Vertigo Studios Amsterdam (ex Force Field)",
+          "company": "Vertigo Studios Amsterdam (ex Force Field)",
+          "status": "researching",
+          "category": "AAA VR Game Studio",
+          "city": "Amsterdam",
+          "website": "https://www.vertigo-games.com",
+          "linkedin": "https://www.linkedin.com/company/forcefieldvr"
+        },
+        {
+          "title": "Triumph Studios",
+          "company": "Triumph Studios",
+          "status": "researching",
+          "category": "AA Game Studio (Strategy/RPG)",
+          "city": "Delft",
+          "website": "https://www.triumph.net",
+          "linkedin": "https://www.linkedin.com/company/triumph-studios"
+        },
+        {
+          "title": "Nixxes Software",
+          "company": "Nixxes Software",
+          "status": "researching",
+          "category": "AAA Porting Studio (PlayStation)",
+          "city": "Utrecht",
+          "website": "https://www.nixxes.com",
+          "linkedin": "https://www.linkedin.com/company/nixxes-software"
+        },
+        {
+          "title": "PALADIN Studios",
+          "company": "PALADIN Studios",
+          "status": "researching",
+          "category": "Game Studio (Mobile)",
+          "city": "The Hague",
+          "website": "https://www.paladinstudios.com",
+          "linkedin": "https://www.linkedin.com/company/paladinstudios"
+        },
+        {
+          "title": "Ronimo Games",
+          "company": "Ronimo Games",
+          "status": "researching",
+          "category": "Game Studio (Indie/Multiplayer)",
+          "city": "Utrecht",
+          "website": "https://www.ronimo-games.com",
+          "linkedin": "https://www.linkedin.com/company/ronimo-games"
+        },
+        {
+          "title": "Abbey Games",
+          "company": "Abbey Games",
+          "status": "researching",
+          "category": "Game Studio (Indie/God Games)",
+          "city": "Utrecht",
+          "website": "https://www.abbeygames.com",
+          "linkedin": "https://www.linkedin.com/company/abbey-games"
+        },
+        {
+          "title": "Codeglue",
+          "company": "Codeglue",
+          "status": "researching",
+          "category": "Game Studio (Porting/Arcade)",
+          "city": "Rotterdam",
+          "website": "https://www.codeglue.com",
+          "linkedin": "https://www.linkedin.com/company/codeglue"
+        },
+        {
+          "title": "Triangle Studios",
+          "company": "Triangle Studios",
+          "status": "researching",
+          "category": "Game Studio (Multi-platform)",
+          "city": "Leeuwarden",
+          "website": "https://www.triangle-studios.com",
+          "linkedin": "https://www.linkedin.com/company/triangle-studios"
+        },
+        {
+          "title": "Miniclip Nederland",
+          "company": "Miniclip Nederland",
+          "status": "researching",
+          "category": "Game Studio (Mobile/Browser)",
+          "city": "Netherlands",
+          "website": "https://www.miniclip.com",
+          "linkedin": "https://www.linkedin.com/company/miniclip"
+        },
+        {
+          "title": "Gamious",
+          "company": "Gamious",
+          "status": "researching",
+          "category": "Game Studio (Indie)",
+          "city": "Netherlands",
+          "website": "https://gamious.com",
+          "linkedin": "https://www.linkedin.com/company/gamious"
+        },
+        {
+          "title": "Engine Software",
+          "company": "Engine Software",
+          "status": "researching",
+          "category": "Game Studio (Porting/Co-dev)",
+          "city": "Netherlands",
+          "website": "https://www.engine-software.com",
+          "linkedin": "https://www.linkedin.com/company/engine-software"
+        },
+        {
+          "title": "GameHouse",
+          "company": "GameHouse",
+          "status": "researching",
+          "category": "Game Studio (Story Games)",
+          "city": "Netherlands",
+          "website": "https://www.gamehouse.com",
+          "linkedin": "https://www.linkedin.com/company/gamehouse"
+        },
+        {
+          "title": "Good Shepherd Entertainment",
+          "company": "Good Shepherd Entertainment",
+          "status": "researching",
+          "category": "Game Publisher",
+          "city": "Netherlands",
+          "website": "https://www.goodshepherd.games",
+          "linkedin": "https://www.linkedin.com/company/good-shepherd-entertainment"
+        },
+        {
+          "title": "RageSquid",
+          "company": "RageSquid",
+          "status": "researching",
+          "category": "Game Studio (Physics Games)",
+          "city": "Netherlands",
+          "website": "https://www.ragesquid.com",
+          "linkedin": "https://www.linkedin.com/company/ragesquid"
+        },
+        {
+          "title": "Abstraction Games",
+          "company": "Abstraction Games",
+          "status": "researching",
+          "category": "Game Studio (Porting/Co-dev)",
+          "city": "Netherlands",
+          "website": "https://www.abstractiongames.com",
+          "linkedin": "https://www.linkedin.com/company/abstraction-games"
+        },
+        {
+          "title": "Rusty Lake",
+          "company": "Rusty Lake",
+          "status": "researching",
+          "category": "Game Studio (Puzzle/Adventure)",
+          "city": "Amsterdam",
+          "website": "https://www.rustylake.com",
+          "linkedin": "https://www.linkedin.com/company/rusty-lake"
+        },
+        {
+          "title": "Black Cube Games",
+          "company": "Black Cube Games",
+          "status": "researching",
+          "category": "Game Studio (Persian Mythology!)",
+          "city": "Amstelveen",
+          "website": "https://www.blackcubegames.com",
+          "linkedin": "https://www.linkedin.com/company/black-cube-games"
+        },
+        {
+          "title": "KeokeN Interactive",
+          "company": "KeokeN Interactive",
+          "status": "researching",
+          "category": "Game Studio (Sci-Fi Adventure)",
+          "city": "Hoofddorp",
+          "website": "https://www.keoken-interactive.com",
+          "linkedin": "https://www.linkedin.com/company/keoken-interactive"
+        },
+        {
+          "title": "Blackmill Games",
+          "company": "Blackmill Games",
+          "status": "researching",
+          "category": "Game Studio (Premium/FPS)",
+          "city": "Netherlands",
+          "website": "https://www.blackmillgames.com",
+          "linkedin": "https://www.linkedin.com/company/blackmill-games"
+        },
+        {
+          "title": "MY.GAMES",
+          "company": "MY.GAMES",
+          "status": "researching",
+          "category": "Game Publisher/Developer (EU HQ)",
+          "city": "Amsterdam",
+          "website": "https://my.games",
+          "linkedin": "https://www.linkedin.com/company/my-games-global"
+        },
+        {
+          "title": "Playtika",
+          "company": "Playtika",
+          "status": "researching",
+          "category": "Game Studio (Mobile/Social Casino)",
+          "city": "Netherlands",
+          "website": "https://www.playtika.com",
+          "linkedin": "https://www.linkedin.com/company/playtika"
+        },
+        {
+          "title": "Bohemia Interactive NL",
+          "company": "Bohemia Interactive NL",
+          "status": "researching",
+          "category": "Game Studio (Simulation/Military)",
+          "city": "Netherlands",
+          "website": "https://www.bohemia.net",
+          "linkedin": "https://www.linkedin.com/company/bohemia-interactive"
+        },
+        {
+          "title": "Kakao Games Europe",
+          "company": "Kakao Games Europe",
+          "status": "researching",
+          "category": "Game Publisher (Korean)",
+          "city": "Netherlands",
+          "website": "https://www.kakaogames.com",
+          "linkedin": "https://www.linkedin.com/company/kakaogames"
+        },
+        {
+          "title": "Digital Dreams",
+          "company": "Digital Dreams",
+          "status": "researching",
+          "category": "Indie Game Studio",
+          "city": "Netherlands",
+          "website": "https://www.digitaldreams.nu",
+          "linkedin": "https://www.linkedin.com/company/digital-dreams-entertainment"
+        },
+        {
+          "title": "Monogon Games",
+          "company": "Monogon Games",
+          "status": "researching",
+          "category": "Indie Game Studio",
+          "city": "Netherlands",
+          "website": "(search needed)",
+          "linkedin": "https://www.linkedin.com/company/monogon-games"
+        },
+        {
+          "title": "Lionade Games",
+          "company": "Lionade Games",
+          "status": "researching",
+          "category": "Indie Game Studio",
+          "city": "Hilversum",
+          "website": "https://www.lionade.com",
+          "linkedin": "https://www.linkedin.com/company/lionade"
+        },
+        {
+          "title": "Illusive Games",
+          "company": "Illusive Games",
+          "status": "researching",
+          "category": "Indie Game Studio",
+          "city": "Hilversum",
+          "website": "(search needed)",
+          "linkedin": "(search needed)"
+        },
+        {
+          "title": "Feel Free Games",
+          "company": "Feel Free Games",
+          "status": "researching",
+          "category": "Indie Game Studio (3D Veterans)",
+          "city": "Netherlands",
+          "website": "https://www.feelfreegames.com",
+          "linkedin": "https://www.linkedin.com/company/feel-free-games"
+        },
+        {
+          "title": "CoolGames",
+          "company": "CoolGames",
+          "status": "researching",
+          "category": "Game Studio (HTML5/Platform)",
+          "city": "Amsterdam",
+          "website": "https://www.coolgames.com",
+          "linkedin": "https://www.linkedin.com/company/coolgames"
+        },
+        {
+          "title": "Voodoo (NL Office)",
+          "company": "Voodoo (NL Office)",
+          "status": "researching",
+          "category": "Game Studio (Mobile/Hyper-casual)",
+          "city": "Netherlands",
+          "website": "https://www.voodoo.io",
+          "linkedin": "https://www.linkedin.com/company/voodoo-io"
+        },
+        {
+          "title": "RBL Labs",
+          "company": "RBL Labs",
+          "status": "researching",
+          "category": "Game Studio",
+          "city": "Netherlands",
+          "website": "https://www.rbllabs.com",
+          "linkedin": "https://www.linkedin.com/company/rbl-labs"
+        },
+        {
+          "title": "Studio Deloryan",
+          "company": "Studio Deloryan",
+          "status": "researching",
+          "category": "Game Studio (Horse Reality)",
+          "city": "Netherlands",
+          "website": "https://www.horsereality.com",
+          "linkedin": "(search needed)"
+        },
+        {
+          "title": "Tover",
+          "company": "Tover",
+          "status": "researching",
+          "category": "Interactive Tables / Serious Games",
+          "city": "Netherlands",
+          "website": "https://www.tover.care",
+          "linkedin": "https://www.linkedin.com/company/tover"
+        },
+        {
+          "title": "No Pressure Studios",
+          "company": "No Pressure Studios",
+          "status": "researching",
+          "category": "Indie Game Studio",
+          "city": "Netherlands",
+          "website": "(search needed)",
+          "linkedin": "(search needed)"
+        },
+        {
+          "title": "Skunx Games",
+          "company": "Skunx Games",
+          "status": "researching",
+          "category": "Indie Game Studio",
+          "city": "Netherlands",
+          "website": "(search needed)",
+          "linkedin": "(search needed)"
+        },
+        {
+          "title": "Alterego Games",
+          "company": "Alterego Games",
+          "status": "researching",
+          "category": "Indie Game Studio",
+          "city": "Netherlands",
+          "website": "https://www.alteregogames.com",
+          "linkedin": "https://www.linkedin.com/company/alterego-games"
+        },
+        {
+          "title": "Picomy",
+          "company": "Picomy",
+          "status": "researching",
+          "category": "Indie Game Studio",
+          "city": "Netherlands",
+          "website": "(search needed)",
+          "linkedin": "(search needed)"
+        },
+        {
+          "title": "Wanted 5 Games",
+          "company": "Wanted 5 Games",
+          "status": "researching",
+          "category": "Game Studio / Publisher",
+          "city": "Netherlands",
+          "website": "(search needed)",
+          "linkedin": "(search needed)"
+        },
+        {
+          "title": "Lirio Games",
+          "company": "Lirio Games",
+          "status": "researching",
+          "category": "Game Studio",
+          "city": "Netherlands",
+          "website": "(search needed)",
+          "linkedin": "(search needed)"
+        },
+        {
+          "title": "Gazingy Interactive",
+          "company": "Gazingy Interactive",
+          "status": "researching",
+          "category": "Game Studio (Mobile)",
+          "city": "Netherlands",
+          "website": "https://www.gazingy.com",
+          "linkedin": "https://www.linkedin.com/company/gazingy-interactive"
+        },
+        {
+          "title": "Jacobs Development",
+          "company": "Jacobs Development",
+          "status": "researching",
+          "category": "Game Studio (Multi-platform)",
+          "city": "Netherlands",
+          "website": "https://www.jacobsdevelopment.com",
+          "linkedin": "https://www.linkedin.com/company/jacobs-development"
+        },
+        {
+          "title": "Mindscape International",
+          "company": "Mindscape International",
+          "status": "researching",
+          "category": "Game Publisher/Developer",
+          "city": "Netherlands",
+          "website": "(search needed)",
+          "linkedin": "(search needed)"
+        },
+        {
+          "title": "Kucheza",
+          "company": "Kucheza",
+          "status": "researching",
+          "category": "Game Studio",
+          "city": "Netherlands",
+          "website": "(search needed)",
+          "linkedin": "(search needed)"
+        },
+        {
+          "title": "Game Architect Studio",
+          "company": "Game Architect Studio",
+          "status": "researching",
+          "category": "Game Design / Consultancy",
+          "city": "Netherlands",
+          "website": "(search needed)",
+          "linkedin": "(search needed)"
+        },
+        {
+          "title": "Monobanda",
+          "company": "Monobanda",
+          "status": "researching",
+          "category": "Playful Interactive Experiences",
+          "city": "Utrecht",
+          "website": "https://www.monobanda.nl",
+          "linkedin": "https://www.linkedin.com/company/monobanda"
+        },
+        {
+          "title": "Self Made Miracle",
+          "company": "Self Made Miracle",
+          "status": "researching",
+          "category": "Indie Game Studio",
+          "city": "Netherlands",
+          "website": "(search needed)",
+          "linkedin": "(search needed)"
+        },
+        {
+          "title": "Sassybot",
+          "company": "Sassybot",
+          "status": "researching",
+          "category": "Indie Game Studio",
+          "city": "Netherlands",
+          "website": "https://www.sassybot.com",
+          "linkedin": "https://www.linkedin.com/company/sassybot"
+        },
+        {
+          "title": "Nifflas' Games",
+          "company": "Nifflas' Games",
+          "status": "researching",
+          "category": "Indie Game Studio",
+          "city": "Netherlands",
+          "website": "(search needed)",
+          "linkedin": "(search needed)"
+        },
+        {
+          "title": "Two Tribes",
+          "company": "Two Tribes",
+          "status": "researching",
+          "category": "Game Studio (Toki Tori)",
+          "city": "Netherlands",
+          "website": "https://www.twotribes.com",
+          "linkedin": "(search needed)"
+        },
+        {
+          "title": "Relic Hunters",
+          "company": "Relic Hunters",
+          "status": "researching",
+          "category": "Game Studio",
+          "city": "Netherlands",
+          "website": "(search needed)",
+          "linkedin": "(search needed)"
+        },
+        {
+          "title": "Spellbrush",
+          "company": "Spellbrush",
+          "status": "researching",
+          "category": "AI + Game Studio",
+          "city": "Netherlands",
+          "website": "https://www.spellbrush.com",
+          "linkedin": "(search needed)"
+        },
+        {
+          "title": "Wemersive",
+          "company": "Wemersive",
+          "status": "researching",
+          "category": "XR/VR Development Agency",
+          "city": "Amsterdam",
+          "website": "https://www.wemersive.com",
+          "linkedin": "https://www.linkedin.com/company/wemersive"
+        },
+        {
+          "title": "WeMakeVR",
+          "company": "WeMakeVR",
+          "status": "researching",
+          "category": "VR Production (Award-winning)",
+          "city": "Netherlands",
+          "website": "https://www.wemakevr.com",
+          "linkedin": "https://www.linkedin.com/company/wemakevr"
+        },
+        {
+          "title": "Treeview",
+          "company": "Treeview",
+          "status": "researching",
+          "category": "Enterprise XR Studio",
+          "city": "Netherlands",
+          "website": "https://treeview.studio",
+          "linkedin": "https://www.linkedin.com/company/treeview-studio"
+        },
+        {
+          "title": "Studio XR",
+          "company": "Studio XR",
+          "status": "researching",
+          "category": "VR Training / Learning",
+          "city": "Nieuwegein",
+          "website": "https://studioxr.nl",
+          "linkedin": "https://www.linkedin.com/company/studio-xr"
+        },
+        {
+          "title": "Under Reality",
+          "company": "Under Reality",
+          "status": "researching",
+          "category": "XR / Digital Media / WebGL",
+          "city": "Amsterdam",
+          "website": "https://www.underreality.com",
+          "linkedin": "https://www.linkedin.com/company/under-reality"
+        },
+        {
+          "title": "Dutch Rose Media",
+          "company": "Dutch Rose Media",
+          "status": "researching",
+          "category": "AR Mobile Experiences",
+          "city": "Netherlands",
+          "website": "https://www.dutchrosemedia.nl",
+          "linkedin": "https://www.linkedin.com/company/dutch-rose-media"
+        },
+        {
+          "title": "PLAYMAX",
+          "company": "PLAYMAX",
+          "status": "researching",
+          "category": "VR/AR Interactive 3D Content",
+          "city": "Netherlands",
+          "website": "https://www.playmax.nl",
+          "linkedin": "https://www.linkedin.com/company/playmax-vr"
+        },
+        {
+          "title": "The Amsterdam VR Company",
+          "company": "The Amsterdam VR Company",
+          "status": "researching",
+          "category": "VR Production (Real Estate/Tourism)",
+          "city": "Amsterdam",
+          "website": "https://www.theamsterdamvrcompany.com",
+          "linkedin": "(search needed)"
+        },
+        {
+          "title": "Vertex VR",
+          "company": "Vertex VR",
+          "status": "researching",
+          "category": "VR/AR Experiences",
+          "city": "Netherlands",
+          "website": "https://www.vertexvr.com",
+          "linkedin": "https://www.linkedin.com/company/vertex-vr"
+        },
+        {
+          "title": "ImproVive",
+          "company": "ImproVive",
+          "status": "researching",
+          "category": "Applied VR/XR/AI",
+          "city": "Netherlands",
+          "website": "https://www.improvive.com",
+          "linkedin": "https://www.linkedin.com/company/improvive"
+        },
+        {
+          "title": "Beyond Sports",
+          "company": "Beyond Sports",
+          "status": "researching",
+          "category": "Real-time 3D Sports XR",
+          "city": "Netherlands",
+          "website": "https://www.beyondsports.nl",
+          "linkedin": "https://www.linkedin.com/company/beyond-sports"
+        },
+        {
+          "title": "SilverFit",
+          "company": "SilverFit",
+          "status": "researching",
+          "category": "VR Rehabilitation Technology",
+          "city": "Netherlands",
+          "website": "https://www.silverfit.com",
+          "linkedin": "https://www.linkedin.com/company/silverfit"
+        },
+        {
+          "title": "Locus Solus Studio",
+          "company": "Locus Solus Studio",
+          "status": "researching",
+          "category": "AR/VR Development",
+          "city": "Amsterdam",
+          "website": "https://www.locussolusstudio.com",
+          "linkedin": "https://www.linkedin.com/company/locus-solus-studio"
+        },
+        {
+          "title": "inBrain",
+          "company": "inBrain",
+          "status": "researching",
+          "category": "VR/Brain Technology",
+          "city": "Netherlands",
+          "website": "(search needed)",
+          "linkedin": "(search needed)"
+        },
+        {
+          "title": "Manus",
+          "company": "Manus",
+          "status": "researching",
+          "category": "VR Glove / Hand Tracking",
+          "city": "Eindhoven",
+          "website": "https://www.manus-meta.com",
+          "linkedin": "https://www.linkedin.com/company/manus-vr"
+        },
+        {
+          "title": "OutHere",
+          "company": "OutHere",
+          "status": "researching",
+          "category": "Creative XR Agency",
+          "city": "Netherlands",
+          "website": "https://www.outhere.nl",
+          "linkedin": "https://www.linkedin.com/company/outhere"
+        },
+        {
+          "title": "E-Semble",
+          "company": "E-Semble",
+          "status": "researching",
+          "category": "VR Training Simulations",
+          "city": "Netherlands",
+          "website": "https://www.e-semble.com",
+          "linkedin": "https://www.linkedin.com/company/e-semble"
+        },
+        {
+          "title": "VR Owl",
+          "company": "VR Owl",
+          "status": "researching",
+          "category": "AR/VR Applications (80+)",
+          "city": "Netherlands",
+          "website": "https://www.vrowl.nl",
+          "linkedin": "https://www.linkedin.com/company/vr-owl"
+        },
+        {
+          "title": "Avataris",
+          "company": "Avataris",
+          "status": "researching",
+          "category": "Digital Humans / VR Avatars",
+          "city": "Netherlands",
+          "website": "https://www.avataris.ai",
+          "linkedin": "https://www.linkedin.com/company/avataris"
+        },
+        {
+          "title": "VERO",
+          "company": "VERO",
+          "status": "researching",
+          "category": "VR/AR Real Estate Visualization",
+          "city": "Netherlands",
+          "website": "https://www.vfrdesign.nl",
+          "linkedin": "https://www.linkedin.com/company/vero-digital"
+        },
+        {
+          "title": "Dutch VR",
+          "company": "Dutch VR",
+          "status": "researching",
+          "category": "VR/AR/MR Solutions",
+          "city": "Netherlands",
+          "website": "https://dutchvr.com",
+          "linkedin": "https://www.linkedin.com/company/dutch-vr"
+        },
+        {
+          "title": "ArtiShock XR Productions",
+          "company": "ArtiShock XR Productions",
+          "status": "researching",
+          "category": "AR/MR/XR Agency",
+          "city": "Rotterdam",
+          "website": "https://artishock.com",
+          "linkedin": "https://www.linkedin.com/company/artishock"
+        },
+        {
+          "title": "EXP360",
+          "company": "EXP360",
+          "status": "researching",
+          "category": "SaaS VR Platform",
+          "city": "Netherlands",
+          "website": "https://www.exp360.com",
+          "linkedin": "https://www.linkedin.com/company/exp360"
+        },
+        {
+          "title": "Garden Gnome Software",
+          "company": "Garden Gnome Software",
+          "status": "researching",
+          "category": "360° VR Tours",
+          "city": "Netherlands",
+          "website": "https://ggnome.com",
+          "linkedin": "https://www.linkedin.com/company/garden-gnome-software"
+        },
+        {
+          "title": "Spatial (NL Office)",
+          "company": "Spatial (NL Office)",
+          "status": "researching",
+          "category": "VR Collaboration Platform",
+          "city": "Netherlands",
+          "website": "https://www.spatial.io",
+          "linkedin": "https://www.linkedin.com/company/spatial-io"
+        },
+        {
+          "title": "VR Base",
+          "company": "VR Base",
+          "status": "researching",
+          "category": "VR Entertainment / Development",
+          "city": "Netherlands",
+          "website": "https://www.vrbase.nl",
+          "linkedin": "https://www.linkedin.com/company/vr-base"
+        },
+        {
+          "title": "VR Expert",
+          "company": "VR Expert",
+          "status": "researching",
+          "category": "VR/AR Consultancy & Solutions",
+          "city": "Amsterdam",
+          "website": "https://vr-expert.nl",
+          "linkedin": "https://www.linkedin.com/company/vr-expert"
+        },
+        {
+          "title": "Viemr",
+          "company": "Viemr",
+          "status": "researching",
+          "category": "VR/360 Video Production",
+          "city": "Amsterdam",
+          "website": "https://www.viemr.com",
+          "linkedin": "https://www.linkedin.com/company/viemr"
+        },
+        {
+          "title": "VRee",
+          "company": "VRee",
+          "status": "researching",
+          "category": "VR Training & Simulation",
+          "city": "Netherlands",
+          "website": "https://www.vree.world",
+          "linkedin": "https://www.linkedin.com/company/vree-world"
+        },
+        {
+          "title": "VisualiseVR",
+          "company": "VisualiseVR",
+          "status": "researching",
+          "category": "VR Visualization",
+          "city": "Netherlands",
+          "website": "https://www.visualisevr.com",
+          "linkedin": "(search needed)"
+        },
+        {
+          "title": "Layar (legacy/Blippar)",
+          "company": "Layar (legacy/Blippar)",
+          "status": "researching",
+          "category": "AR Pioneer (acquired)",
+          "city": "Amsterdam",
+          "website": "https://www.blippar.com",
+          "linkedin": "https://www.linkedin.com/company/layar"
+        },
+        {
+          "title": "Prespective (Unit040)",
+          "company": "Prespective (Unit040)",
+          "status": "researching",
+          "category": "Digital Twin (Unity-based)",
+          "city": "Eindhoven",
+          "website": "https://www.prespective.com",
+          "linkedin": "https://www.linkedin.com/company/unit040"
+        },
+        {
+          "title": "TBL",
+          "company": "TBL",
+          "status": "researching",
+          "category": "Industrial Digital Twin / 3D Viz",
+          "city": "Netherlands",
+          "website": "https://tbl.nl",
+          "linkedin": "https://www.linkedin.com/company/tbl-techniek"
+        },
+        {
+          "title": "ASML",
+          "company": "ASML",
+          "status": "researching",
+          "category": "Semiconductor / 3D Visualization",
+          "city": "Veldhoven",
+          "website": "https://www.asml.com",
+          "linkedin": "https://www.linkedin.com/company/asml"
+        },
+        {
+          "title": "Philips",
+          "company": "Philips",
+          "status": "researching",
+          "category": "Healthcare XR / Digital Twin",
+          "city": "Eindhoven",
+          "website": "https://www.philips.com",
+          "linkedin": "https://www.linkedin.com/company/philips"
+        },
+        {
+          "title": "Thales Netherlands",
+          "company": "Thales Netherlands",
+          "status": "researching",
+          "category": "Naval Simulation / Unity",
+          "city": "Various",
+          "website": "https://www.thalesgroup.com/en/countries/europe/netherlands",
+          "linkedin": "https://www.linkedin.com/company/thaborgroep"
+        },
+        {
+          "title": "Damen Shipyards",
+          "company": "Damen Shipyards",
+          "status": "researching",
+          "category": "Maritime Simulation / Unity",
+          "city": "Gorinchem",
+          "website": "https://www.damen.com",
+          "linkedin": "https://www.linkedin.com/company/damen-shipyards-group"
+        },
+        {
+          "title": "TNO",
+          "company": "TNO",
+          "status": "researching",
+          "category": "Applied Research (VR/AR/Sim)",
+          "city": "The Hague",
+          "website": "https://www.tno.nl",
+          "linkedin": "https://www.linkedin.com/company/tno"
+        },
+        {
+          "title": "NLR (Aerospace Centre)",
+          "company": "NLR (Aerospace Centre)",
+          "status": "researching",
+          "category": "Flight Simulation / XR",
+          "city": "Amsterdam",
+          "website": "https://www.nlr.nl",
+          "linkedin": "https://www.linkedin.com/company/nlr"
+        },
+        {
+          "title": "MARIN",
+          "company": "MARIN",
+          "status": "researching",
+          "category": "Maritime Simulation",
+          "city": "Wageningen",
+          "website": "https://www.marin.nl",
+          "linkedin": "https://www.linkedin.com/company/marin"
+        },
+        {
+          "title": "Siemens NL",
+          "company": "Siemens NL",
+          "status": "researching",
+          "category": "Industrial Simulation / Digital Twin",
+          "city": "The Hague",
+          "website": "https://www.siemens.com/nl",
+          "linkedin": "https://www.linkedin.com/company/siemens"
+        },
+        {
+          "title": "Shell Technology Centre",
+          "company": "Shell Technology Centre",
+          "status": "researching",
+          "category": "VR Training / Process Sim",
+          "city": "Amsterdam",
+          "website": "https://www.shell.nl",
+          "linkedin": "https://www.linkedin.com/company/shell"
+        },
+        {
+          "title": "Fugro",
+          "company": "Fugro",
+          "status": "researching",
+          "category": "Geospatial 3D Visualization",
+          "city": "Leidschendam",
+          "website": "https://www.fugro.com",
+          "linkedin": "https://www.linkedin.com/company/fugro"
+        },
+        {
+          "title": "ABB Netherlands",
+          "company": "ABB Netherlands",
+          "status": "researching",
+          "category": "Industrial Automation / Digital Twin",
+          "city": "Various",
+          "website": "https://new.abb.com/nl",
+          "linkedin": "https://www.linkedin.com/company/abb"
+        },
+        {
+          "title": "Wärtsilä NL",
+          "company": "Wärtsilä NL",
+          "status": "researching",
+          "category": "Maritime Simulation / Digital Twin",
+          "city": "Rotterdam",
+          "website": "https://www.wartsila.com",
+          "linkedin": "https://www.linkedin.com/company/wartsila"
+        },
+        {
+          "title": "Royal HaskoningDHV",
+          "company": "Royal HaskoningDHV",
+          "status": "researching",
+          "category": "Engineering 3D Visualization",
+          "city": "Amersfoort",
+          "website": "https://www.royalhaskoningdhv.com",
+          "linkedin": "https://www.linkedin.com/company/royal-haskoningdhv"
+        },
+        {
+          "title": "Fokker Techniek",
+          "company": "Fokker Techniek",
+          "status": "researching",
+          "category": "Aerospace Visualization",
+          "city": "Netherlands",
+          "website": "https://www.fokker-techniek.com",
+          "linkedin": "https://www.linkedin.com/company/fokker-techniek"
+        },
+        {
+          "title": "BAM Infra",
+          "company": "BAM Infra",
+          "status": "researching",
+          "category": "Construction Digital Twin",
+          "city": "Netherlands",
+          "website": "https://www.bam.com",
+          "linkedin": "https://www.linkedin.com/company/bam-infra"
+        },
+        {
+          "title": "Arcadis",
+          "company": "Arcadis",
+          "status": "researching",
+          "category": "Infrastructure Digital Twin",
+          "city": "Amsterdam",
+          "website": "https://www.arcadis.com",
+          "linkedin": "https://www.linkedin.com/company/arcadis"
+        },
+        {
+          "title": "Heerema Marine",
+          "company": "Heerema Marine",
+          "status": "researching",
+          "category": "Offshore 3D Simulation",
+          "city": "Leiden",
+          "website": "https://www.heerema.com",
+          "linkedin": "https://www.linkedin.com/company/heerema-marine-contractors"
+        },
+        {
+          "title": "SBM Offshore",
+          "company": "SBM Offshore",
+          "status": "researching",
+          "category": "Offshore Digital Twin",
+          "city": "Schiedam",
+          "website": "https://www.sbmoffshore.com",
+          "linkedin": "https://www.linkedin.com/company/sbm-offshore"
+        },
+        {
+          "title": "Allseas",
+          "company": "Allseas",
+          "status": "researching",
+          "category": "Deep-sea Engineering Simulation",
+          "city": "Delft",
+          "website": "https://www.allseas.com",
+          "linkedin": "https://www.linkedin.com/company/allseas"
+        },
+        {
+          "title": "VanBerlo",
+          "company": "VanBerlo",
+          "status": "researching",
+          "category": "Industrial Design / 3D Visualization",
+          "city": "Eindhoven",
+          "website": "https://www.vanberlo.nl",
+          "linkedin": "https://www.linkedin.com/company/vanberlo"
+        },
+        {
+          "title": "Heliox",
+          "company": "Heliox",
+          "status": "researching",
+          "category": "EV Charging Visualization",
+          "city": "Best",
+          "website": "https://www.heliox-energy.com",
+          "linkedin": "https://www.linkedin.com/company/heliox"
+        },
+        {
+          "title": "Lightyear (legacy)",
+          "company": "Lightyear (legacy)",
+          "status": "researching",
+          "category": "Automotive 3D Visualization",
+          "city": "Helmond",
+          "website": "https://www.lightyear.one",
+          "linkedin": "https://www.linkedin.com/company/lightyear"
+        },
+        {
+          "title": "DAF Trucks",
+          "company": "DAF Trucks",
+          "status": "researching",
+          "category": "Automotive Simulation",
+          "city": "Eindhoven",
+          "website": "https://www.daf.com",
+          "linkedin": "https://www.linkedin.com/company/daf-trucks"
+        },
+        {
+          "title": "VDL Groep",
+          "company": "VDL Groep",
+          "status": "researching",
+          "category": "Industrial / Automotive Sim",
+          "city": "Eindhoven",
+          "website": "https://www.vdlgroep.com",
+          "linkedin": "https://www.linkedin.com/company/vdl-groep"
+        },
+        {
+          "title": "&ranj (Ranj Serious Games)",
+          "company": "&ranj (Ranj Serious Games)",
+          "status": "researching",
+          "category": "Serious Games / Unity",
+          "city": "Rotterdam",
+          "website": "https://www.rfranj.nl",
+          "linkedin": "https://www.linkedin.com/company/-ranj"
+        },
+        {
+          "title": "Grendel Games",
+          "company": "Grendel Games",
+          "status": "researching",
+          "category": "Serious Games / Medical Sim",
+          "city": "Leeuwarden",
+          "website": "https://grendelgames.com",
+          "linkedin": "https://www.linkedin.com/company/grendel-games"
+        },
+        {
+          "title": "IJsfontein",
+          "company": "IJsfontein",
+          "status": "researching",
+          "category": "Serious Games / Digital Learning",
+          "city": "Amsterdam",
+          "website": "https://www.ijsfontein.nl",
+          "linkedin": "https://www.linkedin.com/company/ijsfontein"
+        },
+        {
+          "title": "MAD Multimedia",
+          "company": "MAD Multimedia",
+          "status": "researching",
+          "category": "Serious Games / Gamification",
+          "city": "Groningen",
+          "website": "https://www.mad-multimedia.nl",
+          "linkedin": "https://www.linkedin.com/company/mad-multimedia"
+        },
+        {
+          "title": "DTT Multimedia",
+          "company": "DTT Multimedia",
+          "status": "researching",
+          "category": "App / Game Development",
+          "city": "Amsterdam",
+          "website": "https://www.d-tt.nl",
+          "linkedin": "https://www.linkedin.com/company/dtt"
+        },
+        {
+          "title": "Dutch Game Studio",
+          "company": "Dutch Game Studio",
+          "status": "researching",
+          "category": "Advergames / Serious Games",
+          "city": "Netherlands",
+          "website": "https://www.dutchgamestudio.com",
+          "linkedin": "https://www.linkedin.com/company/dutch-game-studio"
+        },
+        {
+          "title": "Capitola",
+          "company": "Capitola",
+          "status": "researching",
+          "category": "Interactive / Game Agency",
+          "city": "Netherlands",
+          "website": "https://www.capitola.nl",
+          "linkedin": "https://www.linkedin.com/company/capitola"
+        },
+        {
+          "title": "FutureWhiz",
+          "company": "FutureWhiz",
+          "status": "researching",
+          "category": "Educational Gaming",
+          "city": "Netherlands",
+          "website": "https://www.futurewhiz.com",
+          "linkedin": "https://www.linkedin.com/company/futurewhiz"
+        },
+        {
+          "title": "Flavour",
+          "company": "Flavour",
+          "status": "researching",
+          "category": "Gamification / Digital Learning",
+          "city": "Netherlands",
+          "website": "https://www.flavour.nl",
+          "linkedin": "https://www.linkedin.com/company/flavour-communication"
+        },
+        {
+          "title": "Drillster",
+          "company": "Drillster",
+          "status": "researching",
+          "category": "Micro-learning / Gamification",
+          "city": "Netherlands",
+          "website": "https://www.drillster.com",
+          "linkedin": "https://www.linkedin.com/company/drillster"
+        },
+        {
+          "title": "Adesign",
+          "company": "Adesign",
+          "status": "researching",
+          "category": "Interactive Learning",
+          "city": "Netherlands",
+          "website": "https://www.adesign.nl",
+          "linkedin": "(search needed)"
+        },
+        {
+          "title": "Springlab",
+          "company": "Springlab",
+          "status": "researching",
+          "category": "Gamification / EdTech",
+          "city": "Amsterdam",
+          "website": "https://www.springlab.nl",
+          "linkedin": "https://www.linkedin.com/company/springlab"
+        },
+        {
+          "title": "8D Games",
+          "company": "8D Games",
+          "status": "researching",
+          "category": "Serious Games",
+          "city": "Netherlands",
+          "website": "https://www.8dgames.com",
+          "linkedin": "https://www.linkedin.com/company/8dgames"
+        },
+        {
+          "title": "Serious Simulations",
+          "company": "Serious Simulations",
+          "status": "researching",
+          "category": "Simulation Training Games",
+          "city": "Netherlands",
+          "website": "(search needed)",
+          "linkedin": "(search needed)"
+        },
+        {
+          "title": "Gearbox Entertainment NL",
+          "company": "Gearbox Entertainment NL",
+          "status": "researching",
+          "category": "Serious Games",
+          "city": "Netherlands",
+          "website": "(search needed)",
+          "linkedin": "(search needed)"
+        },
+        {
+          "title": "Purple Giraffe",
+          "company": "Purple Giraffe",
+          "status": "researching",
+          "category": "Gamification Platform",
+          "city": "Netherlands",
+          "website": "(search needed)",
+          "linkedin": "(search needed)"
+        },
+        {
+          "title": "Speqtral",
+          "company": "Speqtral",
+          "status": "researching",
+          "category": "Serious Games / Simulation",
+          "city": "Netherlands",
+          "website": "(search needed)",
+          "linkedin": "(search needed)"
+        },
+        {
+          "title": "QGames",
+          "company": "QGames",
+          "status": "researching",
+          "category": "Applied Games",
+          "city": "Netherlands",
+          "website": "(search needed)",
+          "linkedin": "(search needed)"
+        },
+        {
+          "title": "Triumph of Technology",
+          "company": "Triumph of Technology",
+          "status": "researching",
+          "category": "Applied Games / VR Training",
+          "city": "Netherlands",
+          "website": "(search needed)",
+          "linkedin": "(search needed)"
+        },
+        {
+          "title": "i3D.net",
+          "company": "i3D.net",
+          "status": "researching",
+          "category": "Game Hosting / Infrastructure",
+          "city": "Rotterdam",
+          "website": "https://www.i3d.net",
+          "linkedin": "https://www.linkedin.com/company/i3d-net"
+        },
+        {
+          "title": "Media.Monks",
+          "company": "Media.Monks",
+          "status": "researching",
+          "category": "Creative Tech Agency",
+          "city": "Hilversum",
+          "website": "https://www.mediamonks.com",
+          "linkedin": "https://www.linkedin.com/company/mediamonks"
+        },
+        {
+          "title": "Dept",
+          "company": "Dept",
+          "status": "researching",
+          "category": "Digital Agency / Creative Tech",
+          "city": "Amsterdam",
+          "website": "https://www.deptagency.com",
+          "linkedin": "https://www.linkedin.com/company/deptagency"
+        },
+        {
+          "title": "Active Theory",
+          "company": "Active Theory",
+          "status": "researching",
+          "category": "Interactive Web / WebGL",
+          "city": "Amsterdam",
+          "website": "https://activetheory.net",
+          "linkedin": "https://www.linkedin.com/company/active-theory"
+        },
+        {
+          "title": "Superhero Cheesecake",
+          "company": "Superhero Cheesecake",
+          "status": "researching",
+          "category": "Creative Tech / Installations",
+          "city": "Amsterdam",
+          "website": "https://www.superhero-cheesecake.com",
+          "linkedin": "https://www.linkedin.com/company/superhero-cheesecake"
+        },
+        {
+          "title": "Random Studio",
+          "company": "Random Studio",
+          "status": "researching",
+          "category": "Interactive Art / Tech",
+          "city": "Amsterdam",
+          "website": "https://random.studio",
+          "linkedin": "https://www.linkedin.com/company/random-studio"
+        },
+        {
+          "title": "Beeld & Geluid",
+          "company": "Beeld & Geluid",
+          "status": "researching",
+          "category": "Interactive Museum Tech",
+          "city": "Hilversum",
+          "website": "https://www.beeldengeluid.nl",
+          "linkedin": "https://www.linkedin.com/company/beeldengeluid"
+        },
+        {
+          "title": "Fabrique",
+          "company": "Fabrique",
+          "status": "researching",
+          "category": "Digital Design / Interactive",
+          "city": "Delft",
+          "website": "https://www.fabrique.nl",
+          "linkedin": "https://www.linkedin.com/company/fabrique"
+        },
+        {
+          "title": "Clever Franke",
+          "company": "Clever Franke",
+          "status": "researching",
+          "category": "Data Viz / Interactive",
+          "city": "Utrecht",
+          "website": "https://www.cleverfranke.com",
+          "linkedin": "https://www.linkedin.com/company/clever-franke"
+        },
+        {
+          "title": "DPDK",
+          "company": "DPDK",
+          "status": "researching",
+          "category": "Digital Agency / 3D/WebGL",
+          "city": "Rotterdam",
+          "website": "https://www.dpdk.com",
+          "linkedin": "https://www.linkedin.com/company/dpdk"
+        },
+        {
+          "title": "Fonk",
+          "company": "Fonk",
+          "status": "researching",
+          "category": "Digital Agency / Interactive",
+          "city": "Amsterdam",
+          "website": "https://www.fonk.amsterdam",
+          "linkedin": "https://www.linkedin.com/company/fonk"
+        },
+        {
+          "title": "IO Digital",
+          "company": "IO Digital",
+          "status": "researching",
+          "category": "Digital Experiences",
+          "city": "Various",
+          "website": "https://www.iodigital.com",
+          "linkedin": "https://www.linkedin.com/company/iodigital"
+        },
+        {
+          "title": "Mirabeau (Cognizant)",
+          "company": "Mirabeau (Cognizant)",
+          "status": "researching",
+          "category": "Digital Experiences",
+          "city": "Amsterdam",
+          "website": "https://www.mirabeau.nl",
+          "linkedin": "https://www.linkedin.com/company/mirabeau"
+        },
+        {
+          "title": "Little Chicken Game Company",
+          "company": "Little Chicken Game Company",
+          "status": "researching",
+          "category": "Game / Interactive Agency",
+          "city": "Amsterdam",
+          "website": "https://www.littlechicken.nl",
+          "linkedin": "https://www.linkedin.com/company/little-chicken-game-company"
+        },
+        {
+          "title": "Momkai",
+          "company": "Momkai",
+          "status": "researching",
+          "category": "Creative Digital Agency",
+          "city": "Amsterdam",
+          "website": "https://www.momkai.com",
+          "linkedin": "https://www.linkedin.com/company/momkai"
+        },
+        {
+          "title": "Build in Amsterdam",
+          "company": "Build in Amsterdam",
+          "status": "researching",
+          "category": "Creative Tech Agency",
+          "city": "Amsterdam",
+          "website": "https://www.buildinamsterdam.com",
+          "linkedin": "https://www.linkedin.com/company/build-in-amsterdam"
+        },
+        {
+          "title": "Resoluut",
+          "company": "Resoluut",
+          "status": "researching",
+          "category": "Digital / Interactive Agency",
+          "city": "Netherlands",
+          "website": "https://www.resoluut.nl",
+          "linkedin": "(search needed)"
+        },
+        {
+          "title": "Submarine Channel",
+          "company": "Submarine Channel",
+          "status": "researching",
+          "category": "Interactive Storytelling",
+          "city": "Amsterdam",
+          "website": "https://www.submarinechannel.com",
+          "linkedin": "https://www.linkedin.com/company/submarine-channel"
+        },
+        {
+          "title": "HALAL",
+          "company": "HALAL",
+          "status": "researching",
+          "category": "Creative Tech / Installations",
+          "city": "Amsterdam",
+          "website": "https://www.halalhalalhalal.com",
+          "linkedin": "https://www.linkedin.com/company/halalstudio"
+        },
+        {
+          "title": "Capitola Interactive",
+          "company": "Capitola Interactive",
+          "status": "researching",
+          "category": "Interactive Digital Experiences",
+          "city": "Netherlands",
+          "website": "https://www.capitola.nl",
+          "linkedin": "(search needed)"
+        },
+        {
+          "title": "Craftwork",
+          "company": "Craftwork",
+          "status": "researching",
+          "category": "Creative Tech / WebGL",
+          "city": "Netherlands",
+          "website": "(search needed)",
+          "linkedin": "(search needed)"
+        },
+        {
+          "title": "CWI Amsterdam",
+          "company": "CWI Amsterdam",
+          "status": "researching",
+          "category": "Research (VR/Graphics)",
+          "city": "Amsterdam",
+          "website": "https://www.cwi.nl",
+          "linkedin": "https://www.linkedin.com/company/cwi-amsterdam"
+        },
+        {
+          "title": "TU Delft (Computer Graphics)",
+          "company": "TU Delft (Computer Graphics)",
+          "status": "researching",
+          "category": "Research (Visualization)",
+          "city": "Delft",
+          "website": "https://www.tudelft.nl",
+          "linkedin": "https://www.linkedin.com/company/tu-delft"
+        },
+        {
+          "title": "TU Eindhoven (Visual Computing)",
+          "company": "TU Eindhoven (Visual Computing)",
+          "status": "researching",
+          "category": "Research (VR/Procedural)",
+          "city": "Eindhoven",
+          "website": "https://www.tue.nl",
+          "linkedin": "https://www.linkedin.com/company/tueindhoven"
+        },
+        {
+          "title": "Utrecht University (Game Research)",
+          "company": "Utrecht University (Game Research)",
+          "status": "researching",
+          "category": "Research (Game AI)",
+          "city": "Utrecht",
+          "website": "https://www.uu.nl",
+          "linkedin": "https://www.linkedin.com/company/utrecht-university"
+        },
+        {
+          "title": "BUAS (Breda University)",
+          "company": "BUAS (Breda University)",
+          "status": "researching",
+          "category": "Game Dev Education/Research",
+          "city": "Breda",
+          "website": "https://www.buas.nl",
+          "linkedin": "https://www.linkedin.com/company/buas"
+        },
+        {
+          "title": "Saxion UAS",
+          "company": "Saxion UAS",
+          "status": "researching",
+          "category": "Game Tech Education",
+          "city": "Enschede",
+          "website": "https://www.saxion.nl",
+          "linkedin": "https://www.linkedin.com/company/saxion"
+        },
+        {
+          "title": "HKU (Utrecht Uni of Arts)",
+          "company": "HKU (Utrecht Uni of Arts)",
+          "status": "researching",
+          "category": "Game/Interactive Media",
+          "city": "Utrecht",
+          "website": "https://www.hku.nl",
+          "linkedin": "https://www.linkedin.com/company/hku"
+        },
+        {
+          "title": "NHTV/BUAS Game Lab",
+          "company": "NHTV/BUAS Game Lab",
+          "status": "researching",
+          "category": "Game Research Lab",
+          "city": "Breda",
+          "website": "https://www.buas.nl",
+          "linkedin": "(search needed)"
+        },
+        {
+          "title": "Amsterdam University (VR Lab)",
+          "company": "Amsterdam University (VR Lab)",
+          "status": "researching",
+          "category": "VR/XR Research",
+          "city": "Amsterdam",
+          "website": "https://www.uva.nl",
+          "linkedin": "https://www.linkedin.com/company/uva"
+        },
+        {
+          "title": "Hanze UAS",
+          "company": "Hanze UAS",
+          "status": "researching",
+          "category": "Game Dev Education",
+          "city": "Groningen",
+          "website": "https://www.hanze.nl",
+          "linkedin": "https://www.linkedin.com/company/hanze-university-of-applied-sciences"
+        },
+        {
+          "title": "Spellbrush Games",
+          "company": "Spellbrush Games",
+          "status": "researching",
+          "category": "AI Art / Game Studio",
+          "city": "Netherlands",
+          "website": "(search needed)",
+          "linkedin": "(search needed)"
+        },
+        {
+          "title": "FocusHome Interactive NL",
+          "company": "FocusHome Interactive NL",
+          "status": "researching",
+          "category": "Game Publisher (NL Office)",
+          "city": "Netherlands",
+          "website": "https://www.focus-entmt.com",
+          "linkedin": "https://www.linkedin.com/company/focus-entertainment"
+        },
+        {
+          "title": "Koch Media / Plaion NL",
+          "company": "Koch Media / Plaion NL",
+          "status": "researching",
+          "category": "Game Publisher",
+          "city": "Netherlands",
+          "website": "https://www.kochmedia.com",
+          "linkedin": "https://www.linkedin.com/company/plaion"
+        },
+        {
+          "title": "Team17 (NL Presence)",
+          "company": "Team17 (NL Presence)",
+          "status": "researching",
+          "category": "Game Publisher",
+          "city": "Netherlands",
+          "website": "https://www.team17.com",
+          "linkedin": "https://www.linkedin.com/company/team17"
+        },
+        {
+          "title": "Soedesco",
+          "company": "Soedesco",
+          "status": "researching",
+          "category": "Game Publisher",
+          "city": "Utrecht",
+          "website": "https://www.soedesco.com",
+          "linkedin": "https://www.linkedin.com/company/soedesco"
+        },
+        {
+          "title": "Toplitz Productions NL",
+          "company": "Toplitz Productions NL",
+          "status": "researching",
+          "category": "Game Publisher",
+          "city": "Netherlands",
+          "website": "https://toplitz-productions.com",
+          "linkedin": "https://www.linkedin.com/company/toplitz-productions"
+        },
+        {
+          "title": "Lectra (NL)",
+          "company": "Lectra (NL)",
+          "status": "researching",
+          "category": "Fashion / 3D Visualization",
+          "city": "Amsterdam",
+          "website": "https://www.lectra.com",
+          "linkedin": "https://www.linkedin.com/company/lectra"
+        },
+        {
+          "title": "Tomtom",
+          "company": "Tomtom",
+          "status": "researching",
+          "category": "3D Maps / Visualization",
+          "city": "Amsterdam",
+          "website": "https://www.tomtom.com",
+          "linkedin": "https://www.linkedin.com/company/tomtom"
+        },
+        {
+          "title": "HERE Technologies",
+          "company": "HERE Technologies",
+          "status": "researching",
+          "category": "3D Mapping / Digital Twin",
+          "city": "Eindhoven",
+          "website": "https://www.here.com",
+          "linkedin": "https://www.linkedin.com/company/here"
+        },
+        {
+          "title": "Booking.com (Design Tech)",
+          "company": "Booking.com (Design Tech)",
+          "status": "researching",
+          "category": "Interactive / 3D Experiences",
+          "city": "Amsterdam",
+          "website": "https://www.booking.com",
+          "linkedin": "https://www.linkedin.com/company/booking.com"
+        },
+        {
+          "title": "CGTrader (NL Office)",
+          "company": "CGTrader (NL Office)",
+          "status": "researching",
+          "category": "3D Content Marketplace",
+          "city": "Netherlands",
+          "website": "https://www.cgtrader.com",
+          "linkedin": "https://www.linkedin.com/company/cgtrader"
+        },
+        {
+          "title": "Sketchfab (NL Team)",
+          "company": "Sketchfab (NL Team)",
+          "status": "researching",
+          "category": "3D Content Platform",
+          "city": "Netherlands",
+          "website": "https://sketchfab.com",
+          "linkedin": "https://www.linkedin.com/company/sketchfab"
+        },
+        {
+          "title": "Mapbox (NL)",
+          "company": "Mapbox (NL)",
+          "status": "researching",
+          "category": "3D Maps / Visualization",
+          "city": "Netherlands",
+          "website": "https://www.mapbox.com",
+          "linkedin": "https://www.linkedin.com/company/mapbox"
+        },
+        {
+          "title": "Ultimaker / UltiMaker",
+          "company": "Ultimaker / UltiMaker",
+          "status": "researching",
+          "category": "3D Printing / Visualization",
+          "city": "Utrecht",
+          "website": "https://ultimaker.com",
+          "linkedin": "https://www.linkedin.com/company/ultimaker"
+        },
+        {
+          "title": "Funda (AR Features)",
+          "company": "Funda (AR Features)",
+          "status": "researching",
+          "category": "Real Estate / AR Pioneer",
+          "city": "Amsterdam",
+          "website": "https://www.funda.nl",
+          "linkedin": "https://www.linkedin.com/company/funda"
+        },
+        {
+          "title": "Cyclomedia",
+          "company": "Cyclomedia",
+          "status": "researching",
+          "category": "3D Street-level Visualization",
+          "city": "Zaltbommel",
+          "website": "https://www.cyclomedia.com",
+          "linkedin": "https://www.linkedin.com/company/cyclomedia"
+        },
+        {
+          "title": "NavInfo Europe",
+          "company": "NavInfo Europe",
+          "status": "researching",
+          "category": "3D HD Mapping",
+          "city": "Eindhoven",
+          "website": "https://www.navinfo.eu",
+          "linkedin": "https://www.linkedin.com/company/navinfo-europe"
+        },
+        {
+          "title": "Noldus",
+          "company": "Noldus",
+          "status": "researching",
+          "category": "Behavioral Research / VR",
+          "city": "Wageningen",
+          "website": "https://www.noldus.com",
+          "linkedin": "https://www.linkedin.com/company/noldus"
+        },
+        {
+          "title": "Lely",
+          "company": "Lely",
+          "status": "researching",
+          "category": "Agritech / Simulation",
+          "city": "Maassluis",
+          "website": "https://www.lely.com",
+          "linkedin": "https://www.linkedin.com/company/lely"
+        },
+        {
+          "title": "Vanderlande",
+          "company": "Vanderlande",
+          "status": "researching",
+          "category": "Logistics Simulation",
+          "city": "Veghel",
+          "website": "https://www.vanderlande.com",
+          "linkedin": "https://www.linkedin.com/company/vanderlande"
+        },
+        {
+          "title": "Bosch (NL R&D)",
+          "company": "Bosch (NL R&D)",
+          "status": "researching",
+          "category": "Automotive Simulation",
+          "city": "Eindhoven",
+          "website": "https://www.bosch.nl",
+          "linkedin": "https://www.linkedin.com/company/bosch"
+        },
+        {
+          "title": "NXP Semiconductors",
+          "company": "NXP Semiconductors",
+          "status": "researching",
+          "category": "Chip Design Visualization",
+          "city": "Eindhoven",
+          "website": "https://www.nxp.com",
+          "linkedin": "https://www.linkedin.com/company/nxp-semiconductors"
+        },
+        {
+          "title": "Signify (Philips Lighting)",
+          "company": "Signify (Philips Lighting)",
+          "status": "researching",
+          "category": "3D Lighting Visualization",
+          "city": "Eindhoven",
+          "website": "https://www.signify.com",
+          "linkedin": "https://www.linkedin.com/company/signify"
+        },
+        {
+          "title": "Canon Europe (NL HQ)",
+          "company": "Canon Europe (NL HQ)",
+          "status": "researching",
+          "category": "Imaging / VR/AR R&D",
+          "city": "Amstelveen",
+          "website": "https://www.canon-europe.com",
+          "linkedin": "https://www.linkedin.com/company/canon-europe"
+        },
+        {
+          "title": "Barco (NL)",
+          "company": "Barco (NL)",
+          "status": "researching",
+          "category": "Visualization / Simulation Displays",
+          "city": "Netherlands",
+          "website": "https://www.barco.com",
+          "linkedin": "https://www.linkedin.com/company/barco"
+        },
+        {
+          "title": "VSTEP",
+          "company": "VSTEP",
+          "status": "researching",
+          "category": "Maritime / Emergency Sim",
+          "city": "Rotterdam",
+          "website": "https://www.vstepsimulation.com",
+          "linkedin": "https://www.linkedin.com/company/vstep-simulation"
+        },
+        {
+          "title": "Re-lion",
+          "company": "Re-lion",
+          "status": "researching",
+          "category": "VR Training / Simulation",
+          "city": "Netherlands",
+          "website": "https://www.re-lion.com",
+          "linkedin": "https://www.linkedin.com/company/re-lion"
+        },
+        {
+          "title": "SenseGlove",
+          "company": "SenseGlove",
+          "status": "researching",
+          "category": "VR Haptic Gloves",
+          "city": "Delft",
+          "website": "https://www.senseglove.com",
+          "linkedin": "https://www.linkedin.com/company/senseglove"
+        },
+        {
+          "title": "Varjo (NL Presence)",
+          "company": "Varjo (NL Presence)",
+          "status": "researching",
+          "category": "VR/XR Headsets",
+          "city": "Netherlands",
+          "website": "https://www.varjo.com",
+          "linkedin": "https://www.linkedin.com/company/varjo"
+        },
+        {
+          "title": "Nined (9D Solutions)",
+          "company": "Nined (9D Solutions)",
+          "status": "researching",
+          "category": "VR/AR Enterprise Solutions",
+          "city": "Netherlands",
+          "website": "(search needed)",
+          "linkedin": "(search needed)"
+        },
+        {
+          "title": "Serious VR",
+          "company": "Serious VR",
+          "status": "researching",
+          "category": "VR Training",
+          "city": "Netherlands",
+          "website": "(search needed)",
+          "linkedin": "(search needed)"
+        },
+        {
+          "title": "Medical VR",
+          "company": "Medical VR",
+          "status": "researching",
+          "category": "Healthcare VR Solutions",
+          "city": "Netherlands",
+          "website": "(search needed)",
+          "linkedin": "(search needed)"
+        },
+        {
+          "title": "Phia Lab",
+          "company": "Phia Lab",
+          "status": "researching",
+          "category": "VR/AR Health & Wellbeing",
+          "city": "Netherlands",
+          "website": "(search needed)",
+          "linkedin": "(search needed)"
+        },
+        {
+          "title": "PerSim",
+          "company": "PerSim",
+          "status": "researching",
+          "category": "Personalized Simulation",
+          "city": "Netherlands",
+          "website": "(search needed)",
+          "linkedin": "(search needed)"
+        },
+        {
+          "title": "VRmaze",
+          "company": "VRmaze",
+          "status": "researching",
+          "category": "VR Escape Room / Entertainment",
+          "city": "Netherlands",
+          "website": "(search needed)",
+          "linkedin": "(search needed)"
+        },
+        {
+          "title": "XRstudio",
+          "company": "XRstudio",
+          "status": "researching",
+          "category": "XR Production Studio",
+          "city": "Netherlands",
+          "website": "(search needed)",
+          "linkedin": "(search needed)"
+        }
+      ],
+      "cover_image": "asset://assets/images/headers/header_job.jpg"
     }
   ],
   "ingredients_master": [

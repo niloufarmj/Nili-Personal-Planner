@@ -119,6 +119,7 @@ class SeedCollection {
   final String template;
   final String? icon;
   final String? parent;
+  final String? coverImage;
   final List<SeedItemMedia> itemsMedia;
   final List<SeedItemShopping> itemsShopping;
   final List<SeedItemJob> itemsJob;
@@ -128,6 +129,7 @@ class SeedCollection {
     required this.template,
     this.icon,
     this.parent,
+    this.coverImage,
     required this.itemsMedia,
     required this.itemsShopping,
     required this.itemsJob,
@@ -139,6 +141,7 @@ class SeedCollection {
       template: json['template'] as String? ?? '',
       icon: json['icon'] as String?,
       parent: json['parent'] as String?,
+      coverImage: json['cover_image'] as String?,
       itemsMedia:
           (json['items_media'] as List?)
               ?.map((e) => SeedItemMedia.fromJson(e as Map<String, dynamic>))

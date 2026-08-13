@@ -230,7 +230,11 @@ class _CollectionCard extends ConsumerWidget {
     final mainColor = getTemplateMainColor(collection.template, isDark);
     final inkColor = isDark ? DesignTokens.inkDark : DesignTokens.inkLight;
 
-    final hasCover = hasDisplayableImage(collection.coverImage);
+    final coverPath = getCoverImageForCollection(
+      collectionName: collection.name,
+      template: collection.template,
+      coverImage: collection.coverImage,
+    );
 
     return GestureDetector(
       onLongPress: () => _showContextMenu(context, ref),
@@ -240,19 +244,20 @@ class _CollectionCard extends ConsumerWidget {
         onTap: () => context.push(Routes.collectionPath(collection.id)),
         child: Stack(
           children: [
-            if (hasCover)
-              Positioned.fill(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: Opacity(
-                    opacity: 0.16,
-                    child: Image(
-                      image: imageProviderFor(collection.coverImage)!,
-                      fit: BoxFit.cover,
-                    ),
+            Positioned.fill(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Opacity(
+                  opacity: 0.18,
+                  child: Image(
+                    image: imageProviderFor(coverPath)!,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) =>
+                        const SizedBox.shrink(),
                   ),
                 ),
               ),
+            ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
