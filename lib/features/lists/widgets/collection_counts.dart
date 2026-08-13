@@ -40,28 +40,32 @@ class CollectionProgressBar extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  '$done/$total completed',
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: isDark
-                        ? DesignTokens.inkSoftDark
-                        : DesignTokens.inkSoftLight,
-                    fontWeight: FontWeight.w600,
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    '$done/$total completed ',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: isDark
+                          ? DesignTokens.inkSoftDark
+                          : DesignTokens.inkSoftLight,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                ),
-                Text(
-                  '${(progress * 100).toInt()}%',
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: isDark
-                        ? DesignTokens.inkSoftDark
-                        : DesignTokens.inkSoftLight,
-                    fontWeight: FontWeight.bold,
+                  Text(
+                    '${(progress * 100).toInt()}%',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: isDark
+                          ? DesignTokens.inkSoftDark
+                          : DesignTokens.inkSoftLight,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
             const SizedBox(height: 6),
             ClipRRect(

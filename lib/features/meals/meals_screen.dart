@@ -612,7 +612,7 @@ class _RecipeCardContent extends ConsumerWidget {
             children: [
               // Recipe Image Thumbnail or Fallback Icon Header
               Expanded(
-                flex: 5,
+                flex: 4,
                 child: Container(
                   color: statusColor.withValues(alpha: 0.15),
                   child: imgProvider != null
@@ -629,7 +629,7 @@ class _RecipeCardContent extends ConsumerWidget {
               Expanded(
                 flex: 6,
                 child: Padding(
-                  padding: const EdgeInsets.all(6),
+                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 3),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -638,25 +638,29 @@ class _RecipeCardContent extends ConsumerWidget {
                         recipe.name,
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: 11,
-                          height: 1.15,
+                          fontSize: 10.5,
+                          height: 1.1,
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
                       if (missingNames.isNotEmpty)
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-                          decoration: BoxDecoration(
-                            color: Colors.red.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            '🛒 Need ${missingNames.length}',
-                            style: const TextStyle(
-                              fontSize: 9,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.redAccent,
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                            decoration: BoxDecoration(
+                              color: Colors.red.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              '🛒 Need ${missingNames.length}',
+                              style: const TextStyle(
+                                fontSize: 9,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.redAccent,
+                              ),
                             ),
                           ),
                         )
