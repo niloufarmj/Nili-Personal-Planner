@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import '../../../core/db/database.dart';
 import '../../../core/design/design.dart';
 import '../../../core/services/image_service.dart';
+import '../../projects/projects_screen.dart';
 import '../../meals/groceries_service.dart';
 import '../helpers/job_status_helper.dart';
 import '../repositories/collection_repository.dart';
@@ -59,6 +60,10 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
             body: Center(child: Text('Collection not found')),
           );
         }
+        if (collection.template == 'projects' || collection.name == 'Personal Projects') {
+          return ProjectsScreen(collection: collection);
+        }
+
         final template = TemplateRegistry.get(collection.template);
         final isGroceries =
             collection.template == 'groceries' ||
