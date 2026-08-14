@@ -719,40 +719,112 @@ class _DueItemsSection extends ConsumerWidget {
         final isDark = theme.brightness == Brightness.dark;
         final inkColor = isDark ? DesignTokens.inkDark : DesignTokens.inkLight;
         final softInk = isDark ? DesignTokens.inkSoftDark : DesignTokens.inkSoftLight;
+        final cardBg = isDark ? DesignTokens.surfaceDark : DesignTokens.surfaceLight;
+        final border = isDark ? DesignTokens.lineDark : DesignTokens.lineLight;
 
         return Column(
           children: items.map((item) {
             final isCompleted = item.status == 'done';
-            return FlatListTile(
-              categoryColor: DesignTokens.lavender,
-              leading: Checkbox(
-                value: isCompleted,
-                onChanged: (val) {
-                  ref
-                      .read(itemRepositoryProvider)
-                      .toggleItemStatus(
-                        item.id,
-                        doneStatus: 'done',
-                        openStatus: 'open',
-                      );
-                },
-              ),
-              title: Text(
-                item.title,
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: isCompleted ? softInk : inkColor,
-                  decoration: isCompleted ? TextDecoration.lineThrough : null,
+            final prioLabel = switch (item.priority) {
+              1 => 'HIGH',
+              3 => 'LOW',
+              _ => 'NORMAL',
+            };
+            final prioColor = switch (item.priority) {
+              1 => DesignTokens.danger,
+              3 => DesignTokens.dustyBlue,
+              _ => DesignTokens.sage,
+            };
+
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: cardBg,
+                  borderRadius: BorderRadius.circular(DesignTokens.radiusCard),
+                  border: Border.all(color: border),
                 ),
-              ),
-              subtitle: Text(
-                'Priority: ${item.priority ?? 'normal'}',
-                style: TextStyle(color: softInk),
-              ),
-              trailing: IconButton(
-                icon: const Icon(Icons.chevron_right),
-                onPressed: () =>
-                    context.push('/collection/${item.collectionId}'),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(DesignTokens.radiusCard),
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      border: Border(
+                        left: BorderSide(color: DesignTokens.lavender, width: 4),
+                      ),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    child: Row(
+                      children: [
+                        Checkbox(
+                          value: isCompleted,
+                          activeColor: DesignTokens.accentLight,
+                          onChanged: (val) {
+                            ref
+                                .read(itemRepositoryProvider)
+                                .toggleItemStatus(
+                                  item.id,
+                                  doneStatus: 'done',
+                                  openStatus: 'open',
+                                );
+                          },
+                        ),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                item.title,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 15,
+                                  color: isCompleted ? softInk : inkColor,
+                                  decoration: isCompleted ? TextDecoration.lineThrough : null,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 6,
+                                      vertical: 2,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: prioColor.withValues(alpha: 0.15),
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Text(
+                                      prioLabel,
+                                      style: TextStyle(
+                                        fontSize: 9,
+                                        fontWeight: FontWeight.bold,
+                                        color: prioColor,
+                                      ),
+                                    ),
+                                  ),
+                                  if (item.dueDate != null) ...[
+                                    const SizedBox(width: 8),
+                                    Icon(Icons.calendar_today, size: 11, color: softInk),
+                                    const SizedBox(width: 3),
+                                    Text(
+                                      item.dueDate!,
+                                      style: TextStyle(fontSize: 11, color: softInk),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.chevron_right, color: softInk, size: 20),
+                          onPressed: () =>
+                              context.push('/collection/${item.collectionId}'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
             );
           }).toList(),

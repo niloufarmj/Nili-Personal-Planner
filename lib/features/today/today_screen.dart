@@ -16,6 +16,7 @@ import '../../core/design/design.dart';
 import '../calendar/day_tag_picker.dart';
 import '../calendar/event_edit_sheet.dart';
 import '../lists/widgets/task_edit_sheet.dart';
+import '../lists/repositories/item_repository.dart';
 import '../../core/db/database.dart';
 import '../gym/gym_repository.dart';
 import '../habits/habit_repository.dart';
@@ -146,6 +147,24 @@ class TodayScreen extends ConsumerWidget {
                       // ── Events ────────────────────────────────────────────
                       const SectionHeader(title: "Today's Events"),
                       _EventsList(todayStr: todayStr),
+                      const SizedBox(height: 20),
+
+                      // ── Tasks & Chores ────────────────────────────────────
+                      SectionHeader(
+                        title: "Today's Tasks & Chores",
+                        trailing: GestureDetector(
+                          onTap: () => TaskEditSheet.show(context, initialDate: todayStr),
+                          child: const Text(
+                            '+ Add Task',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: DesignTokens.accentLight,
+                            ),
+                          ),
+                        ),
+                      ),
+                      _TodayTasksSection(todayStr: todayStr),
                       const SizedBox(height: 20),
 
                       // ── Next 7 Days Plans ──────────────────────────────────
@@ -678,6 +697,162 @@ class _EventsList extends ConsumerWidget {
     'work' => Icons.work_outline,
     _ => Icons.event_outlined,
   };
+}
+
+// ── Today's Tasks & Chores Section ───────────────────────────────────────────
+
+final _todayTasksProvider = StreamProvider.autoDispose.family<List<Item>, String>((ref, todayStr) {
+  final db = ref.watch(appDatabaseProvider);
+  return (db.select(db.items)..where((i) => i.dueDate.equals(todayStr))).watch();
+});
+
+class _TodayTasksSection extends ConsumerWidget {
+  const _TodayTasksSection({required this.todayStr});
+  final String todayStr;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final async = ref.watch(_todayTasksProvider(todayStr));
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    final inkColor = isDark ? DesignTokens.inkDark : DesignTokens.inkLight;
+    final softInk = isDark ? DesignTokens.inkSoftDark : DesignTokens.inkSoftLight;
+    final cardBg = isDark ? DesignTokens.surfaceDark : DesignTokens.surfaceLight;
+    final border = isDark ? DesignTokens.lineDark : DesignTokens.lineLight;
+
+    return async.when(
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
+      data: (items) {
+        if (items.isEmpty) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: cardBg,
+                borderRadius: BorderRadius.circular(DesignTokens.radiusCard),
+                border: Border.all(color: border),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.check_box_outlined, size: 18, color: softInk),
+                  const SizedBox(width: 10),
+                  Text(
+                    'No tasks due today',
+                    style: TextStyle(color: softInk, fontSize: 13),
+                  ),
+                  const Spacer(),
+                  TextButton.icon(
+                    onPressed: () => TaskEditSheet.show(context, initialDate: todayStr),
+                    icon: const Icon(Icons.add, size: 16),
+                    label: const Text('+ Task', style: TextStyle(fontSize: 12)),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        return Column(
+          children: items.map((item) {
+            final isCompleted = item.status == 'done';
+            final prioLabel = switch (item.priority) {
+              1 => 'HIGH',
+              3 => 'LOW',
+              _ => 'NORMAL',
+            };
+            final prioColor = switch (item.priority) {
+              1 => DesignTokens.danger,
+              3 => DesignTokens.dustyBlue,
+              _ => DesignTokens.sage,
+            };
+
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: cardBg,
+                  borderRadius: BorderRadius.circular(DesignTokens.radiusCard),
+                  border: Border.all(color: border),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(DesignTokens.radiusCard),
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      border: Border(
+                        left: BorderSide(color: DesignTokens.lavender, width: 4),
+                      ),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    child: Row(
+                      children: [
+                        Checkbox(
+                          value: isCompleted,
+                          activeColor: DesignTokens.accentLight,
+                          onChanged: (val) {
+                            ref.read(itemRepositoryProvider).toggleItemStatus(
+                              item.id,
+                              doneStatus: 'done',
+                              openStatus: 'open',
+                            );
+                          },
+                        ),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                item.title,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 15,
+                                  color: isCompleted ? softInk : inkColor,
+                                  decoration: isCompleted ? TextDecoration.lineThrough : null,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 6,
+                                      vertical: 2,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: prioColor.withValues(alpha: 0.15),
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Text(
+                                      prioLabel,
+                                      style: TextStyle(
+                                        fontSize: 9,
+                                        fontWeight: FontWeight.bold,
+                                        color: prioColor,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.chevron_right, color: softInk, size: 20),
+                          onPressed: () => context.push('/collection/${item.collectionId}'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+        );
+      },
+    );
+  }
 }
 
 // ── Conflict feed ─────────────────────────────────────────────────────────────
