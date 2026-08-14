@@ -181,6 +181,14 @@ final List<RouteBase> agentRoutes = [
       child: TripDetailScreen(tripId: int.parse(state.pathParameters['id']!)),
     ),
   ),
+  GoRoute(
+    path: '/trip/:id',
+    pageBuilder: (context, state) => _fadeThroughPage(
+      context: context,
+      state: state,
+      child: TripDetailScreen(tripId: int.parse(state.pathParameters['id']!)),
+    ),
+  ),
   // Reminders
   GoRoute(
     path: '/reminders',

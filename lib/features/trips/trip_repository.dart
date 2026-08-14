@@ -35,6 +35,10 @@ class TripRepository {
   Future<List<Trip>> getByStatus(String status) =>
       (_db.select(_db.trips)..where((t) => t.status.equals(status))).get();
 
+  Stream<Trip?> watchById(int id) =>
+      (_db.select(_db.trips)..where((t) => t.id.equals(id)))
+          .watchSingleOrNull();
+
   Future<Trip?> getById(int id) async {
     final rows = await (_db.select(
       _db.trips,
