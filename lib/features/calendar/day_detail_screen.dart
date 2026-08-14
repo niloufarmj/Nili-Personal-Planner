@@ -221,75 +221,6 @@ final dayTagsFutureProvider = FutureProvider.autoDispose
       return ref.watch(dayRepositoryProvider).getTagsForDate(date);
     });
 
-// ── Custom Flat List Tile Widget (Left Category-Colored Bar) ──────────────────
-
-class FlatListTile extends StatelessWidget {
-  const FlatListTile({
-    required this.title,
-    required this.categoryColor,
-    this.subtitle,
-    this.trailing,
-    this.leading,
-    this.onTap,
-    super.key,
-  });
-
-  final Widget title;
-  final Widget? subtitle;
-  final Color categoryColor;
-  final Widget? trailing;
-  final Widget? leading;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
-    final bg = isDark ? DesignTokens.surfaceDark : DesignTokens.surfaceLight;
-    final lineColor = isDark ? DesignTokens.lineDark : DesignTokens.lineLight;
-    final inkColor = isDark ? DesignTokens.inkDark : DesignTokens.inkLight;
-    final softInk = isDark ? DesignTokens.inkSoftDark : DesignTokens.inkSoftLight;
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      decoration: BoxDecoration(
-        color: bg,
-        border: Border(
-          left: BorderSide(color: categoryColor, width: 5),
-          top: BorderSide(color: lineColor, width: 1),
-          right: BorderSide(color: lineColor, width: 1),
-          bottom: BorderSide(color: lineColor, width: 1),
-        ),
-        borderRadius: const BorderRadius.only(
-          topRight: Radius.circular(10),
-          bottomRight: Radius.circular(10),
-        ),
-      ),
-      child: ListTileTheme(
-        textColor: inkColor,
-        iconColor: inkColor,
-        child: ListTile(
-          onTap: onTap,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-          leading: leading,
-          title: DefaultTextStyle.merge(
-            style: TextStyle(color: inkColor),
-            child: title,
-          ),
-          subtitle: subtitle != null
-              ? DefaultTextStyle.merge(
-                  style: TextStyle(color: softInk),
-                  child: subtitle!,
-                )
-              : null,
-          trailing: trailing,
-        ),
-      ),
-    );
-  }
-}
-
 // ── Events section ─────────────────────────────────────────────────────────────
 
 final _eventsForDateStreamProvider = StreamProvider.autoDispose
@@ -556,24 +487,81 @@ class _FinanceSection extends ConsumerWidget {
 
             final inkColor = isDark ? DesignTokens.inkDark : DesignTokens.inkLight;
             final softInk = isDark ? DesignTokens.inkSoftDark : DesignTokens.inkSoftLight;
+            final cardBg = isDark ? DesignTokens.surfaceDark : DesignTokens.surfaceLight;
+            final border = isDark ? DesignTokens.lineDark : DesignTokens.lineLight;
 
-            return FlatListTile(
-              categoryColor: DesignTokens.sage,
-              title: Text(
-                tx.note ?? tx.category,
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: inkColor,
-                ),
-              ),
-              subtitle: Text(tx.category, style: TextStyle(color: softInk)),
-              trailing: Text(
-                '$sign$formattedAmount',
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  color: color,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+            return Column(
+              children: txs.map((tx) {
+                final formattedAmount = CurrencyFormatter.format(tx.amountCents);
+                final sign = tx.direction == 'in' ? '+' : '–';
+                final color = tx.direction == 'in'
+                    ? DesignTokens.success
+                    : DesignTokens.danger;
+
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: cardBg,
+                      borderRadius: BorderRadius.circular(DesignTokens.radiusCard),
+                      border: Border.all(color: border),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(DesignTokens.radiusCard),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          border: Border(
+                            left: BorderSide(color: color, width: 4),
+                          ),
+                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                        child: Row(
+                          children: [
+                            Icon(
+                              tx.direction == 'in'
+                                  ? Icons.arrow_downward
+                                  : Icons.arrow_upward,
+                              color: color,
+                              size: 18,
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    tx.note != null && tx.note!.isNotEmpty
+                                        ? tx.note!
+                                        : tx.category,
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 14,
+                                      color: inkColor,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    tx.category.toUpperCase(),
+                                    style: TextStyle(color: softInk, fontSize: 11, fontWeight: FontWeight.w500),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Text(
+                              '$sign$formattedAmount',
+                              style: TextStyle(
+                                color: color,
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
             );
           }).toList(),
         );
