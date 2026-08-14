@@ -311,7 +311,7 @@ class CalendarAggregator {
       switch (name.toLowerCase()) {
         'gym' => filter.showGym ? Icons.fitness_center : null,
         'work' => filter.showWork ? Icons.work_outline : null,
-        'partner-day' || 'partner_day' || 'reza-day' || 'reza_day' => filter.showPartner ? Icons.favorite : null,
+        'partner-day' || 'partner_day' => filter.showPartner ? Icons.favorite : null,
         _ => null,
       };
 }

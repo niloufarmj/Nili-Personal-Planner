@@ -11,8 +11,7 @@ class DayContext {
 
   bool get isGymDay => tagNames.contains('gym');
   bool get isWorkDay => tagNames.contains('work');
-  bool get isPartnerDay => tagNames.contains('partner-day') || tagNames.contains('reza-day');
-  bool get isRezaDay => isPartnerDay;
+  bool get isPartnerDay => tagNames.contains('partner-day');
   bool get isLinzDay => tagNames.contains('linz');
   bool get isTravelDay => tagNames.contains('travel');
   bool get isPeriodDay => tagNames.contains('period');
@@ -170,7 +169,7 @@ class MealSuggester {
     }
 
     if (day.isPartnerDay || day.isLinzDay) {
-      tags.addAll(['partner-shared', 'reza-shared']);
+      tags.add('partner-shared');
     }
     return tags;
   }

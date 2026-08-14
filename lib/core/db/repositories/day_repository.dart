@@ -21,8 +21,9 @@ class DayRepository {
 
   // ── Seed ────────────────────────────────────────────────────────
 
-  /// Inserts default tags if the tags table is empty.
+  /// Inserts default tags if the tags table is empty, and purges any legacy reza tags.
   Future<void> seedDefaultTagsIfNeeded() async {
+    await purgeLegacyRezaTags();
     final count = await _db.tags.count().getSingle();
     if (count > 0) return;
     for (final t in _defaultTags) {
@@ -31,6 +32,15 @@ class DayRepository {
           .insert(
             TagsCompanion.insert(name: t.name, color: t.color, kind: t.kind),
           );
+    }
+  }
+
+  /// Removes any legacy tag with name containing 'reza' from tags and day_tags tables.
+  Future<void> purgeLegacyRezaTags() async {
+    final all = await getAllTags();
+    final rezaTags = all.where((t) => t.name.toLowerCase().contains('reza')).toList();
+    for (final tag in rezaTags) {
+      await deleteTag(tag.id);
     }
   }
 
@@ -60,6 +70,11 @@ class DayRepository {
       );
 
   Future<void> updateTag(Tag tag) => _db.update(_db.tags).replace(tag);
+
+  Future<void> deleteTag(int tagId) async {
+    await (_db.delete(_db.dayTags)..where((dt) => dt.tagId.equals(tagId))).go();
+    await (_db.delete(_db.tags)..where((t) => t.id.equals(tagId))).go();
+  }
 
   // ── Day tags ─────────────────────────────────────────────────────
 

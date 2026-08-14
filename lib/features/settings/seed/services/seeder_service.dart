@@ -214,6 +214,7 @@ class SeederService {
 
     // Seeding in dependency order
     // ── TAGS ──
+    await dayRepo.purgeLegacyRezaTags();
     final allTags = await dayRepo.getAllTags();
     for (final t in data.tags) {
       final existing = allTags.firstWhereOrNull(

@@ -10025,10 +10025,10 @@
   ],
   "debts": [
     {
-      "person": "Reza",
+      "person": "Partner",
       "amount_cents": 100000,
       "direction": "i_owe",
-      "note": "1000 Euros debt to Reza"
+      "note": "1000 Euros debt"
     }
   ],
   "sport_activities": [
