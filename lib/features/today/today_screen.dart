@@ -1024,25 +1024,61 @@ class _MealSlotChip extends ConsumerWidget {
     );
     final badgeFg = isDark ? DesignTokens.inkDark : mealColor;
 
+    final inkColor = isDark ? DesignTokens.inkDark : DesignTokens.inkLight;
+    final softInk = isDark ? DesignTokens.inkSoftDark : DesignTokens.inkSoftLight;
+    final cardBg = isDark ? DesignTokens.surfaceDark : DesignTokens.surfaceLight;
+    final border = isDark ? DesignTokens.lineDark : DesignTokens.lineLight;
+
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: AppCard(
-        child: ListTile(
-          contentPadding: EdgeInsets.zero,
-          leading: Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(color: badgeBg, shape: BoxShape.circle),
-            child: Icon(_slotIcon(slot.slot), color: badgeFg, size: 20),
-          ),
-          title: Text(
-            name ?? slot.slot,
-            style: theme.textTheme.bodyLarge?.copyWith(
-              fontWeight: FontWeight.w600,
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Container(
+        decoration: BoxDecoration(
+          color: cardBg,
+          borderRadius: BorderRadius.circular(DesignTokens.radiusCard),
+          border: Border.all(color: border),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(DesignTokens.radiusCard),
+          child: Container(
+            decoration: const BoxDecoration(
+              border: Border(
+                left: BorderSide(color: DesignTokens.peach, width: 4),
+              ),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            child: Row(
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(color: badgeBg, shape: BoxShape.circle),
+                  child: Icon(_slotIcon(slot.slot), color: badgeFg, size: 18),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        name ?? _capitalize(slot.slot),
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                          color: inkColor,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        _capitalize(slot.slot),
+                        style: TextStyle(color: softInk, fontSize: 12),
+                      ),
+                    ],
+                  ),
+                ),
+                _statusChip(slot.status, theme),
+              ],
             ),
           ),
-          subtitle: Text(_capitalize(slot.slot)),
-          trailing: _statusChip(slot.status, theme),
         ),
       ),
     );
