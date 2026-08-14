@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../core/calendar/calendar_aggregator.dart';
 import '../../core/db/database.dart';
 import '../../core/db/repositories/event_repository.dart';
 import '../../core/design/design.dart';
@@ -352,6 +353,7 @@ class _EventEditSheetState extends ConsumerState<EventEditSheet> {
     } else {
       await repo.createEvent(companion);
     }
+    ref.invalidate(calendarAggregatorProvider);
     if (mounted) Navigator.of(context).pop();
   }
 

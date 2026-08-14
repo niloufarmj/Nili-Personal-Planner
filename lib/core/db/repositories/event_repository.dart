@@ -35,11 +35,46 @@ class EventRepository {
 
   // ── Recurrence expansion ─────────────────────────────────────────
 
+  /// Reactive stream of all event occurrences in [start..end].
+  Stream<List<EventOccurrence>> watchOccurrencesForRange(
+    DateTime start,
+    DateTime end,
+  ) {
+    final windowStart = _dayOnly(start);
+    final windowEnd = _dayOnly(end);
+    return _db.select(_db.events).watch().map((allEvents) {
+      final result = <EventOccurrence>[];
+      for (final event in allEvents) {
+        final eventDate = _parseDate(event.date);
+
+        if (event.rrule == null || event.rrule!.isEmpty) {
+          if (!eventDate.isBefore(windowStart) && !eventDate.isAfter(windowEnd)) {
+            result.add(EventOccurrence(event: event, date: eventDate));
+          }
+        } else {
+          final occurrences = _expandRrule(
+            rruleStr: event.rrule!,
+            dtStart: eventDate,
+            windowStart: windowStart,
+            windowEnd: windowEnd,
+          );
+          for (final occ in occurrences) {
+            result.add(EventOccurrence(event: event, date: occ));
+          }
+        }
+      }
+      result.sort((a, b) => a.date.compareTo(b.date));
+      return result;
+    });
+  }
+
   /// Returns all event occurrences (one-off + expanded rrule) in [start..end].
   Future<List<EventOccurrence>> expandOccurrences(
     DateTime start,
     DateTime end,
   ) async {
+    final windowStart = _dayOnly(start);
+    final windowEnd = _dayOnly(end);
     final allEvents = await _db.select(_db.events).get();
     final result = <EventOccurrence>[];
 
@@ -48,7 +83,7 @@ class EventRepository {
 
       if (event.rrule == null || event.rrule!.isEmpty) {
         // One-off event: include if its date is within window
-        if (!eventDate.isBefore(start) && !eventDate.isAfter(end)) {
+        if (!eventDate.isBefore(windowStart) && !eventDate.isAfter(windowEnd)) {
           result.add(EventOccurrence(event: event, date: eventDate));
         }
       } else {
@@ -56,8 +91,8 @@ class EventRepository {
         final occurrences = _expandRrule(
           rruleStr: event.rrule!,
           dtStart: eventDate,
-          windowStart: start,
-          windowEnd: end,
+          windowStart: windowStart,
+          windowEnd: windowEnd,
         );
         for (final occ in occurrences) {
           result.add(EventOccurrence(event: event, date: occ));
@@ -68,6 +103,8 @@ class EventRepository {
     result.sort((a, b) => a.date.compareTo(b.date));
     return result;
   }
+
+  static DateTime _dayOnly(DateTime d) => DateTime(d.year, d.month, d.day);
 
   // ── Helpers ──────────────────────────────────────────────────────
 

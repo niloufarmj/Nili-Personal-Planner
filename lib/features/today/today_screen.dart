@@ -36,12 +36,12 @@ final _todayDataProvider = FutureProvider.autoDispose<CalendarDayData>((
   return map[_fmtDate(today)] ?? CalendarDayData(date: today);
 });
 
-final _todayEventsProvider = FutureProvider.autoDispose<List<EventOccurrence>>((
+final _todayEventsProvider = StreamProvider.autoDispose<List<EventOccurrence>>((
   ref,
 ) {
   final today = _todayDate();
   final repo = ref.watch(eventRepositoryProvider);
-  return repo.expandOccurrences(today, today);
+  return repo.watchOccurrencesForRange(today, today);
 });
 
 final todayTagsProvider = FutureProvider.autoDispose<List<Tag>>((ref) {

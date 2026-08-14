@@ -254,10 +254,10 @@ class FlatListTile extends StatelessWidget {
 
 // ── Events section ─────────────────────────────────────────────────────────────
 
-final _eventsForDateFutureProvider = FutureProvider.autoDispose
+final _eventsForDateStreamProvider = StreamProvider.autoDispose
     .family<List<EventOccurrence>, DateTime>(
       (ref, day) =>
-          ref.watch(eventRepositoryProvider).expandOccurrences(day, day),
+          ref.watch(eventRepositoryProvider).watchOccurrencesForRange(day, day),
     );
 
 class _EventsSection extends ConsumerWidget {
@@ -270,7 +270,7 @@ class _EventsSection extends ConsumerWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    final occAsync = ref.watch(_eventsForDateFutureProvider(day));
+    final occAsync = ref.watch(_eventsForDateStreamProvider(day));
 
     return occAsync.when(
       loading: () => const SizedBox(
