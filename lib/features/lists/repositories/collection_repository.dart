@@ -57,6 +57,20 @@ class CollectionRepository {
     _db.collections,
   )..where((c) => c.template.equals(template))).getSingleOrNull();
 
+  Future<Collection> getOrCreateGeneralTasksCollection() async {
+    final existing = await (_db.select(_db.collections)
+          ..where((c) => c.name.equals('Daily Tasks') | c.name.equals('General Tasks')))
+        .getSingleOrNull();
+    if (existing != null) return existing;
+
+    final id = await create(
+      name: 'Daily Tasks',
+      template: 'custom',
+      icon: 'check_box',
+    );
+    return (await getById(id))!;
+  }
+
   Future<int> create({
     required String name,
     required String template,

@@ -17,6 +17,7 @@ import '../period/period_screen.dart';
 import '../period/services/period_service.dart';
 import 'day_tag_picker.dart';
 import 'event_edit_sheet.dart';
+import '../lists/widgets/task_edit_sheet.dart';
 
 class DayDetailScreen extends ConsumerWidget {
   const DayDetailScreen({required this.date, super.key});
@@ -154,6 +155,28 @@ class _DayDetailSheetContent extends ConsumerWidget {
                   DayTagPicker(date: date),
                   const SizedBox(height: 24),
 
+                  // Quick Actions Bar
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          icon: const Icon(Icons.event, size: 16),
+                          label: const Text('+ Event'),
+                          onPressed: () => EventEditSheet.show(context, initialDate: date),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          icon: const Icon(Icons.check_box_outlined, size: 16),
+                          label: const Text('+ Task'),
+                          onPressed: () => TaskEditSheet.show(context, initialDate: date),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+
                   // Events
                   const SectionHeader(title: 'Scheduled Events'),
                   _EventsSection(date: date),
@@ -225,6 +248,8 @@ class FlatListTile extends StatelessWidget {
 
     final bg = isDark ? DesignTokens.surfaceDark : DesignTokens.surfaceLight;
     final lineColor = isDark ? DesignTokens.lineDark : DesignTokens.lineLight;
+    final inkColor = isDark ? DesignTokens.inkDark : DesignTokens.inkLight;
+    final softInk = isDark ? DesignTokens.inkSoftDark : DesignTokens.inkSoftLight;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
@@ -241,13 +266,25 @@ class FlatListTile extends StatelessWidget {
           bottomRight: Radius.circular(10),
         ),
       ),
-      child: ListTile(
-        onTap: onTap,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-        leading: leading,
-        title: title,
-        subtitle: subtitle,
-        trailing: trailing,
+      child: ListTileTheme(
+        textColor: inkColor,
+        iconColor: inkColor,
+        child: ListTile(
+          onTap: onTap,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          leading: leading,
+          title: DefaultTextStyle.merge(
+            style: TextStyle(color: inkColor),
+            child: title,
+          ),
+          subtitle: subtitle != null
+              ? DefaultTextStyle.merge(
+                  style: TextStyle(color: softInk),
+                  child: subtitle!,
+                )
+              : null,
+          trailing: trailing,
+        ),
       ),
     );
   }

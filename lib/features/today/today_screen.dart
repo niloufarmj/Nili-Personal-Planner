@@ -15,6 +15,7 @@ import '../../core/db/repositories/day_repository.dart';
 import '../../core/design/design.dart';
 import '../calendar/day_tag_picker.dart';
 import '../calendar/event_edit_sheet.dart';
+import '../lists/widgets/task_edit_sheet.dart';
 import '../../core/db/database.dart';
 import '../gym/gym_repository.dart';
 import '../habits/habit_repository.dart';
@@ -482,72 +483,185 @@ class _EventsList extends ConsumerWidget {
             );
             final badgeFg = isDark ? DesignTokens.inkDark : catColor;
 
+            final inkColor = isDark ? DesignTokens.inkDark : DesignTokens.inkLight;
+            final softInk = isDark ? DesignTokens.inkSoftDark : DesignTokens.inkSoftLight;
+            final cardBg = isDark ? DesignTokens.surfaceDark : DesignTokens.surfaceLight;
+            final border = isDark ? DesignTokens.lineDark : DesignTokens.lineLight;
+
             return Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: AppCard(
-                child: ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: Container(
-                    width: 40,
-                    height: 40,
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: cardBg,
+                  borderRadius: BorderRadius.circular(DesignTokens.radiusCard),
+                  border: Border.all(color: border),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(DesignTokens.radiusCard),
+                  child: Container(
                     decoration: BoxDecoration(
-                      color: badgeBg,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      _categoryIcon(e.category),
-                      color: badgeFg,
-                      size: 20,
-                    ),
-                  ),
-                  title: Text(
-                    e.title,
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  subtitle: timeStr != null
-                      ? Text(timeStr, style: theme.textTheme.bodySmall)
-                      : null,
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (e.location != null)
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: isDark
-                                ? DesignTokens.lineDark
-                                : DesignTokens.lineLight,
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Text(
-                            e.location!,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              fontSize: 11,
-                            ),
-                          ),
-                        ),
-                      IconButton(
-                        icon: const Icon(Icons.delete_outline, size: 18, color: DesignTokens.danger),
-                        onPressed: () async {
-                          final ok = await ConfirmDialog.show(
-                            context,
-                            title: 'Delete Event?',
-                            message: 'Remove "${e.title}" from your schedule?',
-                          );
-                          if (ok == true) {
-                            await ref.read(eventRepositoryProvider).deleteEvent(e.id);
-                            ref.invalidate(calendarAggregatorProvider);
-                          }
-                        },
+                      border: Border(
+                        left: BorderSide(color: catColor, width: 4),
                       ),
-                    ],
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 10,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Header row: Category Pill + Time + Owner
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: badgeBg,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    _categoryIcon(e.category),
+                                    size: 12,
+                                    color: badgeFg,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    e.category.toUpperCase(),
+                                    style: TextStyle(
+                                      color: badgeFg,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w800,
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            if (timeStr != null) ...[
+                              const SizedBox(width: 8),
+                              Icon(Icons.access_time, size: 12, color: softInk),
+                              const SizedBox(width: 3),
+                              Text(
+                                timeStr,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: softInk,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                            const Spacer(),
+                            if (e.owner != 'me')
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: DesignTokens.peach.withValues(alpha: 0.2),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(
+                                  e.owner.toUpperCase(),
+                                  style: const TextStyle(
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.bold,
+                                    color: DesignTokens.peach,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+
+                        // Main Title + Action Buttons
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                e.title,
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 15,
+                                  color: inkColor,
+                                ),
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.edit_outlined, size: 16),
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(
+                                minWidth: 28,
+                                minHeight: 28,
+                              ),
+                              onPressed: () => EventEditSheet.show(context, existing: e),
+                            ),
+                            IconButton(
+                              icon: const Icon(
+                                Icons.delete_outline,
+                                size: 16,
+                                color: DesignTokens.danger,
+                              ),
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(
+                                minWidth: 28,
+                                minHeight: 28,
+                              ),
+                              onPressed: () async {
+                                final ok = await ConfirmDialog.show(
+                                  context,
+                                  title: 'Delete Event?',
+                                  message: 'Remove "${e.title}" from your schedule?',
+                                );
+                                if (ok == true) {
+                                  await ref.read(eventRepositoryProvider).deleteEvent(e.id);
+                                  ref.invalidate(calendarAggregatorProvider);
+                                }
+                              },
+                            ),
+                          ],
+                        ),
+
+                        // Optional Details Row (Location & Notes)
+                        if (e.location != null || (e.notes != null && e.notes!.isNotEmpty)) ...[
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              if (e.location != null) ...[
+                                Icon(Icons.place_outlined, size: 13, color: softInk),
+                                const SizedBox(width: 3),
+                                Text(
+                                  e.location!,
+                                  style: TextStyle(fontSize: 12, color: softInk),
+                                ),
+                                const SizedBox(width: 12),
+                              ],
+                              if (e.notes != null && e.notes!.isNotEmpty) ...[
+                                Icon(Icons.notes, size: 13, color: softInk),
+                                const SizedBox(width: 3),
+                                Expanded(
+                                  child: Text(
+                                    e.notes!,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(fontSize: 12, color: softInk),
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ],
+                      ],
+                    ),
                   ),
-                  onTap: () => EventEditSheet.show(context, existing: e),
                 ),
               ),
             );
@@ -1163,7 +1277,10 @@ class _TodayFabState extends State<TodayFab> {
                       color: DesignTokens.lavender,
                       onTap: () {
                         _toggle();
-                        context.push('/lists');
+                        TaskEditSheet.show(
+                          context,
+                          initialDate: widget.todayStr,
+                        );
                       },
                     )
                     .animate(delay: 80.ms)
