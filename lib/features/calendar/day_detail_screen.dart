@@ -297,6 +297,8 @@ class _EventsSection extends ConsumerWidget {
                 : null;
 
             final catColor = AppColors.forTagName(e.category);
+            final inkColor = isDark ? DesignTokens.inkDark : DesignTokens.inkLight;
+            final softInk = isDark ? DesignTokens.inkSoftDark : DesignTokens.inkSoftLight;
 
             return FlatListTile(
               categoryColor: catColor,
@@ -304,9 +306,12 @@ class _EventsSection extends ConsumerWidget {
                 e.title,
                 style: theme.textTheme.bodyLarge?.copyWith(
                   fontWeight: FontWeight.w600,
+                  color: inkColor,
                 ),
               ),
-              subtitle: timeStr != null ? Text(timeStr) : null,
+              subtitle: timeStr != null
+                  ? Text(timeStr, style: TextStyle(color: softInk))
+                  : null,
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -389,15 +394,19 @@ class _FinanceSection extends ConsumerWidget {
                 ? DesignTokens.success
                 : DesignTokens.danger;
 
+            final inkColor = isDark ? DesignTokens.inkDark : DesignTokens.inkLight;
+            final softInk = isDark ? DesignTokens.inkSoftDark : DesignTokens.inkSoftLight;
+
             return FlatListTile(
               categoryColor: DesignTokens.sage,
               title: Text(
                 tx.note ?? tx.category,
                 style: theme.textTheme.bodyLarge?.copyWith(
                   fontWeight: FontWeight.w600,
+                  color: inkColor,
                 ),
               ),
-              subtitle: Text(tx.category),
+              subtitle: Text(tx.category, style: TextStyle(color: softInk)),
               trailing: Text(
                 '$sign$formattedAmount',
                 style: theme.textTheme.bodyLarge?.copyWith(
@@ -451,6 +460,9 @@ class _MealsSection extends ConsumerWidget {
             final recipes = snapshot.data ?? [];
             final recipeMap = {for (final r in recipes) r.id: r};
 
+            final inkColor = isDark ? DesignTokens.inkDark : DesignTokens.inkLight;
+            final softInk = isDark ? DesignTokens.inkSoftDark : DesignTokens.inkSoftLight;
+
             return Column(
               children: slots.map((slot) {
                 final recipe = slot.recipeId != null
@@ -464,9 +476,13 @@ class _MealsSection extends ConsumerWidget {
                     recipeName,
                     style: theme.textTheme.bodyLarge?.copyWith(
                       fontWeight: FontWeight.w600,
+                      color: inkColor,
                     ),
                   ),
-                  subtitle: Text('${slot.slot.toUpperCase()} · ${slot.status}'),
+                  subtitle: Text(
+                    '${slot.slot.toUpperCase()} · ${slot.status}',
+                    style: TextStyle(color: softInk),
+                  ),
                   trailing: slot.status == 'accepted'
                       ? TextButton(
                           onPressed: () => ref
@@ -512,6 +528,10 @@ class _DueItemsSection extends ConsumerWidget {
             ),
           );
         }
+        final isDark = theme.brightness == Brightness.dark;
+        final inkColor = isDark ? DesignTokens.inkDark : DesignTokens.inkLight;
+        final softInk = isDark ? DesignTokens.inkSoftDark : DesignTokens.inkSoftLight;
+
         return Column(
           children: items.map((item) {
             final isCompleted = item.status == 'done';
@@ -533,10 +553,14 @@ class _DueItemsSection extends ConsumerWidget {
                 item.title,
                 style: theme.textTheme.bodyLarge?.copyWith(
                   fontWeight: FontWeight.w600,
+                  color: isCompleted ? softInk : inkColor,
                   decoration: isCompleted ? TextDecoration.lineThrough : null,
                 ),
               ),
-              subtitle: Text('Priority: ${item.priority ?? 'normal'}'),
+              subtitle: Text(
+                'Priority: ${item.priority ?? 'normal'}',
+                style: TextStyle(color: softInk),
+              ),
               trailing: IconButton(
                 icon: const Icon(Icons.chevron_right),
                 onPressed: () =>
