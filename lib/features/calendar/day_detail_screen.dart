@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/calendar/calendar_aggregator.dart';
 import '../../core/db/database.dart';
 import '../../core/db/repositories/event_repository.dart';
 import '../../core/db/repositories/day_repository.dart';
@@ -322,6 +323,20 @@ class _EventsSection extends ConsumerWidget {
                   IconButton(
                     icon: const Icon(Icons.edit_outlined, size: 18),
                     onPressed: () => EventEditSheet.show(context, existing: e),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.delete_outline, size: 18, color: DesignTokens.danger),
+                    onPressed: () async {
+                      final ok = await ConfirmDialog.show(
+                        context,
+                        title: 'Delete Event?',
+                        message: 'Remove "${e.title}" from your schedule?',
+                      );
+                      if (ok == true) {
+                        await ref.read(eventRepositoryProvider).deleteEvent(e.id);
+                        ref.invalidate(calendarAggregatorProvider);
+                      }
+                    },
                   ),
                 ],
               ),

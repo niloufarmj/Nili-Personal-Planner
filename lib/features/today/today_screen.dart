@@ -509,8 +509,11 @@ class _EventsList extends ConsumerWidget {
                   subtitle: timeStr != null
                       ? Text(timeStr, style: theme.textTheme.bodySmall)
                       : null,
-                  trailing: e.location != null
-                      ? Container(
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (e.location != null)
+                        Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 8,
                             vertical: 4,
@@ -527,8 +530,23 @@ class _EventsList extends ConsumerWidget {
                               fontSize: 11,
                             ),
                           ),
-                        )
-                      : null,
+                        ),
+                      IconButton(
+                        icon: const Icon(Icons.delete_outline, size: 18, color: DesignTokens.danger),
+                        onPressed: () async {
+                          final ok = await ConfirmDialog.show(
+                            context,
+                            title: 'Delete Event?',
+                            message: 'Remove "${e.title}" from your schedule?',
+                          );
+                          if (ok == true) {
+                            await ref.read(eventRepositoryProvider).deleteEvent(e.id);
+                            ref.invalidate(calendarAggregatorProvider);
+                          }
+                        },
+                      ),
+                    ],
+                  ),
                   onTap: () => EventEditSheet.show(context, existing: e),
                 ),
               ),

@@ -249,6 +249,18 @@ class _EventEditSheetState extends ConsumerState<EventEditSheet> {
                 onPressed: _save,
                 child: Text(isEdit ? 'Save' : 'Create'),
               ),
+              if (isEdit) ...[
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: DesignTokens.danger,
+                    side: const BorderSide(color: DesignTokens.danger),
+                  ),
+                  icon: const Icon(Icons.delete_outline),
+                  label: const Text('Delete Event'),
+                  onPressed: _delete,
+                ),
+              ],
             ],
           ),
         ),
@@ -355,6 +367,19 @@ class _EventEditSheetState extends ConsumerState<EventEditSheet> {
     }
     ref.invalidate(calendarAggregatorProvider);
     if (mounted) Navigator.of(context).pop();
+  }
+
+  Future<void> _delete() async {
+    final ok = await ConfirmDialog.show(
+      context,
+      title: 'Delete Event?',
+      message: 'Are you sure you want to delete "${widget.existing!.title}"?',
+    );
+    if (ok == true && widget.existing != null) {
+      await ref.read(eventRepositoryProvider).deleteEvent(widget.existing!.id);
+      ref.invalidate(calendarAggregatorProvider);
+      if (mounted) Navigator.of(context).pop();
+    }
   }
 
   static DateTime _parseDate(String iso) {
