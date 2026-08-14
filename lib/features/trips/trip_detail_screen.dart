@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import '../../core/db/database.dart';
 import '../../core/design/design.dart';
 import '../../core/router/routes.dart';
+import '../finance/repositories/transaction_repository.dart';
 import 'models/trip_models.dart';
 import 'trip_edit_sheet.dart';
 import 'trip_repository.dart';
@@ -58,7 +59,7 @@ class _TripDetailViewState extends ConsumerState<_TripDetailView>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
     _meta = TripMetaData.fromJson(widget.trip.meta);
   }
 
@@ -244,6 +245,172 @@ class _TripDetailViewState extends ConsumerState<_TripDetailView>
     _saveMeta(_meta.copyWith(placesToVisit: updatedList));
   }
 
+  // ── Expenses & Sync to Finance Methods ─────────────────────────────────────
+  Future<void> _addExpenseDialog() async {
+    final titleCtrl = TextEditingController();
+    final amountCtrl = TextEditingController();
+    final dateCtrl = TextEditingController(
+      text: widget.trip.startDate ?? DateTime.now().toIso8601String().split('T').first,
+    );
+    String category = 'Travel';
+
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: const Row(
+            children: [
+              Icon(Icons.euro, color: DesignTokens.accentLight),
+              SizedBox(width: 8),
+              Text('Add Real Travel Expense'),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: titleCtrl,
+                  autofocus: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Expense Name',
+                    hintText: 'e.g. Flight Tickets, Hotel Tehran, Dinner',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: amountCtrl,
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  decoration: const InputDecoration(
+                    labelText: 'Amount (€)',
+                    hintText: 'e.g. 120.50',
+                    prefixText: '€ ',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                DropdownButtonFormField<String>(
+                  value: category,
+                  decoration: const InputDecoration(
+                    labelText: 'Category',
+                    border: OutlineInputBorder(),
+                  ),
+                  items: const [
+                    DropdownMenuItem(value: 'Travel', child: Text('✈️ Travel & Transport')),
+                    DropdownMenuItem(value: 'Accommodation', child: Text('🏨 Accommodation')),
+                    DropdownMenuItem(value: 'Food', child: Text('🍽️ Food & Dining')),
+                    DropdownMenuItem(value: 'Activity', child: Text('🎟️ Activity & Tours')),
+                    DropdownMenuItem(value: 'Shopping', child: Text('🛍️ Shopping')),
+                    DropdownMenuItem(value: 'Other', child: Text('📦 Other')),
+                  ],
+                  onChanged: (val) {
+                    if (val != null) setDialogState(() => category = val);
+                  },
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: dateCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'Date (YYYY-MM-DD)',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () {
+                final title = titleCtrl.text.trim();
+                final amtDouble = double.tryParse(amountCtrl.text.trim()) ?? 0.0;
+                final amtCents = (amtDouble * 100).round();
+
+                if (title.isNotEmpty && amtCents > 0) {
+                  final newExpense = TripExpenseItem(
+                    id: DateTime.now().millisecondsSinceEpoch.toString(),
+                    title: title,
+                    amountCents: amtCents,
+                    category: category,
+                    date: dateCtrl.text.trim(),
+                  );
+                  final updatedList = [..._meta.expenses, newExpense];
+                  _saveMeta(_meta.copyWith(expenses: updatedList));
+                }
+                Navigator.of(ctx).pop();
+              },
+              child: const Text('Add Expense'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _syncExpensesToFinance() async {
+    final unsynced = _meta.expenses.where((e) => !e.isSyncedToFinance).toList();
+
+    if (unsynced.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('All travel expenses are already synced with Finance! No duplicates created. 👍'),
+          backgroundColor: DesignTokens.success,
+        ),
+      );
+      return;
+    }
+
+    HapticFeedback.mediumImpact();
+    final txRepo = ref.read(transactionRepositoryProvider);
+    final List<TripExpenseItem> updatedExpenses = [];
+
+    for (final exp in _meta.expenses) {
+      if (!exp.isSyncedToFinance) {
+        // Construct transaction prefixed with trip title
+        final noteText = '[${widget.trip.title}] ${exp.title}';
+        final txId = await txRepo.create(
+          TransactionsCompanion.insert(
+            date: exp.date,
+            amountCents: exp.amountCents,
+            direction: 'out',
+            status: 'actual',
+            category: exp.category.toLowerCase(),
+            note: Value(noteText),
+            tripId: Value(widget.trip.id),
+          ),
+        );
+        updatedExpenses.add(
+          exp.copyWith(
+            isSyncedToFinance: true,
+            syncedTransactionId: txId,
+          ),
+        );
+      } else {
+        updatedExpenses.add(exp);
+      }
+    }
+
+    await _saveMeta(_meta.copyWith(expenses: updatedExpenses));
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Synced ${unsynced.length} new travel expense(s) to Finance Tracker! 💳'),
+          backgroundColor: DesignTokens.accentLight,
+        ),
+      );
+    }
+  }
+
+  void _deleteExpense(String id) {
+    final updatedList = _meta.expenses.where((e) => e.id != id).toList();
+    _saveMeta(_meta.copyWith(expenses: updatedList));
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -293,10 +460,12 @@ class _TripDetailViewState extends ConsumerState<_TripDetailView>
           indicatorColor: DesignTokens.accentLight,
           labelColor: DesignTokens.accentLight,
           unselectedLabelColor: softInk,
+          isScrollable: true,
           tabs: const [
             Tab(icon: Icon(Icons.flight), text: 'Tickets'),
             Tab(icon: Icon(Icons.checklist), text: 'Tasks & Packing'),
             Tab(icon: Icon(Icons.place), text: 'Places to Visit'),
+            Tab(icon: Icon(Icons.account_balance_wallet_outlined), text: 'Expenses & Sync'),
           ],
         ),
       ),
@@ -378,6 +547,9 @@ class _TripDetailViewState extends ConsumerState<_TripDetailView>
 
                 // Tab 3: Places to Visit List
                 _buildPlacesTab(theme, isDark, inkColor, softInk),
+
+                // Tab 4: Expenses & Sync to Finance
+                _buildExpensesTab(theme, isDark, inkColor, softInk),
               ],
             ),
           ),
@@ -395,7 +567,7 @@ class _TripDetailViewState extends ConsumerState<_TripDetailView>
         _buildTicketCard(
           theme: theme,
           isDark: isDark,
-          title: '🛫 Outbound Ticket',
+          title: '${_meta.outboundTicket.ticketType.emoji} Outbound Ticket (${_meta.outboundTicket.ticketType.label})',
           ticket: _meta.outboundTicket,
           onEdit: () => _editTicket(true),
         ),
@@ -405,7 +577,7 @@ class _TripDetailViewState extends ConsumerState<_TripDetailView>
         _buildTicketCard(
           theme: theme,
           isDark: isDark,
-          title: '🛬 Return Ticket',
+          title: '${_meta.returnTicket.ticketType.emoji} Return Ticket (${_meta.returnTicket.ticketType.label})',
           ticket: _meta.returnTicket,
           onEdit: () => _editTicket(false),
         ),
@@ -449,7 +621,7 @@ class _TripDetailViewState extends ConsumerState<_TripDetailView>
 
           if (ticket.isEmpty)
             Text(
-              'No ticket info added yet. Tap "Add Ticket" to record flight/train details.',
+              'No ticket info added yet. Tap "Add Ticket" to record flight/train/bus details.',
               style: theme.textTheme.bodySmall?.copyWith(color: softInk),
             )
           else ...[
@@ -468,7 +640,7 @@ class _TripDetailViewState extends ConsumerState<_TripDetailView>
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        ticket.carrier.isEmpty ? 'Carrier / Airline' : ticket.carrier,
+                        ticket.carrier.isEmpty ? 'Carrier / Company' : ticket.carrier,
                         style: theme.textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: inkColor,
@@ -529,7 +701,7 @@ class _TripDetailViewState extends ConsumerState<_TripDetailView>
                 if (ticket.terminalGate.isNotEmpty) ...[
                   Icon(Icons.door_sliding_outlined, size: 14, color: softInk),
                   const SizedBox(width: 4),
-                  Text('Gate: ${ticket.terminalGate}', style: theme.textTheme.bodySmall),
+                  Text('Gate/Plat: ${ticket.terminalGate}', style: theme.textTheme.bodySmall),
                   const SizedBox(width: 16),
                 ],
                 if (ticket.seat.isNotEmpty) ...[
@@ -785,6 +957,235 @@ class _TripDetailViewState extends ConsumerState<_TripDetailView>
                     IconButton(
                       icon: const Icon(Icons.delete_outline, size: 18),
                       onPressed: () => _deleteLocation(place.id),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+      ],
+    );
+  }
+
+  // ── Tab 4: Expenses & Sync to Finance Tracker ──────────────────────────────
+  Widget _buildExpensesTab(ThemeData theme, bool isDark, Color inkColor, Color softInk) {
+    final expenses = _meta.expenses;
+    final totalSpentCents = _meta.totalExpensesCents;
+    final unsyncedCount = _meta.unsyncedExpensesCount;
+
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        // Total Spent & Sync Header Card
+        AppCard(
+          padding: const EdgeInsets.all(16),
+          color: DesignTokens.resolvePastelFill(
+            color: DesignTokens.dustyBlue,
+            isDark: isDark,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Total Real Expenses',
+                        style: theme.textTheme.labelMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: softInk,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        CurrencyFormatter.format(totalSpentCents),
+                        style: theme.textTheme.headlineMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: inkColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                  ElevatedButton.icon(
+                    icon: const Icon(Icons.sync, size: 16),
+                    label: Text(unsyncedCount > 0 ? 'Sync ($unsyncedCount new)' : 'Synced ✓'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: unsyncedCount > 0 ? DesignTokens.accentLight : DesignTokens.success,
+                      foregroundColor: Colors.white,
+                    ),
+                    onPressed: _syncExpensesToFinance,
+                  ),
+                ],
+              ),
+              if (widget.trip.budgetCents != null) ...[
+                const SizedBox(height: 10),
+                LinearProgressIndicator(
+                  value: (totalSpentCents / widget.trip.budgetCents!).clamp(0.0, 1.0),
+                  backgroundColor: isDark ? DesignTokens.lineDark : DesignTokens.lineLight,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    totalSpentCents > widget.trip.budgetCents! ? DesignTokens.danger : DesignTokens.accentLight,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Budget: ${CurrencyFormatter.format(widget.trip.budgetCents!)}',
+                  style: theme.textTheme.bodySmall?.copyWith(color: softInk),
+                ),
+              ],
+            ],
+          ),
+        ),
+        const SizedBox(height: 20),
+
+        // Section Title & Add Expense Action
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'EXPENSES LIST (${expenses.length})',
+              style: theme.textTheme.labelSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: softInk,
+                letterSpacing: 0.8,
+              ),
+            ),
+            ElevatedButton.icon(
+              icon: const Icon(Icons.add, size: 16),
+              label: const Text('Add Expense'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: DesignTokens.accentLight,
+                foregroundColor: Colors.white,
+              ),
+              onPressed: _addExpenseDialog,
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+
+        if (expenses.isEmpty)
+          EmptyState(
+            icon: Icons.account_balance_wallet_outlined,
+            message: 'No real expenses logged yet',
+            hint: 'Log ticket costs, hotel stays, or dining expenses to track your trip spending!',
+            actionLabel: 'Add Expense',
+            action: _addExpenseDialog,
+          )
+        else
+          ListView.separated(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: expenses.length,
+            separatorBuilder: (_, __) => const SizedBox(height: 10),
+            itemBuilder: (context, idx) {
+              final exp = expenses[idx];
+
+              String catEmoji;
+              switch (exp.category) {
+                case 'Accommodation':
+                  catEmoji = '🏨';
+                case 'Food':
+                  catEmoji = '🍽️';
+                case 'Activity':
+                  catEmoji = '🎟️';
+                case 'Shopping':
+                  catEmoji = '🛍️';
+                default:
+                  catEmoji = '✈️';
+              }
+
+              return AppCard(
+                padding: const EdgeInsets.all(14),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: DesignTokens.resolvePastelFill(
+                          color: DesignTokens.rose,
+                          isDark: isDark,
+                        ),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Center(
+                        child: Text(catEmoji, style: const TextStyle(fontSize: 18)),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            exp.title,
+                            style: theme.textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: inkColor,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Row(
+                            children: [
+                              Text(
+                                exp.date,
+                                style: theme.textTheme.bodySmall?.copyWith(color: softInk),
+                              ),
+                              const SizedBox(width: 8),
+                              if (exp.isSyncedToFinance)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: DesignTokens.resolvePastelFill(
+                                      color: DesignTokens.success,
+                                      isDark: isDark,
+                                    ),
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: const Row(
+                                    children: [
+                                      Icon(Icons.check_circle, size: 10, color: DesignTokens.success),
+                                      SizedBox(width: 2),
+                                      Text(
+                                        'Finance Synced',
+                                        style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: DesignTokens.success),
+                                      ),
+                                    ],
+                                  ),
+                                )
+                              else
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: DesignTokens.resolvePastelFill(
+                                      color: DesignTokens.peach,
+                                      isDark: isDark,
+                                    ),
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: const Text(
+                                    'Pending Sync',
+                                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: DesignTokens.peach),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    Text(
+                      CurrencyFormatter.format(exp.amountCents),
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: inkColor,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    IconButton(
+                      icon: const Icon(Icons.delete_outline, size: 18),
+                      onPressed: () => _deleteExpense(exp.id),
                     ),
                   ],
                 ),

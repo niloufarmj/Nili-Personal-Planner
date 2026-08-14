@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../../core/design/design.dart';
 import '../models/trip_models.dart';
 
@@ -19,6 +20,7 @@ class TicketEditSheet extends StatefulWidget {
 }
 
 class _TicketEditSheetState extends State<TicketEditSheet> {
+  late TicketType _ticketType;
   late TextEditingController _carrierCtrl;
   late TextEditingController _numberCtrl;
   late TextEditingController _dateCtrl;
@@ -32,6 +34,7 @@ class _TicketEditSheetState extends State<TicketEditSheet> {
   @override
   void initState() {
     super.initState();
+    _ticketType = widget.initialData.ticketType;
     _carrierCtrl = TextEditingController(text: widget.initialData.carrier);
     _numberCtrl = TextEditingController(text: widget.initialData.flightNumber);
     _dateCtrl = TextEditingController(text: widget.initialData.departureDate);
@@ -59,6 +62,7 @@ class _TicketEditSheetState extends State<TicketEditSheet> {
 
   void _submit() {
     final ticket = TicketData(
+      ticketType: _ticketType,
       carrier: _carrierCtrl.text.trim(),
       flightNumber: _numberCtrl.text.trim(),
       departureDate: _dateCtrl.text.trim(),
@@ -80,6 +84,7 @@ class _TicketEditSheetState extends State<TicketEditSheet> {
     final insets = MediaQuery.viewInsetsOf(context);
 
     final inkColor = isDark ? DesignTokens.inkDark : DesignTokens.inkLight;
+    final softInk = isDark ? DesignTokens.inkSoftDark : DesignTokens.inkSoftLight;
 
     return Container(
       padding: EdgeInsets.fromLTRB(20, 20, 20, 20 + insets.bottom),
@@ -94,7 +99,7 @@ class _TicketEditSheetState extends State<TicketEditSheet> {
           children: [
             Row(
               children: [
-                const Icon(Icons.flight_takeoff, color: DesignTokens.accentLight),
+                Text(_ticketType.emoji, style: const TextStyle(fontSize: 20)),
                 const SizedBox(width: 8),
                 Text(
                   widget.title,
@@ -107,15 +112,60 @@ class _TicketEditSheetState extends State<TicketEditSheet> {
             ),
             const SizedBox(height: 16),
 
+            // Ticket Type Selector
+            Text(
+              'TICKET TYPE',
+              style: theme.textTheme.labelSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: softInk,
+                letterSpacing: 0.8,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: TicketType.values.map((type) {
+                final isSelected = _ticketType == type;
+                return ChoiceChip(
+                  avatar: Text(type.emoji),
+                  label: Text(type.label),
+                  selected: isSelected,
+                  selectedColor: DesignTokens.resolvePastelFill(
+                    color: DesignTokens.rose,
+                    isDark: isDark,
+                  ),
+                  labelStyle: TextStyle(
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                    color: isSelected ? DesignTokens.rose : inkColor,
+                  ),
+                  side: BorderSide(
+                    color: isSelected
+                        ? DesignTokens.rose
+                        : (isDark ? DesignTokens.lineDark : DesignTokens.lineLight),
+                  ),
+                  onSelected: (selected) {
+                    if (selected) {
+                      HapticFeedback.selectionClick();
+                      setState(() => _ticketType = type);
+                    }
+                  },
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 16),
+
             Row(
               children: [
                 Expanded(
                   child: TextFormField(
                     controller: _carrierCtrl,
-                    decoration: const InputDecoration(
-                      labelText: 'Airline / Carrier',
-                      hintText: 'e.g. KLM, Turkish Airlines',
-                      border: OutlineInputBorder(),
+                    decoration: InputDecoration(
+                      labelText: 'Company / Carrier',
+                      hintText: _ticketType == TicketType.airplane
+                          ? 'e.g. KLM, Lufthansa'
+                          : (_ticketType == TicketType.train ? 'e.g. Eurostar, NS' : 'e.g. FlixBus'),
+                      border: const OutlineInputBorder(),
                     ),
                   ),
                 ),
@@ -123,10 +173,10 @@ class _TicketEditSheetState extends State<TicketEditSheet> {
                 Expanded(
                   child: TextFormField(
                     controller: _numberCtrl,
-                    decoration: const InputDecoration(
-                      labelText: 'Flight / Train #',
+                    decoration: InputDecoration(
+                      labelText: '${_ticketType.label} #',
                       hintText: 'e.g. KL 1234',
-                      border: OutlineInputBorder(),
+                      border: const OutlineInputBorder(),
                     ),
                   ),
                 ),
@@ -141,7 +191,7 @@ class _TicketEditSheetState extends State<TicketEditSheet> {
                     controller: _depAirportCtrl,
                     decoration: const InputDecoration(
                       labelText: 'From (Origin)',
-                      hintText: 'e.g. AMS (Amsterdam)',
+                      hintText: 'e.g. Amsterdam (AMS)',
                       border: OutlineInputBorder(),
                     ),
                   ),
@@ -152,7 +202,7 @@ class _TicketEditSheetState extends State<TicketEditSheet> {
                     controller: _arrAirportCtrl,
                     decoration: const InputDecoration(
                       labelText: 'To (Destination)',
-                      hintText: 'e.g. IKA (Tehran)',
+                      hintText: 'e.g. Tehran (IKA)',
                       border: OutlineInputBorder(),
                     ),
                   ),
@@ -194,8 +244,8 @@ class _TicketEditSheetState extends State<TicketEditSheet> {
                   child: TextFormField(
                     controller: _gateCtrl,
                     decoration: const InputDecoration(
-                      labelText: 'Terminal / Gate',
-                      hintText: 'e.g. T2 / Gate B14',
+                      labelText: 'Terminal / Platform / Gate',
+                      hintText: 'e.g. Platform 4 / Gate B14',
                       border: OutlineInputBorder(),
                     ),
                   ),
