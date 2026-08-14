@@ -502,9 +502,12 @@ class _AnalysisTabState extends ConsumerState<_AnalysisTab> {
   }
 
   Widget _buildCycleLengthChart(List<PeriodLog> logs) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     final List<BarChartGroupData> groups = [];
     final List<int> cycleLengths = [];
-    
+
     for (int i = 1; i < logs.length; i++) {
       final prevStart = DateTime.parse(logs[i - 1].startDate);
       final currStart = DateTime.parse(logs[i].startDate);
@@ -517,9 +520,15 @@ class _AnalysisTabState extends ConsumerState<_AnalysisTab> {
     if (cycleLengths.isEmpty) return const SizedBox.shrink();
 
     // Take the last 6 cycles
-    final lastCycles = cycleLengths.length > 5 
-        ? cycleLengths.sublist(cycleLengths.length - 5) 
+    final lastCycles = cycleLengths.length > 5
+        ? cycleLengths.sublist(cycleLengths.length - 5)
         : cycleLengths;
+
+    double maxVal = 40.0;
+    for (final c in lastCycles) {
+      if (c.toDouble() > maxVal) maxVal = c.toDouble();
+    }
+    maxVal = (maxVal + 8).clamp(35.0, 60.0);
 
     for (int i = 0; i < lastCycles.length; i++) {
       groups.add(
@@ -529,8 +538,8 @@ class _AnalysisTabState extends ConsumerState<_AnalysisTab> {
             BarChartRodData(
               toY: lastCycles[i].toDouble(),
               color: DesignTokens.rose,
-              width: 16,
-              borderRadius: BorderRadius.circular(4),
+              width: 18,
+              borderRadius: BorderRadius.circular(6),
             ),
           ],
         ),
@@ -540,32 +549,78 @@ class _AnalysisTabState extends ConsumerState<_AnalysisTab> {
     return BarChart(
       BarChartData(
         alignment: BarChartAlignment.spaceAround,
-        maxY: 45,
+        maxY: maxVal,
         barGroups: groups,
-        gridData: const FlGridData(show: false),
+        gridData: FlGridData(
+          show: true,
+          drawVerticalLine: false,
+          horizontalInterval: 10,
+          getDrawingHorizontalLine: (value) => FlLine(
+            color: isDark ? DesignTokens.lineDark : DesignTokens.lineLight,
+            strokeWidth: 0.8,
+            dashArray: [4, 4],
+          ),
+        ),
         borderData: FlBorderData(show: false),
         titlesData: FlTitlesData(
           bottomTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
-              getTitlesWidget: (v, _) {
+              reservedSize: 26,
+              getTitlesWidget: (v, meta) {
                 final idx = v.toInt();
-                if (idx < 0 || idx >= lastCycles.length) return const SizedBox.shrink();
-                return Text(
-                  'C-${lastCycles.length - idx}',
-                  style: const TextStyle(fontSize: 9),
+                if (idx < 0 || idx >= lastCycles.length) {
+                  return const SizedBox.shrink();
+                }
+                return SideTitleWidget(
+                  meta: meta,
+                  space: 4,
+                  child: Text(
+                    '${lastCycles[idx]}d',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      color: isDark
+                          ? DesignTokens.inkDark
+                          : DesignTokens.inkLight,
+                    ),
+                  ),
                 );
               },
             ),
           ),
-          leftTitles: const AxisTitles(
+          leftTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
-              reservedSize: 24,
+              reservedSize: 34,
+              interval: 10,
+              getTitlesWidget: (value, meta) {
+                if (value < 0 || value > maxVal) {
+                  return const SizedBox.shrink();
+                }
+                return SideTitleWidget(
+                  meta: meta,
+                  space: 6,
+                  child: Text(
+                    '${value.toInt()}',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      color: isDark
+                          ? DesignTokens.inkSoftDark
+                          : DesignTokens.inkSoftLight,
+                    ),
+                  ),
+                );
+              },
             ),
           ),
-          rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-          topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          rightTitles: const AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
+          ),
+          topTitles: const AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
+          ),
         ),
       ),
     );
