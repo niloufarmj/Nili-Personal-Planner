@@ -293,9 +293,12 @@ class FlatListTile extends StatelessWidget {
 // ── Events section ─────────────────────────────────────────────────────────────
 
 final _eventsForDateStreamProvider = StreamProvider.autoDispose
-    .family<List<EventOccurrence>, DateTime>(
-      (ref, day) =>
-          ref.watch(eventRepositoryProvider).watchOccurrencesForRange(day, day),
+    .family<List<EventOccurrence>, String>(
+      (ref, dateStr) {
+        final p = dateStr.split('-');
+        final day = DateTime(int.parse(p[0]), int.parse(p[1]), int.parse(p[2]));
+        return ref.watch(eventRepositoryProvider).watchOccurrencesForRange(day, day);
+      },
     );
 
 class _EventsSection extends ConsumerWidget {
@@ -304,11 +307,10 @@ class _EventsSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final day = _parseDate(date);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    final occAsync = ref.watch(_eventsForDateStreamProvider(day));
+    final occAsync = ref.watch(_eventsForDateStreamProvider(date));
 
     return occAsync.when(
       loading: () => const SizedBox(
@@ -334,64 +336,185 @@ class _EventsSection extends ConsumerWidget {
                 : null;
 
             final catColor = AppColors.forTagName(e.category);
+            final badgeBg = DesignTokens.resolvePastelFill(
+              color: catColor,
+              isDark: isDark,
+            );
+            final badgeFg = isDark ? DesignTokens.inkDark : catColor;
             final inkColor = isDark ? DesignTokens.inkDark : DesignTokens.inkLight;
             final softInk = isDark ? DesignTokens.inkSoftDark : DesignTokens.inkSoftLight;
+            final cardBg = isDark ? DesignTokens.surfaceDark : DesignTokens.surfaceLight;
+            final border = isDark ? DesignTokens.lineDark : DesignTokens.lineLight;
 
-            return FlatListTile(
-              categoryColor: catColor,
-              title: Text(
-                e.title,
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: inkColor,
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: cardBg,
+                  borderRadius: BorderRadius.circular(DesignTokens.radiusCard),
+                  border: Border.all(color: border),
                 ),
-              ),
-              subtitle: timeStr != null
-                  ? Text(timeStr, style: TextStyle(color: softInk))
-                  : null,
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    e.category.toUpperCase(),
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: isDark
-                          ? DesignTokens.inkSoftDark
-                          : DesignTokens.inkSoftLight,
-                      fontWeight: FontWeight.bold,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(DesignTokens.radiusCard),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border(
+                        left: BorderSide(color: catColor, width: 4),
+                      ),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 10,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Header row: Category Pill + Time + Owner
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: badgeBg,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                e.category.toUpperCase(),
+                                style: TextStyle(
+                                  color: badgeFg,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                            ),
+                            if (timeStr != null) ...[
+                              const SizedBox(width: 8),
+                              Icon(Icons.access_time, size: 12, color: softInk),
+                              const SizedBox(width: 3),
+                              Text(
+                                timeStr,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: softInk,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                            const Spacer(),
+                            if (e.owner != 'me')
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: DesignTokens.peach.withValues(alpha: 0.2),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(
+                                  e.owner.toUpperCase(),
+                                  style: const TextStyle(
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.bold,
+                                    color: DesignTokens.peach,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+
+                        // Title + Edit/Delete
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                e.title,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 15,
+                                  color: inkColor,
+                                ),
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.edit_outlined, size: 16),
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(
+                                minWidth: 28,
+                                minHeight: 28,
+                              ),
+                              onPressed: () => EventEditSheet.show(context, existing: e),
+                            ),
+                            IconButton(
+                              icon: const Icon(
+                                Icons.delete_outline,
+                                size: 16,
+                                color: DesignTokens.danger,
+                              ),
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(
+                                minWidth: 28,
+                                minHeight: 28,
+                              ),
+                              onPressed: () async {
+                                final ok = await ConfirmDialog.show(
+                                  context,
+                                  title: 'Delete Event?',
+                                  message: 'Remove "${e.title}" from your schedule?',
+                                );
+                                if (ok == true) {
+                                  await ref.read(eventRepositoryProvider).deleteEvent(e.id);
+                                  ref.invalidate(calendarAggregatorProvider);
+                                }
+                              },
+                            ),
+                          ],
+                        ),
+
+                        if (e.location != null || (e.notes != null && e.notes!.isNotEmpty)) ...[
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              if (e.location != null) ...[
+                                Icon(Icons.place_outlined, size: 13, color: softInk),
+                                const SizedBox(width: 3),
+                                Text(
+                                  e.location!,
+                                  style: TextStyle(fontSize: 12, color: softInk),
+                                ),
+                                const SizedBox(width: 12),
+                              ],
+                              if (e.notes != null && e.notes!.isNotEmpty) ...[
+                                Icon(Icons.notes, size: 13, color: softInk),
+                                const SizedBox(width: 3),
+                                Expanded(
+                                  child: Text(
+                                    e.notes!,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(fontSize: 12, color: softInk),
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ],
+                      ],
                     ),
                   ),
-                  const SizedBox(width: 4),
-                  IconButton(
-                    icon: const Icon(Icons.edit_outlined, size: 18),
-                    onPressed: () => EventEditSheet.show(context, existing: e),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.delete_outline, size: 18, color: DesignTokens.danger),
-                    onPressed: () async {
-                      final ok = await ConfirmDialog.show(
-                        context,
-                        title: 'Delete Event?',
-                        message: 'Remove "${e.title}" from your schedule?',
-                      );
-                      if (ok == true) {
-                        await ref.read(eventRepositoryProvider).deleteEvent(e.id);
-                        ref.invalidate(calendarAggregatorProvider);
-                      }
-                    },
-                  ),
-                ],
+                ),
               ),
             );
           }).toList(),
         );
       },
     );
-  }
-
-  static DateTime _parseDate(String iso) {
-    final p = iso.split('-');
-    return DateTime(int.parse(p[0]), int.parse(p[1]), int.parse(p[2]));
   }
 }
 
@@ -505,20 +628,29 @@ class _MealsSection extends ConsumerWidget {
                 final recipe = slot.recipeId != null
                     ? recipeMap[slot.recipeId]
                     : null;
-                final recipeName = recipe?.name ?? 'No recipe selected';
+                final recipeName = recipe?.name ?? 'No recipe planned';
+
+                final slotIcon = switch (slot.slot.toLowerCase()) {
+                  'breakfast' => Icons.free_breakfast_outlined,
+                  'lunch' => Icons.lunch_dining_outlined,
+                  'dinner' => Icons.dinner_dining_outlined,
+                  _ => Icons.restaurant_outlined,
+                };
 
                 return FlatListTile(
                   categoryColor: DesignTokens.peach,
+                  leading: Icon(slotIcon, color: DesignTokens.peach, size: 22),
                   title: Text(
-                    recipeName,
-                    style: theme.textTheme.bodyLarge?.copyWith(
+                    '${slot.slot.substring(0, 1).toUpperCase()}${slot.slot.substring(1)}: $recipeName',
+                    style: TextStyle(
                       fontWeight: FontWeight.w600,
+                      fontSize: 14,
                       color: inkColor,
                     ),
                   ),
                   subtitle: Text(
-                    '${slot.slot.toUpperCase()} · ${slot.status}',
-                    style: TextStyle(color: softInk),
+                    'Status: ${slot.status.toUpperCase()}',
+                    style: TextStyle(color: softInk, fontSize: 12),
                   ),
                   trailing: slot.status == 'accepted'
                       ? TextButton(
@@ -527,7 +659,26 @@ class _MealsSection extends ConsumerWidget {
                               .updateStatus(slot.date, slot.slot, 'eaten'),
                           child: const Text('Mark Eaten'),
                         )
-                      : null,
+                      : (slot.status == 'eaten'
+                          ? Container(
+                              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: DesignTokens.sageSoft,
+                                borderRadius: BorderRadius.all(Radius.circular(4)),
+                              ),
+                              child: Text(
+                                '✓ Eaten',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: DesignTokens.sage,
+                                ),
+                              ),
+                            )
+                          : TextButton(
+                              onPressed: () => context.push('/meals'),
+                              child: const Text('Plan Meal'),
+                            )),
                 );
               }).toList(),
             );
