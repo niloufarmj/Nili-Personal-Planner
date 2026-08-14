@@ -26,8 +26,13 @@ A comprehensive, beautifully designed, and offline-first personal organizer buil
     The engine integrates current actual balances, future planned income, future recurring bills, and a pro-rated mean of historical variable spends.
 *   **Debts Center**: Track money owed (`i_owe`) or owed to you (`owes_me`). Supports interactive amount editing and auto-prompts to log matching payments/payoffs in your transaction ledger.
 
-### 🎒 4. Lists, Chores & Collections & Job Hunt Tracker
-*   **Template-Driven Collections**: Create shopping lists, travel packing guides, custom todo lists, or job hunt trackers.
+### 🎒 4. Lists, Chores, Personal Projects & Job Hunt Tracker
+*   **Template-Driven Collections**: Create shopping lists, travel packing guides, custom todo lists, personal projects, or job hunt trackers.
+*   **Professional Personal Projects Engine**:
+    *   **Dashboard & Project Workspace**: Dedicated management system for personal projects with live status counters (Total Projects, Active, Total Hours Logged) and progress bars.
+    *   **Rich Subtasks & Detail Sheets**: Break down projects into subtasks with custom statuses (`To Do`, `In Progress`, `Review`, `Done`), logged work hours (`+0.5h`, `+1.0h`), photo attachments, and subtask notes.
+    *   **Project Timeline & Updates Log**: Post project notes, progress updates, and work hour logs into a chronological project timeline stream.
+    *   **Project Photo Gallery**: 3-column visual gallery aggregating all photo attachments across subtasks and project logs.
 *   **Job Hunt Tracker Engine**:
     *   **Direct & Unsolicited Reach-Outs**: Tailored for direct company outreach with fields for Company Name, Company Website, City, Category / Industry, Open Position toggle (`✓ Open Position` vs `↗ Unsolicited Application`), LinkedIn Profile, Job Link, and Company Email.
     *   **Status Color Tinting & 1-Tap Switching**: Cards feature visual background tinting corresponding to current state — Gray (`Researching`), Yellow (`Applied`), Blue (`Interview`), Red (`Rejected`), Green (`Offer`). Tap any status badge to switch state directly from the list tile.
@@ -38,9 +43,12 @@ A comprehensive, beautifully designed, and offline-first personal organizer buil
 *   **Periodic Chores**: Log periodic tasks (cleaning, laundry, plant watering) with history logs.
 *   **Shopping Actual Cost Prompts**: Mark items as "bought" to prompt for actual costs and automatically record them as shopping transactions.
 
-### ✈️ 5. Smart Travel Planner
-*   **Destinations & Budgets**: Detail travel periods, destination descriptions, and budgets.
-*   **Packing Lists**: Generate packing lists linked directly to your travel dates.
+### ✈️ 5. Smart Travel Planner Workspace
+*   **Trip Workspace Pages**: Dedicated 4-tab workspace for each trip (e.g. *Iran*, *Japan*, *Austria*).
+*   **Ticket Type Selector & Tickets Tab**: Select ticket types (✈️ *Airplane*, 🚆 *Train*, 🚌 *Bus*, 🚢 *Boat / Ferry*, 🚗 *Car / Taxi*) and store outbound & return ticket details (Carrier, Flight/Train #, Origin ➔ Destination, Departure Date & Time, Terminal/Gate, Seat, PNR Booking Code).
+*   **Tasks & Packing Checklist**: Interactive checklist with live percentage progress bar (`X of Y items packed`).
+*   **Places & Locations Catalog**: Bookmark places to visit with category badges (🏛️ *Attraction*, 🍽️ *Food & Dining*, 🏨 *Hotel / Stay*, 🎟️ *Activity*, 🛍️ *Shopping*), notes, and priority badges (⭐ *Must Visit*, 📌 *Planned*, ✅ *Visited*).
+*   **Real Expenses & Smart Finance Sync**: Track real trip expenses with amounts and categories. 1-tap **"Sync with Finance"** automatically creates transactions in your Finance Tracker (prefixed as `[Trip Title] Expense Name`) with **strict deduplication** to ensure zero duplicate entries across multiple sync taps.
 *   **Forecast Integration**: Live forecaster computes whether your trip budget is sustainable based on future financial schedules.
 
 ### 🥩 6. Meal Planner & Recipe Book
